@@ -5,7 +5,7 @@ import {
   Search, User, FileText, X, Heart, ArrowUpRight, 
   ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const PacientesPage: React.FC = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -30,6 +30,18 @@ export const PacientesPage: React.FC = () => {
   const [contactoEmergencia, setContactoEmergencia] = useState('');
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) setBusqueda(q);
+    if (searchParams.get('nuevo') === 'true') {
+      setModalAbierto(true);
+      setPasoActual(1);
+      searchParams.delete('nuevo');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams]);
 
   const cargarPacientes = async () => {
     try {

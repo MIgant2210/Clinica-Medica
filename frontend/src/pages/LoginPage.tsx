@@ -207,13 +207,13 @@ export const LoginPage: React.FC = () => {
                 <span className={`text-2xl font-black tracking-tight flex items-center gap-2 ${
                   theme === 'dark' ? 'text-white' : 'text-slate-900'
                 }`}>
-                  ClinicaMed
+                  ClinicMed
                   <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 font-bold border border-emerald-500/30">
                     ECE v1.0
                   </span>
                 </span>
                 <span className="block text-xs font-semibold text-teal-600 dark:text-teal-400 tracking-wide uppercase">
-                  Gestión Clínica & Bull; UMG SQA
+                  Gestión Clínica &bull; UMG SQA
                 </span>
               </div>
             </div>
