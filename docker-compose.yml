@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Base de Datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: clinica_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: clinica_medica
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/install_all.sql:/docker-entrypoint-initdb.d/01_install.sql
+      - ./database/seeds/01_datos_semilla.sql:/docker-entrypoint-initdb.d/02_seeds.sql
+    networks:
+      - clinica_network
+
+  # Backend - API RESTful Express + TypeScript
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clinica_backend
+    restart: always
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/clinica_medica
+      JWT_SECRET: secreto_super_seguro_clinica_medica_umg_2026
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+    networks:
+      - clinica_network
+
+  # Frontend - SPA React + Vite
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinica_frontend
+    restart: always
+    environment:
+      VITE_API_URL: http://localhost:4000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - clinica_network
+
+volumes:
+  pgdata:
+
+networks:
+  clinica_network:
+    driver: bridge

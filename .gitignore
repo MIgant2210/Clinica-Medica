@@ -11,8 +11,10 @@ npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
-# Directorios de dependencias / temporales
+# Directorios de dependencias / temporales / builds
 node_modules/
+dist/
+build/
 .temp/
 .cache/
 
