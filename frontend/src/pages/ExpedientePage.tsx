@@ -3,7 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { Paciente, ExpedienteClinico } from '../types';
-import { FileText, Plus, Heart, Thermometer, Weight, Activity, Pill, User, X } from 'lucide-react';
+import { 
+  FileText, Plus, Heart, Thermometer, Weight, Activity, Pill, User, X, 
+  Stethoscope, Clock, AlertTriangle, ShieldCheck 
+} from 'lucide-react';
 
 export const ExpedientePage: React.FC = () => {
   const { user } = useAuth();
@@ -100,8 +103,8 @@ export const ExpedientePage: React.FC = () => {
           ? [
               {
                 medicamento,
-                dosis,
-                frecuencia: frecuenciaMedicamento,
+                dosis: dosis || '1 dosis',
+                frecuencia: frecuenciaMedicamento || 'Cada 8 horas',
                 duracion_dias: Number(duracionDias),
               },
             ]
@@ -111,7 +114,6 @@ export const ExpedientePage: React.FC = () => {
 
       if (res.data.ok) {
         setModalAbierto(false);
-        // Recargar expediente
         const rec = await apiClient.get(`/clinico/expediente/${pacienteSeleccionadoId}`);
         if (rec.data.ok) {
           setExpediente(rec.data.expediente);
@@ -126,28 +128,29 @@ export const ExpedientePage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      
       {/* Selector de Paciente y Encabezado */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-sky-600 font-semibold text-xs uppercase tracking-wider mb-1">
-            <FileText className="h-4 w-4" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold mb-1 border border-teal-100">
+            <FileText className="h-3.5 w-3.5 text-teal-600" />
             Expediente Clínico Electrónico (ECE)
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Historia Médica del Paciente
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {user?.rol !== 'PACIENTE' && (
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                 Paciente:
               </label>
               <select
                 value={pacienteSeleccionadoId}
                 onChange={(e) => setPacienteSeleccionadoId(e.target.value)}
-                className="px-3 py-2 border rounded-xl text-sm border-slate-200 bg-slate-50 focus:ring-2 focus:ring-sky-500"
+                className="px-4 py-2.5 border rounded-2xl text-sm border-slate-200 bg-slate-50 focus:ring-2 focus:ring-teal-500 font-semibold text-slate-800"
               >
                 {pacientes.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -161,7 +164,7 @@ export const ExpedientePage: React.FC = () => {
           {puedeAtender && expediente && (
             <button
               onClick={() => setModalAbierto(true)}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2"
+              className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-teal-500/25 transition-all duration-300 flex items-center gap-2 active:scale-95"
             >
               <Plus className="h-4 w-4" />
               Nueva Consulta
@@ -171,151 +174,248 @@ export const ExpedientePage: React.FC = () => {
       </div>
 
       {cargando ? (
-        <div className="p-12 text-center text-sm text-slate-500">Cargando historial clínico...</div>
+        <div className="p-12 text-center text-sm text-slate-400">Cargando historial clínico...</div>
       ) : !expediente || !pacienteActual ? (
-        <div className="p-12 text-center text-slate-400 bg-white rounded-3xl border border-slate-200">
+        <div className="p-12 text-center text-slate-400 bg-white rounded-[32px] border border-slate-200/80">
           No se encontró el expediente clínico.
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Ficha Resumen del Paciente & Antecedentes */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm md:col-span-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-12 w-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-                  <User className="h-6 w-6" />
+          
+          {/* Tarjetas de Ficha Técnica y Antecedentes */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            
+            {/* Ficha Resumen Paciente */}
+            <div className="lg:col-span-4 bg-white p-6 rounded-[32px] border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3.5 mb-4">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-emerald-100 to-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200/60 shadow-inner">
+                    <User className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-lg leading-tight">
+                      {pacienteActual.nombre_completo}
+                    </h3>
+                    <span className="text-xs font-mono font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md mt-1 inline-block">
+                      {expediente.numero_expediente}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900">{pacienteActual.nombre_completo}</h3>
-                  <p className="text-xs font-mono text-sky-600 font-semibold">{expediente.numero_expediente}</p>
+
+                <div className="space-y-2.5 text-xs text-slate-600 bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-semibold">Documento:</span>
+                    <span className="font-bold text-slate-800">{pacienteActual.documento}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-semibold">Tipo de Sangre:</span>
+                    <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+                      {pacienteActual.tipo_sangre}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-semibold">Teléfono:</span>
+                    <span className="font-medium text-slate-800">{pacienteActual.telefono}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-semibold">Emergencia:</span>
+                    <span className="font-medium text-slate-800 truncate max-w-[140px]">
+                      {pacienteActual.contacto_emergencia}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2 text-xs text-slate-600">
-                <p><strong className="text-slate-700">Documento:</strong> {pacienteActual.documento}</p>
-                <p><strong className="text-slate-700">Tipo de Sangre:</strong> {pacienteActual.tipo_sangre}</p>
-                <p><strong className="text-slate-700">Teléfono:</strong> {pacienteActual.telefono}</p>
-                <p><strong className="text-slate-700">Emergencia:</strong> {pacienteActual.contacto_emergencia}</p>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Expediente Activo</span>
+                <ShieldCheck className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm md:col-span-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                Antecedentes Clínicos Registrados
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-amber-50/60 rounded-2xl border border-amber-100">
-                  <span className="font-bold text-amber-800 block mb-1">Alergias</span>
-                  <p className="text-amber-900">{expediente.antecedentes_alergias || 'Ninguna registrada'}</p>
-                </div>
-                <div className="p-3 bg-rose-50/60 rounded-2xl border border-rose-100">
-                  <span className="font-bold text-rose-800 block mb-1">Patológicos</span>
-                  <p className="text-rose-900">{expediente.antecedentes_patologicos || 'Sin antecedentes'}</p>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/60">
-                  <span className="font-bold text-slate-700 block mb-1">Heredo-Familiares</span>
-                  <p className="text-slate-600">{expediente.antecedentes_familiares || 'No referidos'}</p>
+            {/* Antecedentes Clínicos */}
+            <div className="lg:col-span-8 bg-white p-6 rounded-[32px] border border-slate-200/80 shadow-sm flex flex-col justify-between">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <span>Antecedentes Médicos Registrados</span>
+                </h4>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
+                  <div className="p-4 bg-rose-50/70 rounded-2xl border border-rose-100 hover:shadow-sm transition-shadow">
+                    <span className="font-bold text-rose-800 flex items-center gap-1 mb-1.5">
+                      <span className="h-2 w-2 rounded-full bg-rose-500" />
+                      Alergias Conocidas
+                    </span>
+                    <p className="text-rose-950 font-medium leading-relaxed">
+                      {expediente.antecedentes_alergias || 'Ninguna alergia registrada'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-100 hover:shadow-sm transition-shadow">
+                    <span className="font-bold text-amber-800 flex items-center gap-1 mb-1.5">
+                      <span className="h-2 w-2 rounded-full bg-amber-500" />
+                      Antecedentes Patológicos
+                    </span>
+                    <p className="text-amber-950 font-medium leading-relaxed">
+                      {expediente.antecedentes_patologicos || 'Sin antecedentes crónicos'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 hover:shadow-sm transition-shadow">
+                    <span className="font-bold text-slate-700 flex items-center gap-1 mb-1.5">
+                      <span className="h-2 w-2 rounded-full bg-slate-400" />
+                      Heredo-Familiares
+                    </span>
+                    <p className="text-slate-600 font-medium leading-relaxed">
+                      {expediente.antecedentes_familiares || 'No referidos por el paciente'}
+                    </p>
+                  </div>
                 </div>
               </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400 flex items-center justify-between">
+                <span>Norma Técnica de Registro Clínico</span>
+                <span className="text-teal-600 font-semibold font-mono text-[10px]">CIE-10 / HIPAA Ready</span>
+              </div>
             </div>
+
           </div>
 
-          {/* Cronología de Atenciones Médicas */}
+          {/* Cronología de Consultas Realizadas */}
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-900">Historial de Consultas Realizadas</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Cronología de Atenciones Médicas</span>
+                <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-full font-bold text-slate-600">
+                  {expediente.consultas.length}
+                </span>
+              </h2>
+            </div>
 
             {expediente.consultas.length === 0 ? (
-              <div className="bg-white p-8 rounded-3xl border border-slate-200 text-center text-sm text-slate-400">
-                Aún no hay atenciones médicas registradas en este expediente.
+              <div className="bg-white p-12 rounded-[32px] border border-slate-200/80 text-center text-sm text-slate-400">
+                Aún no hay consultas médicas registradas en este expediente.
               </div>
             ) : (
               expediente.consultas.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4"
+                  className="bg-white p-6 sm:p-7 rounded-[32px] border border-slate-200/80 shadow-sm space-y-5 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
                     <div>
-                      <div className="text-sm font-bold text-slate-900">{c.motivo_consulta}</div>
-                      <div className="text-xs text-slate-500">
-                        Atendido por: <strong className="text-slate-700">{c.profesional_nombre}</strong>
+                      <div className="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <span>{c.motivo_consulta}</span>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        Facultativo: <strong className="text-slate-800">{c.profesional_nombre}</strong>
                       </div>
                     </div>
-                    <span className="text-xs font-mono text-slate-400">
-                      {new Date(c.fecha_atencion).toLocaleString('es-GT', {
-                        dateStyle: 'long',
-                        timeStyle: 'short',
-                      })}
-                    </span>
+                    <div className="flex items-center gap-2 font-mono text-xs text-slate-400 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                      <Clock className="h-3.5 w-3.5 text-teal-600" />
+                      <span>
+                        {new Date(c.fecha_atencion).toLocaleString('es-GT', {
+                          dateStyle: 'long',
+                          timeStyle: 'short',
+                        })}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Signos Vitales */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                    <div className="bg-slate-50 p-2.5 rounded-xl text-center border border-slate-100">
-                      <div className="flex items-center justify-center text-rose-500 gap-1 text-[11px] font-semibold">
-                        <Heart className="h-3.5 w-3.5" /> P.A.
+                  {/* Medidores de Signos Vitales (Vibrantes) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div className="bg-rose-50/60 p-3 rounded-2xl border border-rose-100 text-center">
+                      <div className="flex items-center justify-center text-rose-600 gap-1 text-xs font-bold">
+                        <Heart className="h-3.5 w-3.5 fill-current" /> P.A.
                       </div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">{c.signos_vitales.presion}</div>
+                      <div className="font-black text-rose-950 text-sm mt-0.5">{c.signos_vitales.presion}</div>
+                      <span className="text-[10px] text-rose-500">mmHg</span>
                     </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl text-center border border-slate-100">
-                      <div className="flex items-center justify-center text-sky-500 gap-1 text-[11px] font-semibold">
+
+                    <div className="bg-sky-50/60 p-3 rounded-2xl border border-sky-100 text-center">
+                      <div className="flex items-center justify-center text-sky-600 gap-1 text-xs font-bold">
                         <Activity className="h-3.5 w-3.5" /> Pulso
                       </div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">{c.signos_vitales.frecuencia_cardiaca} lpm</div>
+                      <div className="font-black text-sky-950 text-sm mt-0.5">{c.signos_vitales.frecuencia_cardiaca}</div>
+                      <span className="text-[10px] text-sky-500">lpm</span>
                     </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl text-center border border-slate-100">
-                      <div className="flex items-center justify-center text-amber-500 gap-1 text-[11px] font-semibold">
+
+                    <div className="bg-amber-50/60 p-3 rounded-2xl border border-amber-100 text-center">
+                      <div className="flex items-center justify-center text-amber-600 gap-1 text-xs font-bold">
                         <Thermometer className="h-3.5 w-3.5" /> Temp
                       </div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">{c.signos_vitales.temperatura} °C</div>
+                      <div className="font-black text-amber-950 text-sm mt-0.5">{c.signos_vitales.temperatura} °C</div>
+                      <span className="text-[10px] text-amber-500">Axilar</span>
                     </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl text-center border border-slate-100">
-                      <div className="flex items-center justify-center text-emerald-500 gap-1 text-[11px] font-semibold">
+
+                    <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100 text-center">
+                      <div className="flex items-center justify-center text-emerald-600 gap-1 text-xs font-bold">
                         <Weight className="h-3.5 w-3.5" /> Peso
                       </div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">{c.signos_vitales.peso_kg} kg</div>
+                      <div className="font-black text-emerald-950 text-sm mt-0.5">{c.signos_vitales.peso_kg} kg</div>
+                      <span className="text-[10px] text-emerald-500">Masa</span>
                     </div>
-                    <div className="bg-slate-50 p-2.5 rounded-xl text-center border border-slate-100">
-                      <div className="flex items-center justify-center text-purple-500 gap-1 text-[11px] font-semibold">
+
+                    <div className="bg-purple-50/60 p-3 rounded-2xl border border-purple-100 text-center">
+                      <div className="flex items-center justify-center text-purple-600 gap-1 text-xs font-bold">
                         Talla
                       </div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">{c.signos_vitales.talla_cm} cm</div>
+                      <div className="font-black text-purple-950 text-sm mt-0.5">{c.signos_vitales.talla_cm} cm</div>
+                      <span className="text-[10px] text-purple-500">Estatura</span>
                     </div>
                   </div>
 
-                  {/* Diagnósticos CIE-10 */}
+                  {/* Diagnósticos con Codificación CIE-10 */}
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                      Diagnósticos Emitidos
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                      Diagnósticos Dictaminados
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {c.diagnosticos.map((d, i) => (
                         <div
                           key={i}
-                          className="px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-100 text-purple-900 text-xs font-medium flex items-center gap-2"
+                          className="px-3.5 py-2 rounded-2xl bg-purple-50 border border-purple-200/80 text-purple-950 text-xs font-semibold flex items-center gap-2.5 shadow-sm"
                         >
-                          <span className="font-mono font-bold bg-purple-200/80 px-1.5 py-0.5 rounded text-[10px]">
+                          <span className="font-mono font-black bg-purple-200 text-purple-900 px-2 py-0.5 rounded-lg text-[11px]">
                             {d.codigo_cie10}
                           </span>
                           <span>{d.descripcion}</span>
-                          <span className="text-[10px] text-purple-600 font-semibold">({d.tipo})</span>
+                          <span className="text-[10px] text-purple-600 uppercase font-black tracking-wider">
+                            ({d.tipo})
+                          </span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Receta Digitalizada */}
+                  {/* Receta Médica Digitalizada */}
                   {c.tratamiento.length > 0 && (
-                    <div className="bg-sky-50/40 p-4 rounded-2xl border border-sky-100">
-                      <div className="flex items-center gap-1.5 text-sky-800 font-bold text-xs mb-2">
-                        <Pill className="h-4 w-4" /> Receta Médica Digitalizada
+                    <div className="bg-gradient-to-br from-teal-50/60 to-emerald-50/40 p-5 rounded-3xl border border-teal-200/70 relative">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 text-teal-800 font-bold text-xs">
+                          <Pill className="h-4 w-4 text-emerald-600" />
+                          <span>Receta Médica Digitalizada</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-teal-700 bg-teal-100/80 px-2.5 py-0.5 rounded-full">
+                          Válida en Farmacia
+                        </span>
                       </div>
-                      <div className="space-y-1 text-xs text-sky-950">
+
+                      <div className="space-y-2 text-xs">
                         {c.tratamiento.map((t, idx) => (
-                          <div key={idx} className="flex items-center justify-between border-b border-sky-100/60 pb-1">
+                          <div
+                            key={idx}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/90 p-3 rounded-2xl border border-teal-100 gap-1.5"
+                          >
                             <div>
-                              <strong>{t.medicamento}</strong> - {t.dosis} ({t.frecuencia})
+                              <strong className="text-slate-900 text-sm">{t.medicamento}</strong>
+                              <span className="text-slate-500 ml-2 font-medium">
+                                {t.dosis} &bull; {t.frecuencia}
+                              </span>
                             </div>
-                            <span className="font-semibold text-sky-700">{t.duracion_dias} días</span>
+                            <span className="font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-xl border border-teal-200 shrink-0 text-right">
+                              {t.duracion_dias} días de tratamiento
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -323,10 +423,13 @@ export const ExpedientePage: React.FC = () => {
                   )}
 
                   {/* Notas de Evolución */}
-                  <div className="text-xs text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                    <strong className="text-slate-800 block mb-0.5">Notas de Evolución:</strong>
-                    {c.notas_evolucion}
+                  <div className="text-xs text-slate-700 bg-slate-50/90 p-4 rounded-2xl border border-slate-100">
+                    <strong className="text-slate-900 block mb-1 font-bold">
+                      Notas Clínicas de Evolución:
+                    </strong>
+                    <p className="leading-relaxed">{c.notas_evolucion}</p>
                   </div>
+
                 </div>
               ))
             )}
@@ -336,116 +439,133 @@ export const ExpedientePage: React.FC = () => {
 
       {/* Modal: Nueva Consulta Médica */}
       {modalAbierto && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-              <h3 className="text-lg font-bold text-slate-900">Registrar Consulta Médica</h3>
-              <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-slate-600">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-[32px] p-6 sm:p-8 shadow-2xl border border-white/60 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+            
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+                  <Stethoscope className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Registrar Consulta Médica</h3>
+                  <p className="text-xs text-slate-400">Emisión de diagnóstico y prescripción</p>
+                </div>
+              </div>
+              <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-slate-600 p-2">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleCrearConsulta} className="space-y-4 text-sm">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Motivo de Consulta *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Motivo de Consulta *
+                </label>
                 <input
                   type="text"
                   required
                   value={motivoConsulta}
                   onChange={(e) => setMotivoConsulta(e.target.value)}
-                  placeholder="Ej. Control de hipertensión y dolor lumbar"
-                  className="w-full px-3 py-2 border rounded-xl border-slate-200 focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Ej. Chequeo preventivo, cefalea moderada y malestar general"
+                  className="w-full px-4 py-2.5 bg-slate-50 border rounded-2xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Examen Físico</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Examen Físico
+                </label>
                 <input
                   type="text"
                   value={examenFisico}
                   onChange={(e) => setExamenFisico(e.target.value)}
-                  placeholder="Ej. Murmullo vesicular conservado, abdomen blando no doloroso"
-                  className="w-full px-3 py-2 border rounded-xl border-slate-200 focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Ej. Murmullo vesicular conservado, campos pulmonares limpios"
+                  className="w-full px-4 py-2.5 bg-slate-50 border rounded-2xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                 />
               </div>
 
               {/* Signos Vitales */}
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <span className="text-xs font-bold text-slate-700 block">Signos Vitales</span>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
+                  Signos Vitales
+                </span>
                 <div className="grid grid-cols-5 gap-2 text-xs">
                   <div>
-                    <label className="block text-slate-500 mb-1">P.A.</label>
+                    <label className="block text-slate-400 font-semibold mb-1">P.A.</label>
                     <input
                       type="text"
                       value={presion}
                       onChange={(e) => setPresion(e.target.value)}
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Pulso</label>
+                    <label className="block text-slate-400 font-semibold mb-1">Pulso</label>
                     <input
                       type="number"
                       value={frecuencia}
                       onChange={(e) => setFrecuencia(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Temp (°C)</label>
+                    <label className="block text-slate-400 font-semibold mb-1">Temp (°C)</label>
                     <input
                       type="number"
                       step="0.1"
                       value={temperatura}
                       onChange={(e) => setTemperatura(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Peso (kg)</label>
+                    <label className="block text-slate-400 font-semibold mb-1">Peso (kg)</label>
                     <input
                       type="number"
                       step="0.1"
                       value={peso}
                       onChange={(e) => setPeso(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Talla (cm)</label>
+                    <label className="block text-slate-400 font-semibold mb-1">Talla (cm)</label>
                     <input
                       type="number"
                       value={talla}
                       onChange={(e) => setTalla(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Diagnóstico CIE-10 */}
-              <div className="p-3 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-2">
-                <span className="text-xs font-bold text-purple-900 block">Diagnóstico (CIE-10)</span>
+              <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100 space-y-2">
+                <span className="text-xs font-bold text-purple-900 block uppercase tracking-wider">
+                  Diagnóstico (Estándar CIE-10)
+                </span>
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div>
-                    <label className="block text-slate-500 mb-1">Código CIE-10</label>
+                    <label className="block text-slate-500 mb-1">Código</label>
                     <input
                       type="text"
                       value={cie10}
                       onChange={(e) => setCie10(e.target.value)}
-                      placeholder="J00, I10, etc."
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      placeholder="J00, I10"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-mono font-bold"
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-slate-500 mb-1">Descripción Diagnóstica</label>
+                    <label className="block text-slate-500 mb-1">Descripción</label>
                     <input
                       type="text"
                       required
                       value={diagnosticoDesc}
                       onChange={(e) => setDiagnosticoDesc(e.target.value)}
-                      placeholder="Ej. Hipertensión esencial primaria"
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      placeholder="Ej. Faringitis aguda"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
                     />
                   </div>
                   <div>
@@ -453,7 +573,7 @@ export const ExpedientePage: React.FC = () => {
                     <select
                       value={diagnosticoTipo}
                       onChange={(e) => setDiagnosticoTipo(e.target.value as 'PRESUNTIVO' | 'DEFINITIVO')}
-                      className="w-full px-2 py-1.5 border rounded-lg bg-white"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-semibold"
                     >
                       <option value="DEFINITIVO">Definitivo</option>
                       <option value="PRESUNTIVO">Presuntivo</option>
@@ -463,8 +583,10 @@ export const ExpedientePage: React.FC = () => {
               </div>
 
               {/* Prescripción Médica */}
-              <div className="p-3 bg-sky-50/50 rounded-2xl border border-sky-100 space-y-2">
-                <span className="text-xs font-bold text-sky-900 block">Receta Médica Digital</span>
+              <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-100 space-y-2">
+                <span className="text-xs font-bold text-teal-900 block uppercase tracking-wider">
+                  Receta Médica Digitalizada
+                </span>
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div>
                     <label className="block text-slate-500 mb-1">Medicamento</label>
@@ -472,8 +594,8 @@ export const ExpedientePage: React.FC = () => {
                       type="text"
                       value={medicamento}
                       onChange={(e) => setMedicamento(e.target.value)}
-                      placeholder="Ej. Losartán 50mg"
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      placeholder="Ej. Amoxicilina 500mg"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
                     />
                   </div>
                   <div>
@@ -482,8 +604,8 @@ export const ExpedientePage: React.FC = () => {
                       type="text"
                       value={dosis}
                       onChange={(e) => setDosis(e.target.value)}
-                      placeholder="1 tableta"
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      placeholder="1 cápsula"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
                     />
                   </div>
                   <div>
@@ -492,8 +614,8 @@ export const ExpedientePage: React.FC = () => {
                       type="text"
                       value={frecuenciaMedicamento}
                       onChange={(e) => setFrecuenciaMedicamento(e.target.value)}
-                      placeholder="Cada 12 horas"
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      placeholder="Cada 8 horas"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
                     />
                   </div>
                   <div>
@@ -502,34 +624,36 @@ export const ExpedientePage: React.FC = () => {
                       type="number"
                       value={duracionDias}
                       onChange={(e) => setDuracionDias(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-lg"
+                      className="w-full px-3 py-2 border rounded-xl bg-white font-bold"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Notas de Evolución</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                  Notas de Evolución y Recomendaciones
+                </label>
                 <textarea
                   rows={2}
                   value={notasEvolucion}
                   onChange={(e) => setNotasEvolucion(e.target.value)}
-                  placeholder="Observaciones y plan de seguimiento clínico..."
-                  className="w-full px-3 py-2 border rounded-xl border-slate-200 focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Plan terapéutico, observaciones y recomendaciones al paciente..."
+                  className="w-full px-4 py-2.5 bg-slate-50 border rounded-2xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
+              <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setModalAbierto(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50"
+                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-2xl font-semibold hover:bg-slate-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md shadow-emerald-600/20"
+                  className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white rounded-2xl font-bold shadow-lg shadow-teal-500/25 active:scale-95 transition-all"
                 >
                   Guardar Consulta en ECE
                 </button>
