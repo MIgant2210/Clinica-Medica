@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -11,25 +12,27 @@ import { AuditoriaPage } from './pages/AuditoriaPage';
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Rutas protegidas bajo el Layout principal */}
-          <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="citas" element={<CitasPage />} />
-            <Route path="pacientes" element={<PacientesPage />} />
-            <Route path="expediente" element={<ExpedientePage />} />
-            <Route path="auditoria" element={<AuditoriaPage />} />
-          </Route>
+            {/* Rutas protegidas bajo el Layout principal */}
+            <Route path="/" element={<DashboardLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="citas" element={<CitasPage />} />
+              <Route path="pacientes" element={<PacientesPage />} />
+              <Route path="expediente" element={<ExpedientePage />} />
+              <Route path="auditoria" element={<AuditoriaPage />} />
+            </Route>
 
-          {/* Redirección por defecto */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+            {/* Redirección por defecto */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

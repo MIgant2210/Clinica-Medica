@@ -130,13 +130,13 @@ export const ExpedientePage: React.FC = () => {
     <div className="space-y-6">
       
       {/* Selector de Paciente y Encabezado */}
-      <div className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold mb-1 border border-teal-100">
-            <FileText className="h-3.5 w-3.5 text-teal-600" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 text-xs font-bold mb-1 border border-teal-100 dark:border-teal-800">
+            <FileText className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
             Expediente Clínico Electrónico (ECE)
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Historia Médica del Paciente
           </h1>
         </div>
@@ -144,16 +144,16 @@ export const ExpedientePage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-3">
           {user?.rol !== 'PACIENTE' && (
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
                 Paciente:
               </label>
               <select
                 value={pacienteSeleccionadoId}
                 onChange={(e) => setPacienteSeleccionadoId(e.target.value)}
-                className="px-4 py-2.5 border rounded-2xl text-sm border-slate-200 bg-slate-50 focus:ring-2 focus:ring-teal-500 font-semibold text-slate-800"
+                className="px-4 py-2.5 border rounded-2xl text-sm border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-teal-500 font-semibold text-slate-800 dark:text-slate-100"
               >
                 {pacientes.map((p) => (
-                  <option key={p.id} value={p.id}>
+                  <option key={p.id} value={p.id} className="dark:bg-slate-900">
                     {p.nombre_completo} ({p.codigo_paciente})
                   </option>
                 ))}
@@ -176,7 +176,7 @@ export const ExpedientePage: React.FC = () => {
       {cargando ? (
         <div className="p-12 text-center text-sm text-slate-400">Cargando historial clínico...</div>
       ) : !expediente || !pacienteActual ? (
-        <div className="p-12 text-center text-slate-400 bg-white rounded-[32px] border border-slate-200/80">
+        <div className="p-12 text-center text-slate-400 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200/80 dark:border-slate-800">
           No se encontró el expediente clínico.
         </div>
       ) : (
@@ -186,54 +186,54 @@ export const ExpedientePage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             
             {/* Ficha Resumen Paciente */}
-            <div className="lg:col-span-4 bg-white p-6 rounded-[32px] border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div className="lg:col-span-4 bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-colors">
               <div>
                 <div className="flex items-center gap-3.5 mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-emerald-100 to-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200/60 shadow-inner">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-emerald-100 dark:from-emerald-950/60 to-teal-50 dark:to-teal-950/40 text-teal-700 dark:text-teal-300 flex items-center justify-center font-bold border border-teal-200/60 dark:border-teal-800/60 shadow-inner">
                     <User className="h-7 w-7" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-lg leading-tight">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">
                       {pacienteActual.nombre_completo}
                     </h3>
-                    <span className="text-xs font-mono font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md mt-1 inline-block">
+                    <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded-md mt-1 inline-block border border-teal-100 dark:border-teal-900">
                       {expediente.numero_expediente}
                     </span>
                   </div>
                 </div>
 
-                <div className="space-y-2.5 text-xs text-slate-600 bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+                <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-semibold">Documento:</span>
-                    <span className="font-bold text-slate-800">{pacienteActual.documento}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{pacienteActual.documento}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-semibold">Tipo de Sangre:</span>
-                    <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+                    <span className="font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-full border border-rose-100 dark:border-rose-900/60">
                       {pacienteActual.tipo_sangre}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-semibold">Teléfono:</span>
-                    <span className="font-medium text-slate-800">{pacienteActual.telefono}</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{pacienteActual.telefono}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-semibold">Emergencia:</span>
-                    <span className="font-medium text-slate-800 truncate max-w-[140px]">
+                    <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
                       {pacienteActual.contacto_emergencia}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                 <span>Expediente Activo</span>
                 <ShieldCheck className="h-4 w-4 text-emerald-500" />
               </div>
             </div>
 
             {/* Antecedentes Clínicos */}
-            <div className="lg:col-span-8 bg-white p-6 rounded-[32px] border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div className="lg:col-span-8 bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-colors">
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
                   <AlertTriangle className="h-4 w-4 text-amber-500" />
@@ -241,41 +241,41 @@ export const ExpedientePage: React.FC = () => {
                 </h4>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
-                  <div className="p-4 bg-rose-50/70 rounded-2xl border border-rose-100 hover:shadow-sm transition-shadow">
-                    <span className="font-bold text-rose-800 flex items-center gap-1 mb-1.5">
+                  <div className="p-4 bg-rose-50/70 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/40 hover:shadow-sm transition-shadow">
+                    <span className="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-1 mb-1.5">
                       <span className="h-2 w-2 rounded-full bg-rose-500" />
                       Alergias Conocidas
                     </span>
-                    <p className="text-rose-950 font-medium leading-relaxed">
+                    <p className="text-rose-950 dark:text-rose-200 font-medium leading-relaxed">
                       {expediente.antecedentes_alergias || 'Ninguna alergia registrada'}
                     </p>
                   </div>
 
-                  <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-100 hover:shadow-sm transition-shadow">
-                    <span className="font-bold text-amber-800 flex items-center gap-1 mb-1.5">
+                  <div className="p-4 bg-amber-50/70 dark:bg-amber-950/30 rounded-2xl border border-amber-100 dark:border-amber-900/40 hover:shadow-sm transition-shadow">
+                    <span className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1 mb-1.5">
                       <span className="h-2 w-2 rounded-full bg-amber-500" />
                       Antecedentes Patológicos
                     </span>
-                    <p className="text-amber-950 font-medium leading-relaxed">
+                    <p className="text-amber-950 dark:text-amber-200 font-medium leading-relaxed">
                       {expediente.antecedentes_patologicos || 'Sin antecedentes crónicos'}
                     </p>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 hover:shadow-sm transition-shadow">
-                    <span className="font-bold text-slate-700 flex items-center gap-1 mb-1.5">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700/60 hover:shadow-sm transition-shadow">
+                    <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-1.5">
                       <span className="h-2 w-2 rounded-full bg-slate-400" />
                       Heredo-Familiares
                     </span>
-                    <p className="text-slate-600 font-medium leading-relaxed">
+                    <p className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
                       {expediente.antecedentes_familiares || 'No referidos por el paciente'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400 flex items-center justify-between">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 flex items-center justify-between">
                 <span>Norma Técnica de Registro Clínico</span>
-                <span className="text-teal-600 font-semibold font-mono text-[10px]">CIE-10 / HIPAA Ready</span>
+                <span className="text-teal-600 dark:text-teal-400 font-semibold font-mono text-[10px]">CIE-10 / HIPAA Ready</span>
               </div>
             </div>
 
@@ -284,35 +284,35 @@ export const ExpedientePage: React.FC = () => {
           {/* Cronología de Consultas Realizadas */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                 <span>Cronología de Atenciones Médicas</span>
-                <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-full font-bold text-slate-600">
+                <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full font-bold text-slate-600 dark:text-slate-400">
                   {expediente.consultas.length}
                 </span>
               </h2>
             </div>
 
             {expediente.consultas.length === 0 ? (
-              <div className="bg-white p-12 rounded-[32px] border border-slate-200/80 text-center text-sm text-slate-400">
+              <div className="bg-white dark:bg-slate-900 p-12 rounded-[32px] border border-slate-200/80 dark:border-slate-800 text-center text-sm text-slate-400">
                 Aún no hay consultas médicas registradas en este expediente.
               </div>
             ) : (
               expediente.consultas.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white p-6 sm:p-7 rounded-[32px] border border-slate-200/80 shadow-sm space-y-5 hover:shadow-md transition-shadow"
+                  className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-5 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 gap-2">
                     <div>
-                      <div className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <div className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>{c.motivo_consulta}</span>
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        Facultativo: <strong className="text-slate-800">{c.profesional_nombre}</strong>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Facultativo: <strong className="text-slate-800 dark:text-slate-200">{c.profesional_nombre}</strong>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 font-mono text-xs text-slate-400 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
-                      <Clock className="h-3.5 w-3.5 text-teal-600" />
+                    <div className="flex items-center gap-2 font-mono text-xs text-slate-400 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/70 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                      <Clock className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
                       <span>
                         {new Date(c.fecha_atencion).toLocaleString('es-GT', {
                           dateStyle: 'long',
@@ -324,63 +324,63 @@ export const ExpedientePage: React.FC = () => {
 
                   {/* Medidores de Signos Vitales (Vibrantes) */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <div className="bg-rose-50/60 p-3 rounded-2xl border border-rose-100 text-center">
-                      <div className="flex items-center justify-center text-rose-600 gap-1 text-xs font-bold">
+                    <div className="bg-rose-50/60 dark:bg-rose-950/25 p-3 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-center">
+                      <div className="flex items-center justify-center text-rose-600 dark:text-rose-400 gap-1 text-xs font-bold">
                         <Heart className="h-3.5 w-3.5 fill-current" /> P.A.
                       </div>
-                      <div className="font-black text-rose-950 text-sm mt-0.5">{c.signos_vitales.presion}</div>
-                      <span className="text-[10px] text-rose-500">mmHg</span>
+                      <div className="font-black text-rose-950 dark:text-rose-200 text-sm mt-0.5">{c.signos_vitales.presion}</div>
+                      <span className="text-[10px] text-rose-500 dark:text-rose-400">mmHg</span>
                     </div>
 
-                    <div className="bg-sky-50/60 p-3 rounded-2xl border border-sky-100 text-center">
-                      <div className="flex items-center justify-center text-sky-600 gap-1 text-xs font-bold">
+                    <div className="bg-sky-50/60 dark:bg-sky-950/25 p-3 rounded-2xl border border-sky-100 dark:border-sky-900/40 text-center">
+                      <div className="flex items-center justify-center text-sky-600 dark:text-sky-400 gap-1 text-xs font-bold">
                         <Activity className="h-3.5 w-3.5" /> Pulso
                       </div>
-                      <div className="font-black text-sky-950 text-sm mt-0.5">{c.signos_vitales.frecuencia_cardiaca}</div>
-                      <span className="text-[10px] text-sky-500">lpm</span>
+                      <div className="font-black text-sky-950 dark:text-sky-200 text-sm mt-0.5">{c.signos_vitales.frecuencia_cardiaca}</div>
+                      <span className="text-[10px] text-sky-500 dark:text-sky-400">lpm</span>
                     </div>
 
-                    <div className="bg-amber-50/60 p-3 rounded-2xl border border-amber-100 text-center">
-                      <div className="flex items-center justify-center text-amber-600 gap-1 text-xs font-bold">
+                    <div className="bg-amber-50/60 dark:bg-amber-950/25 p-3 rounded-2xl border border-amber-100 dark:border-amber-900/40 text-center">
+                      <div className="flex items-center justify-center text-amber-600 dark:text-amber-400 gap-1 text-xs font-bold">
                         <Thermometer className="h-3.5 w-3.5" /> Temp
                       </div>
-                      <div className="font-black text-amber-950 text-sm mt-0.5">{c.signos_vitales.temperatura} °C</div>
-                      <span className="text-[10px] text-amber-500">Axilar</span>
+                      <div className="font-black text-amber-950 dark:text-amber-200 text-sm mt-0.5">{c.signos_vitales.temperatura} °C</div>
+                      <span className="text-[10px] text-amber-500 dark:text-amber-400">Axilar</span>
                     </div>
 
-                    <div className="bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100 text-center">
-                      <div className="flex items-center justify-center text-emerald-600 gap-1 text-xs font-bold">
+                    <div className="bg-emerald-50/60 dark:bg-emerald-950/25 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 text-center">
+                      <div className="flex items-center justify-center text-emerald-600 dark:text-emerald-400 gap-1 text-xs font-bold">
                         <Weight className="h-3.5 w-3.5" /> Peso
                       </div>
-                      <div className="font-black text-emerald-950 text-sm mt-0.5">{c.signos_vitales.peso_kg} kg</div>
-                      <span className="text-[10px] text-emerald-500">Masa</span>
+                      <div className="font-black text-emerald-950 dark:text-emerald-200 text-sm mt-0.5">{c.signos_vitales.peso_kg} kg</div>
+                      <span className="text-[10px] text-emerald-500 dark:text-emerald-400">Masa</span>
                     </div>
 
-                    <div className="bg-purple-50/60 p-3 rounded-2xl border border-purple-100 text-center">
-                      <div className="flex items-center justify-center text-purple-600 gap-1 text-xs font-bold">
+                    <div className="bg-purple-50/60 dark:bg-purple-950/25 p-3 rounded-2xl border border-purple-100 dark:border-purple-900/40 text-center">
+                      <div className="flex items-center justify-center text-purple-600 dark:text-purple-400 gap-1 text-xs font-bold">
                         Talla
                       </div>
-                      <div className="font-black text-purple-950 text-sm mt-0.5">{c.signos_vitales.talla_cm} cm</div>
-                      <span className="text-[10px] text-purple-500">Estatura</span>
+                      <div className="font-black text-purple-950 dark:text-purple-200 text-sm mt-0.5">{c.signos_vitales.talla_cm} cm</div>
+                      <span className="text-[10px] text-purple-500 dark:text-purple-400">Estatura</span>
                     </div>
                   </div>
 
                   {/* Diagnósticos con Codificación CIE-10 */}
                   <div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">
                       Diagnósticos Dictaminados
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {c.diagnosticos.map((d, i) => (
                         <div
                           key={i}
-                          className="px-3.5 py-2 rounded-2xl bg-purple-50 border border-purple-200/80 text-purple-950 text-xs font-semibold flex items-center gap-2.5 shadow-sm"
+                          className="px-3.5 py-2 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800 text-purple-950 dark:text-purple-200 text-xs font-semibold flex items-center gap-2.5 shadow-sm"
                         >
-                          <span className="font-mono font-black bg-purple-200 text-purple-900 px-2 py-0.5 rounded-lg text-[11px]">
+                          <span className="font-mono font-black bg-purple-200 dark:bg-purple-900 text-purple-900 dark:text-purple-100 px-2 py-0.5 rounded-lg text-[11px]">
                             {d.codigo_cie10}
                           </span>
                           <span>{d.descripcion}</span>
-                          <span className="text-[10px] text-purple-600 uppercase font-black tracking-wider">
+                          <span className="text-[10px] text-purple-600 dark:text-purple-400 uppercase font-black tracking-wider">
                             ({d.tipo})
                           </span>
                         </div>
@@ -390,13 +390,13 @@ export const ExpedientePage: React.FC = () => {
 
                   {/* Receta Médica Digitalizada */}
                   {c.tratamiento.length > 0 && (
-                    <div className="bg-gradient-to-br from-teal-50/60 to-emerald-50/40 p-5 rounded-3xl border border-teal-200/70 relative">
+                    <div className="bg-gradient-to-br from-teal-50/60 to-emerald-50/40 dark:from-teal-950/30 dark:to-emerald-950/20 p-5 rounded-3xl border border-teal-200/70 dark:border-teal-800/70 relative">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2 text-teal-800 font-bold text-xs">
-                          <Pill className="h-4 w-4 text-emerald-600" />
+                        <div className="flex items-center gap-2 text-teal-800 dark:text-teal-300 font-bold text-xs">
+                          <Pill className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                           <span>Receta Médica Digitalizada</span>
                         </div>
-                        <span className="text-[10px] font-bold text-teal-700 bg-teal-100/80 px-2.5 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-teal-700 dark:text-teal-300 bg-teal-100/80 dark:bg-teal-900/60 px-2.5 py-0.5 rounded-full">
                           Válida en Farmacia
                         </span>
                       </div>
@@ -405,15 +405,15 @@ export const ExpedientePage: React.FC = () => {
                         {c.tratamiento.map((t, idx) => (
                           <div
                             key={idx}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/90 p-3 rounded-2xl border border-teal-100 gap-1.5"
+                            className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/90 dark:bg-slate-800/90 p-3 rounded-2xl border border-teal-100 dark:border-teal-900/50 gap-1.5"
                           >
                             <div>
-                              <strong className="text-slate-900 text-sm">{t.medicamento}</strong>
-                              <span className="text-slate-500 ml-2 font-medium">
+                              <strong className="text-slate-900 dark:text-white text-sm">{t.medicamento}</strong>
+                              <span className="text-slate-500 dark:text-slate-400 ml-2 font-medium">
                                 {t.dosis} &bull; {t.frecuencia}
                               </span>
                             </div>
-                            <span className="font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-xl border border-teal-200 shrink-0 text-right">
+                            <span className="font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950 px-3 py-1 rounded-xl border border-teal-200 dark:border-teal-800 shrink-0 text-right">
                               {t.duracion_dias} días de tratamiento
                             </span>
                           </div>
@@ -423,8 +423,8 @@ export const ExpedientePage: React.FC = () => {
                   )}
 
                   {/* Notas de Evolución */}
-                  <div className="text-xs text-slate-700 bg-slate-50/90 p-4 rounded-2xl border border-slate-100">
-                    <strong className="text-slate-900 block mb-1 font-bold">
+                  <div className="text-xs text-slate-700 dark:text-slate-300 bg-slate-50/90 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <strong className="text-slate-900 dark:text-white block mb-1 font-bold">
                       Notas Clínicas de Evolución:
                     </strong>
                     <p className="leading-relaxed">{c.notas_evolucion}</p>
@@ -440,26 +440,26 @@ export const ExpedientePage: React.FC = () => {
       {/* Modal: Nueva Consulta Médica */}
       {modalAbierto && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-[32px] p-6 sm:p-8 shadow-2xl border border-white/60 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[32px] p-6 sm:p-8 shadow-2xl border border-white/60 dark:border-slate-800 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+                <div className="h-10 w-10 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
                   <Stethoscope className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Registrar Consulta Médica</h3>
-                  <p className="text-xs text-slate-400">Emisión de diagnóstico y prescripción</p>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white">Registrar Consulta Médica</h3>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">Emisión de diagnóstico y prescripción</p>
                 </div>
               </div>
-              <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-slate-600 p-2">
+              <button onClick={() => setModalAbierto(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleCrearConsulta} className="space-y-4 text-sm">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                   Motivo de Consulta *
                 </label>
                 <input
@@ -468,12 +468,12 @@ export const ExpedientePage: React.FC = () => {
                   value={motivoConsulta}
                   onChange={(e) => setMotivoConsulta(e.target.value)}
                   placeholder="Ej. Chequeo preventivo, cefalea moderada y malestar general"
-                  className="w-full px-4 py-2.5 bg-slate-50 border rounded-2xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border rounded-2xl border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                   Examen Físico
                 </label>
                 <input
@@ -481,13 +481,13 @@ export const ExpedientePage: React.FC = () => {
                   value={examenFisico}
                   onChange={(e) => setExamenFisico(e.target.value)}
                   placeholder="Ej. Murmullo vesicular conservado, campos pulmonares limpios"
-                  className="w-full px-4 py-2.5 bg-slate-50 border rounded-2xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border rounded-2xl border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
               {/* Signos Vitales */}
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block uppercase tracking-wider">
                   Signos Vitales
                 </span>
                 <div className="grid grid-cols-5 gap-2 text-xs">
@@ -497,7 +497,7 @@ export const ExpedientePage: React.FC = () => {
                       type="text"
                       value={presion}
                       onChange={(e) => setPresion(e.target.value)}
-                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
+                      className="w-full px-2 py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-center font-bold"
                     />
                   </div>
                   <div>
@@ -506,7 +506,7 @@ export const ExpedientePage: React.FC = () => {
                       type="number"
                       value={frecuencia}
                       onChange={(e) => setFrecuencia(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
+                      className="w-full px-2 py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-center font-bold"
                     />
                   </div>
                   <div>
@@ -516,7 +516,7 @@ export const ExpedientePage: React.FC = () => {
                       step="0.1"
                       value={temperatura}
                       onChange={(e) => setTemperatura(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
+                      className="w-full px-2 py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-center font-bold"
                     />
                   </div>
                   <div>
@@ -526,7 +526,7 @@ export const ExpedientePage: React.FC = () => {
                       step="0.1"
                       value={peso}
                       onChange={(e) => setPeso(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
+                      className="w-full px-2 py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-center font-bold"
                     />
                   </div>
                   <div>
@@ -535,45 +535,45 @@ export const ExpedientePage: React.FC = () => {
                       type="number"
                       value={talla}
                       onChange={(e) => setTalla(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 border rounded-xl bg-white text-center font-bold"
+                      className="w-full px-2 py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-center font-bold"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Diagnóstico CIE-10 */}
-              <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100 space-y-2">
-                <span className="text-xs font-bold text-purple-900 block uppercase tracking-wider">
+              <div className="p-4 bg-purple-50/60 dark:bg-purple-950/25 rounded-2xl border border-purple-100 dark:border-purple-900/40 space-y-2">
+                <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block uppercase tracking-wider">
                   Diagnóstico (Estándar CIE-10)
                 </span>
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div>
-                    <label className="block text-slate-500 mb-1">Código</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Código</label>
                     <input
                       type="text"
                       value={cie10}
                       onChange={(e) => setCie10(e.target.value)}
                       placeholder="J00, I10"
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-mono font-bold"
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono font-bold"
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-slate-500 mb-1">Descripción</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Descripción</label>
                     <input
                       type="text"
                       required
                       value={diagnosticoDesc}
                       onChange={(e) => setDiagnosticoDesc(e.target.value)}
                       placeholder="Ej. Faringitis aguda"
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Tipo</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Tipo</label>
                     <select
                       value={diagnosticoTipo}
                       onChange={(e) => setDiagnosticoTipo(e.target.value as 'PRESUNTIVO' | 'DEFINITIVO')}
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-semibold"
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold"
                     >
                       <option value="DEFINITIVO">Definitivo</option>
                       <option value="PRESUNTIVO">Presuntivo</option>
@@ -583,55 +583,55 @@ export const ExpedientePage: React.FC = () => {
               </div>
 
               {/* Prescripción Médica */}
-              <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-100 space-y-2">
-                <span className="text-xs font-bold text-teal-900 block uppercase tracking-wider">
+              <div className="p-4 bg-teal-50/60 dark:bg-teal-950/25 rounded-2xl border border-teal-100 dark:border-teal-900/40 space-y-2">
+                <span className="text-xs font-bold text-teal-900 dark:text-teal-300 block uppercase tracking-wider">
                   Receta Médica Digitalizada
                 </span>
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div>
-                    <label className="block text-slate-500 mb-1">Medicamento</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Medicamento</label>
                     <input
                       type="text"
                       value={medicamento}
                       onChange={(e) => setMedicamento(e.target.value)}
                       placeholder="Ej. Amoxicilina 500mg"
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
+                      className="w-full px-3 py-2 border border-teal-200 dark:border-teal-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Dosis</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Dosis</label>
                     <input
                       type="text"
                       value={dosis}
                       onChange={(e) => setDosis(e.target.value)}
                       placeholder="1 cápsula"
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
+                      className="w-full px-3 py-2 border border-teal-200 dark:border-teal-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Frecuencia</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Frecuencia</label>
                     <input
                       type="text"
                       value={frecuenciaMedicamento}
                       onChange={(e) => setFrecuenciaMedicamento(e.target.value)}
                       placeholder="Cada 8 horas"
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-medium"
+                      className="w-full px-3 py-2 border border-teal-200 dark:border-teal-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-500 mb-1">Duración (Días)</label>
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Duración (Días)</label>
                     <input
                       type="number"
                       value={duracionDias}
                       onChange={(e) => setDuracionDias(Number(e.target.value))}
-                      className="w-full px-3 py-2 border rounded-xl bg-white font-bold"
+                      className="w-full px-3 py-2 border border-teal-200 dark:border-teal-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                   Notas de Evolución y Recomendaciones
                 </label>
                 <textarea
@@ -639,15 +639,15 @@ export const ExpedientePage: React.FC = () => {
                   value={notasEvolucion}
                   onChange={(e) => setNotasEvolucion(e.target.value)}
                   placeholder="Plan terapéutico, observaciones y recomendaciones al paciente..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border rounded-2xl border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border rounded-2xl border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
-              <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
+              <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setModalAbierto(false)}
-                  className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-2xl font-semibold hover:bg-slate-50"
+                  className="px-5 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-2xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   Cancelar
                 </button>
