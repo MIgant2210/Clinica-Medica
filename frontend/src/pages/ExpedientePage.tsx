@@ -5,7 +5,7 @@ import { apiClient } from '../api/client';
 import { Paciente, ExpedienteClinico } from '../types';
 import { 
   FileText, Plus, Heart, Thermometer, Weight, Activity, Pill, User, X, 
-  Stethoscope, Clock, AlertTriangle, ShieldCheck 
+  Stethoscope, Clock, AlertTriangle, ShieldCheck, ChevronDown
 } from 'lucide-react';
 
 export const ExpedientePage: React.FC = () => {
@@ -16,6 +16,7 @@ export const ExpedientePage: React.FC = () => {
   const [pacienteActual, setPacienteActual] = useState<Paciente | null>(null);
   const [expediente, setExpediente] = useState<ExpedienteClinico | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
 
   // Modal nueva consulta
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -143,21 +144,63 @@ export const ExpedientePage: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-3">
           {user?.rol !== 'PACIENTE' && (
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
-                Paciente:
+            <div className="flex items-center gap-3 relative z-20">
+              <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Paciente
               </label>
-              <select
-                value={pacienteSeleccionadoId}
-                onChange={(e) => setPacienteSeleccionadoId(e.target.value)}
-                className="px-4 py-2.5 border rounded-2xl text-sm border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-teal-500 font-semibold text-slate-800 dark:text-slate-100"
-              >
-                {pacientes.map((p) => (
-                  <option key={p.id} value={p.id} className="dark:bg-slate-900">
-                    {p.nombre_completo} ({p.codigo_paciente})
-                  </option>
-                ))}
-              </select>
+              
+              <div className="relative min-w-[280px]">
+                <button
+                  type="button"
+                  onClick={() => setIsSelectOpen(!isSelectOpen)}
+                  className="w-full px-5 py-3.5 bg-slate-50/50 hover:bg-slate-100/50 dark:bg-slate-900/50 dark:hover:bg-slate-800/80 backdrop-blur-xl border-2 border-slate-200/60 dark:border-slate-700/60 rounded-[1.25rem] text-sm shadow-sm transition-all text-slate-800 dark:text-slate-100 flex items-center justify-between gap-3 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10"
+                >
+                  <span className="font-bold truncate">
+                    {pacientes.find(p => p.id === pacienteSeleccionadoId)?.nombre_completo || 'Seleccionar paciente...'} 
+                    <span className="ml-2 font-mono text-[11px] text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded-md">
+                      {pacientes.find(p => p.id === pacienteSeleccionadoId)?.codigo_paciente}
+                    </span>
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-300 ${isSelectOpen ? 'rotate-180 text-teal-500' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isSelectOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setIsSelectOpen(false)}
+                    />
+                    <div className="absolute top-full left-0 right-0 mt-2 z-20 bg-white/90 dark:bg-slate-800/95 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/80 rounded-[1.5rem] shadow-2xl shadow-slate-200/40 dark:shadow-none overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="max-h-64 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                        {pacientes.map((p) => (
+                          <button
+                            key={p.id}
+                            onClick={() => {
+                              setPacienteSeleccionadoId(p.id);
+                              setIsSelectOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-between group ${
+                              pacienteSeleccionadoId === p.id 
+                                ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300' 
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                            }`}
+                          >
+                            <span>{p.nombre_completo}</span>
+                            <span className={`font-mono text-[10px] px-2 py-0.5 rounded-md transition-colors ${
+                              pacienteSeleccionadoId === p.id 
+                                ? 'bg-teal-500/20 text-teal-700 dark:text-teal-300' 
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'
+                            }`}>
+                              {p.codigo_paciente}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -568,16 +611,32 @@ export const ExpedientePage: React.FC = () => {
                       className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
                     />
                   </div>
-                  <div>
-                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Tipo</label>
-                    <select
-                      value={diagnosticoTipo}
-                      onChange={(e) => setDiagnosticoTipo(e.target.value as 'PRESUNTIVO' | 'DEFINITIVO')}
-                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold"
-                    >
-                      <option value="DEFINITIVO">Definitivo</option>
-                      <option value="PRESUNTIVO">Presuntivo</option>
-                    </select>
+                  <div className="col-span-4 mt-1">
+                    <label className="block text-slate-500 dark:text-slate-400 mb-2">Tipo de Diagnóstico</label>
+                    <div className="flex bg-purple-100/50 dark:bg-purple-900/30 p-1 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setDiagnosticoTipo('DEFINITIVO')}
+                        className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                          diagnosticoTipo === 'DEFINITIVO'
+                            ? 'bg-white dark:bg-slate-800 text-purple-700 dark:text-purple-300 shadow-sm'
+                            : 'text-purple-600/70 dark:text-purple-400/70 hover:text-purple-700 dark:hover:text-purple-300'
+                        }`}
+                      >
+                        Definitivo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDiagnosticoTipo('PRESUNTIVO')}
+                        className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                          diagnosticoTipo === 'PRESUNTIVO'
+                            ? 'bg-white dark:bg-slate-800 text-purple-700 dark:text-purple-300 shadow-sm'
+                            : 'text-purple-600/70 dark:text-purple-400/70 hover:text-purple-700 dark:hover:text-purple-300'
+                        }`}
+                      >
+                        Presuntivo
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

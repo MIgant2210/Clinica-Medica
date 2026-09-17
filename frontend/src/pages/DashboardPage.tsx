@@ -73,35 +73,39 @@ export const DashboardPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-8 animate-fade-in-up">
       
       {/* 1. ENCABEZADO DE BIENVENIDA Y ACCIONES RÁPIDAS */}
-      <div className="bg-gradient-to-r from-white via-[#f8fafc] to-sky-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(2,132,199,0.06)] flex flex-col md:flex-row md:items-center justify-between gap-5 transition-colors">
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-sky-600 via-teal-500 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20 shrink-0">
-            <Stethoscope className="h-7 w-7 stroke-[2]" />
+      <div className="relative overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-8 sm:p-10 rounded-[2.5rem] border border-white/60 dark:border-white/10 shadow-xl shadow-sky-900/5 dark:shadow-none flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300">
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-teal-400/20 dark:bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-sky-400/20 dark:bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative flex items-center gap-5 z-10">
+          <div className="h-16 w-16 rounded-3xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-sky-500/30 shrink-0 transform transition-transform hover:scale-105">
+            <Stethoscope className="h-8 w-8 stroke-[2.5]" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Hola, {user?.nombreCompleto}
               </h1>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+              <span className="text-[10px] uppercase font-black px-2.5 py-1 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm">
                 {user?.rol}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 capitalize mt-0.5">
-              {fechaHoy} &bull; Centro de Control Clínico ClinicMed
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 capitalize mt-1.5 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              {fechaHoy} &bull; Centro de Control Clínico
             </p>
           </div>
         </div>
 
         {/* Acciones Rápidas Reales */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative flex flex-wrap items-center gap-3 z-10">
           {(user?.rol === 'ADMIN' || user?.rol === 'RECEPCIONISTA' || user?.rol === 'MEDICO') && (
             <button
               onClick={() => navigate('/citas?nueva=true')}
-              className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white rounded-2xl text-xs font-bold shadow-md shadow-sky-500/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+              className="px-5 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white rounded-2xl text-xs font-bold shadow-lg transition-all flex items-center gap-2 hover:-translate-y-1 cursor-pointer"
             >
               <Calendar className="h-4 w-4" />
               <span>Programar Cita</span>
@@ -111,9 +115,9 @@ export const DashboardPage: React.FC = () => {
           {(user?.rol === 'ADMIN' || user?.rol === 'RECEPCIONISTA') && (
             <button
               onClick={() => navigate('/pacientes?nuevo=true')}
-              className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-200/90 dark:border-slate-700 active:scale-95 shadow-sm cursor-pointer"
+              className="px-5 py-3 bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-700/80 text-slate-800 dark:text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-white/60 dark:border-white/10 hover:-translate-y-1 shadow-sm cursor-pointer backdrop-blur-md"
             >
-              <UserPlus className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+              <UserPlus className="h-4 w-4 text-teal-500" />
               <span>Nuevo Paciente</span>
             </button>
           )}
@@ -121,7 +125,7 @@ export const DashboardPage: React.FC = () => {
           {user?.rol === 'MEDICO' && (
             <button
               onClick={() => navigate('/expediente')}
-              className="px-4 py-2.5 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-teal-800 dark:text-teal-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-teal-200 dark:border-teal-800 cursor-pointer shadow-sm"
+              className="px-5 py-3 bg-teal-50/50 dark:bg-teal-900/30 hover:bg-teal-100/80 text-teal-800 dark:text-teal-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-teal-200/50 dark:border-teal-800/50 hover:-translate-y-1 shadow-sm cursor-pointer backdrop-blur-md"
             >
               <FileText className="h-4 w-4 text-teal-600" />
               <span>Ver Expediente ECE</span>
@@ -130,211 +134,241 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. TARJETAS DE INDICADORES PRINCIPALES (DATOS 100% REALES CON TONOS MÉDICOS) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 2. BENTO BOX GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         
         {/* Total Citas */}
-        <div className="bg-gradient-to-br from-white via-[#f8fbfe] to-sky-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-sky-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(2,132,199,0.07)] hover:shadow-lg hover:border-sky-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Citas</span>
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25 flex items-center justify-center">
-              <Calendar className="h-5 w-5" />
+        <div className="group relative overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 rounded-3xl border border-white/80 dark:border-white/10 shadow-lg shadow-slate-200/40 dark:shadow-none hover:shadow-xl hover:shadow-sky-500/10 hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-sky-400/20 to-transparent rounded-full blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <div className="h-10 w-10 rounded-2xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-inner">
+              <Calendar className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 px-2 py-1 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
+              <Activity className="h-3 w-3 text-emerald-500" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Global</span>
             </div>
           </div>
-          <div className="text-3xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
-            {totalCitas}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-sky-700 dark:text-slate-400 mt-1 font-medium">
-            <Activity className="h-3.5 w-3.5 text-sky-500" />
-            <span>Turnos en historial</span>
+          <div className="relative z-10 flex items-end justify-between">
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter drop-shadow-sm">
+                {totalCitas}
+              </div>
+              <div className="text-[10px] font-extrabold text-slate-400 mt-0.5 uppercase tracking-wider">
+                Total Turnos
+              </div>
+            </div>
+            <div className="h-8 w-16 bg-gradient-to-t from-sky-500/10 to-transparent rounded-t-md border-b-2 border-sky-400" />
           </div>
         </div>
 
         {/* Citas Pendientes */}
-        <div className="bg-gradient-to-br from-white via-[#fffdfa] to-amber-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-amber-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(245,158,11,0.07)] hover:shadow-lg hover:border-amber-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Citas Pendientes</span>
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/25 flex items-center justify-center">
-              <Clock className="h-5 w-5" />
+        <div className="group relative overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 rounded-3xl border border-white/80 dark:border-white/10 shadow-lg shadow-slate-200/40 dark:shadow-none hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-400/20 to-transparent rounded-full blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <div className="h-10 w-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-inner">
+              <Clock className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 px-2 py-1 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Activas</span>
             </div>
           </div>
-          <div className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-2 tracking-tight">
-            {citasPendientes}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400/90 mt-1 font-medium">
-            <span>Programadas y confirmadas</span>
+          <div className="relative z-10 flex items-end justify-between">
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter drop-shadow-sm">
+                {citasPendientes}
+              </div>
+              <div className="text-[10px] font-extrabold text-slate-400 mt-0.5 uppercase tracking-wider">
+                En Espera
+              </div>
+            </div>
+            <div className="h-6 w-16 bg-gradient-to-t from-amber-500/10 to-transparent rounded-t-md border-b-2 border-amber-400" />
           </div>
         </div>
 
         {/* Citas Atendidas */}
-        <div className="bg-gradient-to-br from-white via-[#f8fefa] to-emerald-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-emerald-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(16,185,129,0.07)] hover:shadow-lg hover:border-emerald-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Citas Atendidas</span>
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5" />
+        <div className="group relative overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 rounded-3xl border border-white/80 dark:border-white/10 shadow-lg shadow-slate-200/40 dark:shadow-none hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-emerald-400/20 to-transparent rounded-full blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-inner">
+              <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 px-2 py-1 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700">
+              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">ECE</span>
             </div>
           </div>
-          <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 tracking-tight">
-            {citasAtendidas}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400/90 mt-1 font-medium">
-            <span>Consultas completadas en ECE</span>
+          <div className="relative z-10 flex items-end justify-between">
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter drop-shadow-sm">
+                {citasAtendidas}
+              </div>
+              <div className="text-[10px] font-extrabold text-slate-400 mt-0.5 uppercase tracking-wider">
+                Completadas
+              </div>
+            </div>
+            <div className="h-10 w-16 bg-gradient-to-t from-emerald-500/10 to-transparent rounded-t-md border-b-2 border-emerald-400" />
           </div>
         </div>
 
-        {/* Pacientes Registrados (Dato Real de la API) */}
-        <div className="bg-gradient-to-br from-white via-[#f8fdfd] to-teal-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-teal-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(20,184,166,0.07)] hover:shadow-lg hover:border-teal-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pacientes Activos</span>
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/25 flex items-center justify-center">
-              <Users className="h-5 w-5" />
+        {/* Pacientes Registrados */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-teal-500 to-emerald-600 p-5 rounded-3xl border border-teal-400/50 shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none transform translate-x-10 -translate-y-10" />
+          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-black/10 rounded-full blur-xl pointer-events-none" />
+          
+          <div className="flex items-center justify-between mb-3 relative z-10">
+            <div className="h-10 w-10 rounded-2xl bg-white/20 text-white flex items-center justify-center group-hover:scale-110 transition-transform duration-300 backdrop-blur-md shadow-inner">
+              <Users className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div className="flex items-center gap-1.5 bg-black/10 px-2 py-1 rounded-lg backdrop-blur-md border border-white/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal-200 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-teal-50">Red</span>
             </div>
           </div>
-          <div className="text-3xl font-black text-teal-600 dark:text-teal-400 mt-2 tracking-tight">
-            {totalPacientes}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-teal-700 dark:text-teal-400/90 mt-1 font-medium">
-            <span>Directorio de fichas activas</span>
+          <div className="relative z-10 flex items-end justify-between">
+            <div>
+              <div className="text-3xl font-black text-white tracking-tighter drop-shadow-md">
+                {totalPacientes}
+              </div>
+              <div className="text-[10px] font-extrabold text-teal-100 mt-0.5 uppercase tracking-wider">
+                Pacientes Activos
+              </div>
+            </div>
+            <div className="flex gap-1 items-end h-8">
+              <div className="w-1.5 h-3 bg-white/40 rounded-t-sm" />
+              <div className="w-1.5 h-5 bg-white/60 rounded-t-sm" />
+              <div className="w-1.5 h-8 bg-white rounded-t-sm shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+            </div>
           </div>
         </div>
 
       </div>
 
-      {/* 3. AGENDA DE CONSULTAS: FILTRABLE, BUSCABLE Y RESPONSIVA */}
-      <div className="bg-gradient-to-b from-white via-[#fafcff] to-[#f8fafc] dark:from-slate-900 dark:to-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(15,23,42,0.05)] overflow-hidden transition-colors">
+      {/* 3. AGENDA DE CONSULTAS: BENTO LIST */}
+      <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] border border-white/60 dark:border-white/10 shadow-xl shadow-slate-200/30 dark:shadow-none overflow-hidden transition-colors">
         
         {/* Barra superior de la tabla */}
-        <div className="p-5 sm:p-6 border-b border-slate-200/70 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-6 sm:p-8 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Agenda de Consultas Clínicas
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                <Clock className="h-5 w-5" />
+              </div>
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Agenda del Día
               </h2>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Visualización y seguimiento de turnos en tiempo real
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2 ml-13">
+              Monitoreo en tiempo real de los turnos programados
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             {/* Buscador de la tabla */}
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="relative group">
+              <Search className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors" />
               <input
                 type="text"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Filtrar por paciente, médico o servicio..."
-                className="pl-8 pr-3 py-2 bg-white dark:bg-slate-800 border-2 border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 shadow-sm w-full sm:w-64"
+                placeholder="Buscar por paciente, DPI..."
+                className="pl-11 pr-4 py-2.5 bg-white/50 dark:bg-slate-800/50 border-2 border-white/80 dark:border-slate-700/80 rounded-2xl text-sm font-semibold text-slate-900 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-slate-800 shadow-sm w-full sm:w-64 transition-all"
               />
             </div>
 
             <Link
               to="/citas"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 dark:text-sky-400 hover:text-sky-800 bg-sky-50 dark:bg-sky-950/60 px-3.5 py-2 rounded-xl transition-colors border border-sky-200 dark:border-sky-800/60 shadow-sm"
+              className="inline-flex items-center gap-2 text-xs font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 px-5 py-3 rounded-2xl transition-transform hover:-translate-y-0.5 shadow-md"
             >
-              <span>Ver Agenda Completa</span>
-              <ArrowUpRight className="h-3.5 w-3.5" />
+              <span>Ver Todo</span>
+              <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        {/* Pestañas de Filtro por Estado */}
-        <div className="px-5 sm:px-6 pt-3 pb-2 flex flex-wrap items-center gap-1.5 border-b border-slate-200/70 dark:border-slate-800 text-xs bg-slate-50/60 dark:bg-slate-900">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3 text-teal-600 dark:text-teal-400" />
-            Estado:
+        {/* Pestañas de Filtro por Estado estilo píldora */}
+        <div className="px-6 sm:px-8 py-4 flex flex-wrap items-center gap-2 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/30 dark:bg-slate-900/30">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mr-2 flex items-center gap-1">
+            <Filter className="h-3 w-3" />
+            Filtros
           </span>
           {(['TODAS', 'PROGRAMADA', 'CONFIRMADA', 'ATENDIDA', 'CANCELADA'] as const).map((estado) => (
             <button
               key={estado}
               onClick={() => setFiltroEstado(estado)}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                 filtroEstado === estado
-                  ? 'bg-gradient-to-r from-sky-600 to-teal-600 text-white shadow-sm shadow-sky-500/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border border-transparent hover:border-slate-200 dark:hover:border-slate-700'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md transform scale-105'
+                  : 'bg-white/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border border-slate-200/60 dark:border-slate-700'
               }`}
             >
-              {estado === 'TODAS' ? 'Todas' : estado.charAt(0) + estado.slice(1).toLowerCase()}
+              {estado === 'TODAS' ? 'Mostrar Todas' : estado.charAt(0) + estado.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
 
         {/* Contenido de la Tabla / Lista */}
         {cargando ? (
-          <div className="p-12 text-center text-sm text-slate-400">Cargando agenda de consultas...</div>
+          <div className="p-16 text-center text-sm font-bold text-slate-400 animate-pulse">Sincronizando agenda...</div>
         ) : citasFiltradas.length === 0 ? (
-          <div className="p-12 text-center text-sm text-slate-400 flex flex-col items-center gap-2">
-            <AlertCircle className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-            <span>No se encontraron citas con los filtros seleccionados.</span>
+          <div className="p-16 text-center flex flex-col items-center gap-3">
+            <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+              <AlertCircle className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+            </div>
+            <span className="text-sm font-bold text-slate-500">No se encontraron citas con estos filtros.</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-              <thead className="bg-[#f1f5f9]/80 dark:bg-slate-800/60 text-xs uppercase text-slate-600 dark:text-slate-400 font-bold tracking-wider border-b border-slate-200/80 dark:border-slate-800">
-                <tr>
-                  <th className="px-6 py-3.5">Paciente</th>
-                  <th className="px-6 py-3.5">Facultativo</th>
-                  <th className="px-6 py-3.5">Sede / Servicio</th>
-                  <th className="px-6 py-3.5">Horario</th>
-                  <th className="px-6 py-3.5">Duración</th>
-                  <th className="px-6 py-3.5 text-center">Estado</th>
-                  <th className="px-6 py-3.5 text-right">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {citasFiltradas.slice(0, 8).map((c) => {
-                  const style = estadoBadgeClass[c.estado] || estadoBadgeClass.PROGRAMADA;
-                  return (
-                    <tr
-                      key={c.id}
-                      className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors group"
+          <div className="p-4 sm:p-6 grid grid-cols-1 gap-3">
+            {citasFiltradas.slice(0, 8).map((c) => {
+              const style = estadoBadgeClass[c.estado] || estadoBadgeClass.PROGRAMADA;
+              return (
+                <div
+                  key={c.id}
+                  className="group relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/80 dark:border-slate-700/80 rounded-[1.5rem] p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-xl hover:shadow-sky-500/5 hover:-translate-y-1 hover:border-sky-200 dark:hover:border-sky-800 transition-all duration-300 cursor-pointer overflow-hidden"
+                  onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="hidden sm:flex h-12 w-12 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-400 items-center justify-center font-bold text-lg border border-slate-100 dark:border-slate-800 group-hover:bg-sky-50 dark:group-hover:bg-sky-900/30 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                      {c.paciente_nombre.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                        {c.paciente_nombre}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 flex items-center gap-2 mt-1">
+                        <span className="text-slate-700 dark:text-slate-300 font-bold">{c.profesional_nombre}</span>
+                        &bull;
+                        <span>{c.servicio_nombre}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 justify-between md:justify-end w-full md:w-auto">
+                    <div className="text-left md:text-right">
+                      <div className="text-sm font-black text-slate-900 dark:text-white">
+                        {new Date(c.fecha_inicio).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                        {new Date(c.fecha_inicio).toLocaleDateString('es-GT', { month: 'short', day: 'numeric' })} &bull; {c.duracion_minutos} min
+                      </div>
+                    </div>
+                    
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[10px] uppercase tracking-widest font-black border ${style.bg} ${style.text} ${style.border}`}
                     >
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900 dark:text-white">
-                          {c.paciente_nombre}
-                        </div>
-                        <div className="text-xs text-slate-400 truncate max-w-xs">{c.motivo || 'Consulta médica general'}</div>
-                      </td>
-                      <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
-                        {c.profesional_nombre}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">{c.servicio_nombre}</div>
-                        <div className="text-xs text-slate-400">{c.sede_nombre}</div>
-                      </td>
-                      <td className="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400">
-                        {new Date(c.fecha_inicio).toLocaleString('es-GT', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        })}
-                      </td>
-                      <td className="px-6 py-4 font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        {c.duracion_minutos} min
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.text} ${style.border}`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-                          {c.estado}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)}
-                          className="text-xs text-sky-600 dark:text-sky-400 hover:text-sky-700 font-semibold p-1.5 hover:bg-sky-50 dark:hover:bg-sky-950/50 rounded-lg transition-colors"
-                          title="Ver Expediente de este Paciente"
-                        >
-                          Ver ECE
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      <span className={`h-1.5 w-1.5 rounded-full ${style.dot} animate-pulse`} />
+                      {c.estado}
+                    </span>
+                    
+                    <div className="hidden lg:flex h-8 w-8 rounded-full bg-slate-50 dark:bg-slate-900 items-center justify-center group-hover:bg-sky-100 dark:group-hover:bg-sky-900 text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 

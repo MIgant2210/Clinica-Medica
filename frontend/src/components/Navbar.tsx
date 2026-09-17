@@ -45,7 +45,7 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30 transition-colors duration-200">
+    <header className="h-[60px] flex-shrink-0 bg-gradient-to-r from-white/80 to-white/40 dark:from-slate-900/80 dark:to-slate-900/40 backdrop-blur-2xl border border-white/60 dark:border-white/10 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-none flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30 transition-all duration-300 mx-1 mt-1">
       
       {/* 1. Menú Móvil + Título de Sección */}
       <div className="flex items-center gap-3">

@@ -25,15 +25,36 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <LayoutProvider>
-      <div className="min-h-screen flex flex-col bg-[#f1f5f9] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
-        <Navbar />
-        <div className="flex-1 flex overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              <Outlet />
-            </div>
-          </main>
+      <div className="relative min-h-screen w-full bg-gradient-to-br from-sky-50 via-slate-50 to-teal-50 dark:from-[#040b16] dark:via-[#020617] dark:to-[#09151a] text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-500">
+        
+        {/* Fondo Animado de Malla (Mesh Gradient) y Puntos */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          {/* Blobs de color más vívidos */}
+          <div className="absolute top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full blur-[120px] bg-teal-400/20 dark:bg-teal-500/15 animate-blob" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full blur-[100px] bg-sky-400/20 dark:bg-sky-500/15 animate-blob" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-[40%] left-[60%] w-[35vw] h-[35vw] rounded-full blur-[100px] bg-emerald-400/15 dark:bg-emerald-500/10 animate-blob" style={{ animationDelay: '4s' }} />
+          <div className="absolute top-[20%] right-[30%] w-[25vw] h-[25vw] rounded-full blur-[90px] bg-purple-400/10 dark:bg-indigo-500/10 animate-blob" style={{ animationDelay: '6s' }} />
+          
+          {/* Patrón de puntos premium (Dotted Grid) */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuNSIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+PC9zdmc+')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEuNSIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+PC9zdmc+')] [mask-image:linear-gradient(to_bottom,white,transparent)]" />
+        </div>
+
+        {/* Contenedor Principal */}
+        <div className="relative z-10 flex h-screen w-full p-2 sm:p-4 gap-4">
+          {/* Sidebar Flotante */}
+          <div className="hidden lg:flex w-[260px] flex-shrink-0">
+            <Sidebar />
+          </div>
+          
+          {/* Contenido Central */}
+          <div className="flex-1 flex flex-col min-w-0 h-full relative">
+            <Navbar />
+            <main className="flex-1 overflow-y-auto mt-4 pb-4">
+              <div className="h-full w-full max-w-7xl mx-auto px-2 sm:px-4">
+                <Outlet />
+              </div>
+            </main>
+          </div>
         </div>
       </div>
     </LayoutProvider>

@@ -54,7 +54,7 @@ export const Sidebar: React.FC = () => {
   const allowedNavItems = navItems.filter((item) => user && item.roles.includes(user.rol));
 
   const sidebarContent = (
-    <div className="h-full flex flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800/80 select-none transition-all duration-300 shadow-sm">
+    <div className="h-full flex flex-col justify-between bg-gradient-to-b from-white/80 to-white/40 dark:from-slate-900/80 dark:to-slate-900/40 backdrop-blur-2xl border border-white/60 dark:border-white/10 select-none transition-all duration-300 shadow-2xl shadow-slate-200/40 dark:shadow-none rounded-[2rem] overflow-hidden">
       
       {/* 1. Cabecera y Logotipo */}
       <div>

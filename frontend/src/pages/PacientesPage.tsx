@@ -5,6 +5,7 @@ import {
   Search, User, FileText, X, Heart, ArrowUpRight, 
   ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact
 } from 'lucide-react';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const PacientesPage: React.FC = () => {
@@ -106,19 +107,23 @@ export const PacientesPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-8 animate-fade-in-up relative">
       
+      {/* Fondos flotantes decorativos */}
+      <div className="absolute top-0 right-10 w-72 h-72 bg-emerald-400/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-40 left-10 w-72 h-72 bg-sky-400/10 dark:bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+
       {/* Encabezado y Acción */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2rem] border border-white/60 dark:border-white/10 shadow-lg shadow-slate-200/20 dark:shadow-none">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold mb-1 border border-emerald-100 dark:border-emerald-800">
-            <User className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-black uppercase tracking-widest mb-3">
+            <User className="h-3.5 w-3.5" />
             Padrón Único de Salud
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Directorio de Pacientes
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
             Identidad centralizada y apertura automática del Expediente Clínico Electrónico (ECE)
           </p>
         </div>
@@ -128,87 +133,86 @@ export const PacientesPage: React.FC = () => {
             setPasoActual(1);
             setModalAbierto(true);
           }}
-          className="px-5 py-3 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-emerald-500/25 transition-all duration-300 flex items-center justify-center gap-2 active:scale-95"
+          className="group relative px-6 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-[1.5rem] text-sm font-bold shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-1 overflow-hidden"
         >
-          <UserPlus className="h-4 w-4" />
-          Registrar Paciente
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+          <UserPlus className="h-5 w-5 relative z-10" />
+          <span className="relative z-10">Registrar Paciente</span>
         </button>
       </div>
 
       {/* Buscador Interactivo */}
-      <div className="relative group">
-        <Search className="h-5 w-5 text-slate-400 group-focus-within:text-teal-600 dark:group-focus-within:text-teal-400 transition-colors absolute left-4 top-1/2 -translate-y-1/2" />
+      <div className="relative group z-10">
+        <Search className="h-5 w-5 text-slate-400 group-focus-within:text-teal-500 transition-colors absolute left-5 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           placeholder="Buscar por nombre completo, número de DPI o código de expediente..."
-          className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-2xl text-sm shadow-sm focus:outline-none focus:border-teal-500 font-medium transition-all text-slate-800 dark:text-slate-100 placeholder-slate-400"
+          className="w-full pl-14 pr-6 py-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border-2 border-white/60 dark:border-white/10 rounded-[1.5rem] text-sm shadow-lg shadow-slate-200/20 dark:shadow-none focus:outline-none focus:border-teal-500 focus:bg-white dark:focus:bg-slate-800 font-bold transition-all text-slate-800 dark:text-slate-100 placeholder-slate-400"
         />
       </div>
 
       {/* Grid de Pacientes */}
       {cargando ? (
-        <div className="p-12 text-center text-sm text-slate-400">Cargando pacientes...</div>
+        <div className="p-16 text-center text-sm font-bold text-slate-400 animate-pulse">Cargando pacientes...</div>
       ) : pacientes.length === 0 ? (
-        <div className="p-12 text-center text-sm text-slate-400 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200/80 dark:border-slate-800">
+        <div className="p-16 text-center text-sm font-bold text-slate-500 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-[2rem] border border-white/60 dark:border-white/10">
           No se encontraron pacientes que coincidan con la búsqueda.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative z-10">
           {pacientes.map((p) => {
             const sangreBadge = sangreColors[p.tipo_sangre] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
             return (
               <div
                 key={p.id}
-                className="bg-gradient-to-br from-white via-[#fafcff] to-[#f7fbfa] dark:from-slate-900 dark:to-slate-900 p-6 rounded-[32px] border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_20px_rgba(15,23,42,0.05)] hover:shadow-xl hover:border-teal-400 dark:hover:border-teal-500 transition-all duration-300 flex flex-col justify-between group"
+                className="bg-white/60 dark:bg-slate-900/50 backdrop-blur-xl p-6 rounded-[2rem] border border-white/60 dark:border-white/10 shadow-lg shadow-slate-200/20 dark:shadow-none hover:shadow-2xl hover:shadow-teal-500/10 hover:border-teal-400/50 dark:hover:border-teal-500/50 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
+                onClick={() => navigate(`/expediente?pacienteId=${p.id}`)}
               >
                 <div>
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-emerald-100 to-teal-50 dark:from-emerald-950/60 dark:to-teal-950/60 text-teal-700 dark:text-teal-300 flex items-center justify-center font-bold border border-teal-200/50 dark:border-teal-800 group-hover:scale-105 transition-transform">
-                        <User className="h-6 w-6" />
+                  <div className="flex items-start justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="h-14 w-14 rounded-[1.25rem] bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold border border-emerald-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                        <User className="h-7 w-7" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-900 dark:text-white text-base leading-tight group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-lg leading-tight group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                           {p.nombre_completo}
                         </h3>
-                        <span className="text-xs font-mono font-semibold text-teal-600 dark:text-teal-400">
+                        <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 px-2 py-0.5 rounded-lg mt-1 inline-block">
                           {p.codigo_paciente}
                         </span>
                       </div>
                     </div>
                     
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-black border flex items-center gap-1 ${sangreBadge}`}>
+                    <span className={`px-3 py-1.5 rounded-xl text-[10px] uppercase tracking-widest font-black border flex items-center gap-1.5 ${sangreBadge}`}>
                       <Heart className="h-3 w-3 fill-current" />
                       {p.tipo_sangre}
                     </span>
                   </div>
 
-                  <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-700/50 mb-4">
+                  <div className="space-y-3 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 p-4 rounded-2xl border border-white/60 dark:border-white/5 mb-6">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-semibold">Documento:</span>
-                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{p.documento}</span>
+                      <span className="text-slate-400 uppercase tracking-wider text-[10px] font-black">Documento</span>
+                      <span className="font-mono text-slate-800 dark:text-slate-200">{p.documento}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-semibold">Teléfono:</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">{p.telefono}</span>
+                      <span className="text-slate-400 uppercase tracking-wider text-[10px] font-black">Teléfono</span>
+                      <span className="text-slate-700 dark:text-slate-300">{p.telefono}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-semibold">Correo:</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[150px]">{p.correo}</span>
+                      <span className="text-slate-400 uppercase tracking-wider text-[10px] font-black">Correo</span>
+                      <span className="text-slate-700 dark:text-slate-300 truncate max-w-[140px]">{p.correo}</span>
                     </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => navigate(`/expediente?pacienteId=${p.id}`)}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-950/40 dark:to-emerald-950/40 hover:from-teal-600 hover:to-emerald-600 text-teal-800 dark:text-teal-200 hover:text-white font-bold rounded-2xl text-xs border border-teal-200 dark:border-teal-800/80 hover:border-transparent shadow-sm transition-all duration-300 flex items-center justify-center gap-2 active:scale-95"
-                >
+                <div className="w-full py-3.5 px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-[1.25rem] text-xs shadow-md transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-teal-600 dark:group-hover:bg-teal-500 dark:group-hover:text-white group-hover:scale-[1.02]">
                   <FileText className="h-4 w-4" />
                   <span>Abrir Expediente (ECE)</span>
-                  <ArrowUpRight className="h-3.5 w-3.5 opacity-70" />
-                </button>
+                  <ArrowUpRight className="h-4 w-4 opacity-70" />
+                </div>
               </div>
             );
           })}
@@ -365,12 +369,9 @@ export const PacientesPage: React.FC = () => {
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                         Fecha de Nacimiento *
                       </label>
-                      <input
-                        type="date"
-                        required
+                      <CustomDatePicker
                         value={fechaNacimiento}
-                        onChange={(e) => setFechaNacimiento(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                        onChange={(date) => setFechaNacimiento(date)}
                       />
                     </div>
 

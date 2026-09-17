@@ -8,6 +8,7 @@ import {
   Stethoscope, Building2, AlertCircle, CheckCircle2, 
   Search, ChevronRight, ChevronLeft, User
 } from 'lucide-react';
+import { CustomDatePicker } from '../components/CustomDatePicker';
 
 export const CitasPage: React.FC = () => {
   const { user } = useAuth();
@@ -209,19 +210,23 @@ export const CitasPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-8 animate-fade-in-up relative">
       
+      {/* Fondos flotantes decorativos */}
+      <div className="absolute top-0 right-20 w-72 h-72 bg-sky-400/10 dark:bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-60 left-10 w-72 h-72 bg-emerald-400/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
       {/* 1. ENCABEZADO Y BOTÓN DE APERTURA DE WIZARD */}
-      <div className="bg-gradient-to-r from-white via-[#f8fafc] to-sky-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(2,132,199,0.06)] flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2rem] border border-white/60 dark:border-white/10 shadow-lg shadow-slate-200/20 dark:shadow-none">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 text-xs font-bold mb-1 border border-sky-200 dark:border-sky-800">
-            <CalIcon className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400 text-xs font-black uppercase tracking-widest mb-3">
+            <CalIcon className="h-3.5 w-3.5" />
             Agenda y Turnos Clínicos
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Gestión de Citas Médicas
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
             Programación guiada, disponibilidad en tiempo real y seguimiento de estados
           </p>
         </div>
@@ -229,16 +234,17 @@ export const CitasPage: React.FC = () => {
         {user?.rol !== 'PACIENTE' && (
           <button
             onClick={abrirModalNuevo}
-            className="px-5 py-3 bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-sky-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0 cursor-pointer"
+            className="group relative px-6 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-[1.5rem] text-sm font-bold shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-1 overflow-hidden shrink-0"
           >
-            <Plus className="h-4 w-4 stroke-[3]" />
-            <span>Programar Nueva Cita</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-sky-500/20 to-teal-500/20 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+            <Plus className="h-5 w-5 stroke-[3] relative z-10" />
+            <span className="relative z-10">Programar Nueva Cita</span>
           </button>
         )}
       </div>
 
       {/* 2. TABLA PRINCIPAL DE CITAS CON FILTROS Y BÚSQUEDA */}
-      <div className="bg-gradient-to-b from-white via-[#fafcff] to-[#f8fafc] dark:from-slate-900 dark:to-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(15,23,42,0.05)] overflow-hidden transition-colors">
+      <div className="relative z-10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] border border-white/60 dark:border-white/10 shadow-xl shadow-slate-200/30 dark:shadow-none overflow-hidden transition-colors">
         
         {/* Barra de Filtros */}
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -682,12 +688,10 @@ export const CitasPage: React.FC = () => {
                               {d.label}
                             </button>
                           ))}
-                          <input
-                            type="date"
+                          <CustomDatePicker
                             value={fechaSeleccionada}
-                            min={new Date().toISOString().split('T')[0]}
-                            onChange={(e) => setFechaSeleccionada(e.target.value)}
-                            className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-sky-500"
+                            onChange={(date) => setFechaSeleccionada(date)}
+                            minDate={new Date().toISOString().split('T')[0]}
                           />
                         </div>
                       </div>
@@ -713,15 +717,16 @@ export const CitasPage: React.FC = () => {
                                 type="button"
                                 disabled={ocupado}
                                 onClick={() => setHoraSeleccionada(h)}
-                                className={`py-2 px-1 text-xs font-bold rounded-xl border text-center transition-all ${
+                                className={`relative py-3 px-2 text-sm font-black rounded-2xl text-center transition-all duration-300 overflow-hidden ${
                                   ocupado
-                                    ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 border-slate-200/50 dark:border-slate-800 cursor-not-allowed line-through opacity-60'
+                                    ? 'bg-slate-100/50 dark:bg-slate-800/20 text-slate-400 dark:text-slate-500 border border-slate-200/50 dark:border-slate-800 cursor-not-allowed line-through opacity-60'
                                     : seleccionado
-                                    ? 'bg-sky-600 text-white border-sky-600 shadow-md ring-2 ring-sky-500/50 scale-105'
-                                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-sky-400'
+                                    ? 'bg-gradient-to-tr from-sky-500 to-teal-400 text-white shadow-xl shadow-sky-500/30 scale-105 border-0 ring-4 ring-sky-500/20 z-10'
+                                    : 'bg-white/60 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 border-2 border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:text-sky-600 dark:hover:text-sky-400 backdrop-blur-sm'
                                 }`}
                               >
-                                {h}
+                                {seleccionado && <div className="absolute inset-0 bg-white/20 animate-pulse" />}
+                                <span className="relative z-10">{h}</span>
                               </button>
                             );
                           })}
