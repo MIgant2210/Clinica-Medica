@@ -13,8 +13,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
+      const userSet = localStorage.getItem('clinica_theme_user_set');
       const saved = localStorage.getItem('clinica_theme');
-      if (saved === 'dark' || saved === 'light') return saved;
+      if (userSet === 'true' && (saved === 'dark' || saved === 'light')) {
+        return saved;
+      }
     } catch (e) {}
     // Por defecto modo claro clínico solicitado por el usuario
     return 'light';
@@ -34,9 +37,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     applyTheme(theme);
-    try {
-      localStorage.setItem('clinica_theme', theme);
-    } catch (e) {}
   }, [theme]);
 
   const toggleTheme = () => {
@@ -45,6 +45,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       applyTheme(next);
       try {
         localStorage.setItem('clinica_theme', next);
+        localStorage.setItem('clinica_theme_user_set', 'true');
       } catch (e) {}
       return next;
     });
@@ -54,6 +55,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     applyTheme(newTheme);
     try {
       localStorage.setItem('clinica_theme', newTheme);
+      localStorage.setItem('clinica_theme_user_set', 'true');
     } catch (e) {}
     setThemeState(newTheme);
   };

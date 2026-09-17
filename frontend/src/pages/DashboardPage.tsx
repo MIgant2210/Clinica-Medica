@@ -76,7 +76,7 @@ export const DashboardPage: React.FC = () => {
     <div className="space-y-6">
       
       {/* 1. ENCABEZADO DE BIENVENIDA Y ACCIONES RÁPIDAS */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-colors">
+      <div className="bg-gradient-to-r from-white via-[#f8fafc] to-sky-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(2,132,199,0.06)] flex flex-col md:flex-row md:items-center justify-between gap-5 transition-colors">
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-sky-600 via-teal-500 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20 shrink-0">
             <Stethoscope className="h-7 w-7 stroke-[2]" />
@@ -86,7 +86,7 @@ export const DashboardPage: React.FC = () => {
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 Hola, {user?.nombreCompleto}
               </h1>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
                 {user?.rol}
               </span>
             </div>
@@ -101,7 +101,7 @@ export const DashboardPage: React.FC = () => {
           {(user?.rol === 'ADMIN' || user?.rol === 'RECEPCIONISTA' || user?.rol === 'MEDICO') && (
             <button
               onClick={() => navigate('/citas?nueva=true')}
-              className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white rounded-2xl text-xs font-bold shadow-md shadow-sky-500/20 transition-all flex items-center gap-2 active:scale-95"
+              className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white rounded-2xl text-xs font-bold shadow-md shadow-sky-500/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
             >
               <Calendar className="h-4 w-4" />
               <span>Programar Cita</span>
@@ -111,7 +111,7 @@ export const DashboardPage: React.FC = () => {
           {(user?.rol === 'ADMIN' || user?.rol === 'RECEPCIONISTA') && (
             <button
               onClick={() => navigate('/pacientes?nuevo=true')}
-              className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-200/80 dark:border-slate-700 active:scale-95"
+              className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-200/90 dark:border-slate-700 active:scale-95 shadow-sm cursor-pointer"
             >
               <UserPlus className="h-4 w-4 text-teal-600 dark:text-teal-400" />
               <span>Nuevo Paciente</span>
@@ -121,7 +121,7 @@ export const DashboardPage: React.FC = () => {
           {user?.rol === 'MEDICO' && (
             <button
               onClick={() => navigate('/expediente')}
-              className="px-4 py-2.5 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-teal-800 dark:text-teal-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-teal-200 dark:border-teal-800"
+              className="px-4 py-2.5 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-teal-800 dark:text-teal-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border border-teal-200 dark:border-teal-800 cursor-pointer shadow-sm"
             >
               <FileText className="h-4 w-4 text-teal-600" />
               <span>Ver Expediente ECE</span>
@@ -130,70 +130,70 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. TARJETAS DE INDICADORES PRINCIPALES (DATOS 100% REALES) */}
+      {/* 2. TARJETAS DE INDICADORES PRINCIPALES (DATOS 100% REALES CON TONOS MÉDICOS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total Citas */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-white via-[#f8fbfe] to-sky-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-sky-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(2,132,199,0.07)] hover:shadow-lg hover:border-sky-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Citas</span>
-            <div className="h-10 w-10 rounded-2xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Citas</span>
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/25 flex items-center justify-center">
               <Calendar className="h-5 w-5" />
             </div>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
             {totalCitas}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <div className="flex items-center gap-1.5 text-xs text-sky-700 dark:text-slate-400 mt-1 font-medium">
             <Activity className="h-3.5 w-3.5 text-sky-500" />
             <span>Turnos en historial</span>
           </div>
         </div>
 
         {/* Citas Pendientes */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-white via-[#fffdfa] to-amber-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-amber-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(245,158,11,0.07)] hover:shadow-lg hover:border-amber-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Citas Pendientes</span>
-            <div className="h-10 w-10 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Citas Pendientes</span>
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/25 flex items-center justify-center">
               <Clock className="h-5 w-5" />
             </div>
           </div>
           <div className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-2 tracking-tight">
             {citasPendientes}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400/90 mt-1">
+          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400/90 mt-1 font-medium">
             <span>Programadas y confirmadas</span>
           </div>
         </div>
 
         {/* Citas Atendidas */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-white via-[#f8fefa] to-emerald-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-emerald-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(16,185,129,0.07)] hover:shadow-lg hover:border-emerald-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Citas Atendidas</span>
-            <div className="h-10 w-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Citas Atendidas</span>
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25 flex items-center justify-center">
               <CheckCircle2 className="h-5 w-5" />
             </div>
           </div>
           <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-2 tracking-tight">
             {citasAtendidas}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400/90 mt-1">
+          <div className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400/90 mt-1 font-medium">
             <span>Consultas completadas en ECE</span>
           </div>
         </div>
 
         {/* Pacientes Registrados (Dato Real de la API) */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-white via-[#f8fdfd] to-teal-50/70 dark:from-slate-900 dark:to-slate-900 p-5 rounded-3xl border border-teal-200/90 dark:border-slate-800 shadow-[0_6px_20px_rgba(20,184,166,0.07)] hover:shadow-lg hover:border-teal-300 transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Pacientes Activos</span>
-            <div className="h-10 w-10 rounded-2xl bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pacientes Activos</span>
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-teal-500 to-cyan-600 text-white shadow-md shadow-teal-500/25 flex items-center justify-center">
               <Users className="h-5 w-5" />
             </div>
           </div>
           <div className="text-3xl font-black text-teal-600 dark:text-teal-400 mt-2 tracking-tight">
             {totalPacientes}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-teal-700 dark:text-teal-400/90 mt-1">
+          <div className="flex items-center gap-1.5 text-xs text-teal-700 dark:text-teal-400/90 mt-1 font-medium">
             <span>Directorio de fichas activas</span>
           </div>
         </div>
@@ -201,10 +201,10 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* 3. AGENDA DE CONSULTAS: FILTRABLE, BUSCABLE Y RESPONSIVA */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+      <div className="bg-gradient-to-b from-white via-[#fafcff] to-[#f8fafc] dark:from-slate-900 dark:to-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(15,23,42,0.05)] overflow-hidden transition-colors">
         
         {/* Barra superior de la tabla */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 border-b border-slate-200/70 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-sky-600 dark:text-sky-400" />
@@ -212,7 +212,7 @@ export const DashboardPage: React.FC = () => {
                 Agenda de Consultas Clínicas
               </h2>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Visualización y seguimiento de turnos en tiempo real
             </p>
           </div>
@@ -226,13 +226,13 @@ export const DashboardPage: React.FC = () => {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Filtrar por paciente, médico o servicio..."
-                className="pl-8 pr-3 py-1.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 w-full sm:w-64"
+                className="pl-8 pr-3 py-2 bg-white dark:bg-slate-800 border-2 border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 shadow-sm w-full sm:w-64"
               />
             </div>
 
             <Link
               to="/citas"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 bg-sky-50 dark:bg-sky-950/60 px-3.5 py-1.5 rounded-xl transition-colors border border-sky-200/60 dark:border-sky-800/60"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 dark:text-sky-400 hover:text-sky-800 bg-sky-50 dark:bg-sky-950/60 px-3.5 py-2 rounded-xl transition-colors border border-sky-200 dark:border-sky-800/60 shadow-sm"
             >
               <span>Ver Agenda Completa</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -241,19 +241,19 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Pestañas de Filtro por Estado */}
-        <div className="px-5 sm:px-6 pt-3 pb-1 flex flex-wrap items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 text-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" />
+        <div className="px-5 sm:px-6 pt-3 pb-2 flex flex-wrap items-center gap-1.5 border-b border-slate-200/70 dark:border-slate-800 text-xs bg-slate-50/60 dark:bg-slate-900">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
+            <Filter className="h-3 w-3 text-teal-600 dark:text-teal-400" />
             Estado:
           </span>
           {(['TODAS', 'PROGRAMADA', 'CONFIRMADA', 'ATENDIDA', 'CANCELADA'] as const).map((estado) => (
             <button
               key={estado}
               onClick={() => setFiltroEstado(estado)}
-              className={`px-3 py-1 rounded-xl font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
                 filtroEstado === estado
-                  ? 'bg-sky-600 text-white font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-sky-600 to-teal-600 text-white shadow-sm shadow-sky-500/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border border-transparent hover:border-slate-200 dark:hover:border-slate-700'
               }`}
             >
               {estado === 'TODAS' ? 'Todas' : estado.charAt(0) + estado.slice(1).toLowerCase()}
@@ -272,7 +272,7 @@ export const DashboardPage: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-              <thead className="bg-slate-50/80 dark:bg-slate-800/60 text-xs uppercase text-slate-400 dark:text-slate-400 font-bold tracking-wider border-b border-slate-100 dark:border-slate-800">
+              <thead className="bg-[#f1f5f9]/80 dark:bg-slate-800/60 text-xs uppercase text-slate-600 dark:text-slate-400 font-bold tracking-wider border-b border-slate-200/80 dark:border-slate-800">
                 <tr>
                   <th className="px-6 py-3.5">Paciente</th>
                   <th className="px-6 py-3.5">Facultativo</th>

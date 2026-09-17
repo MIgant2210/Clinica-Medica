@@ -16,7 +16,7 @@ export const LoginPage: React.FC = () => {
   const [cargando, setCargando] = useState(false);
 
   const { login, quickLogin } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,29 +46,36 @@ export const LoginPage: React.FC = () => {
         : 'bg-gradient-to-br from-sky-100 via-teal-50 to-emerald-100 text-slate-800'
     }`}>
       
-      {/* Botón de Modo Claro / Modo Oscuro en Login */}
+      {/* Selector de Modo Claro / Modo Oscuro en Login */}
       <div className="absolute top-6 right-6 z-30">
-        <button
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
-          className={`p-3 rounded-2xl border transition-all duration-300 shadow-lg flex items-center gap-2 text-xs font-bold cursor-pointer ${
-            theme === 'dark'
-              ? 'bg-slate-900/85 border-white/20 text-amber-300 hover:bg-slate-800 shadow-amber-500/10'
-              : 'bg-white/95 border-emerald-200/80 text-slate-700 hover:bg-white shadow-md shadow-sky-500/10'
-          }`}
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun className="h-4 w-4 text-amber-400" />
-              <span className="hidden sm:inline">Modo Claro</span>
-            </>
-          ) : (
-            <>
-              <Moon className="h-4 w-4 text-sky-600" />
-              <span className="hidden sm:inline">Modo Oscuro</span>
-            </>
-          )}
-        </button>
+        <div className={`p-1 rounded-2xl border backdrop-blur-md flex items-center shadow-lg transition-all ${
+          theme === 'dark' ? 'bg-slate-900/90 border-white/20' : 'bg-white/95 border-emerald-200/80 shadow-sky-500/10'
+        }`}>
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              theme === 'light'
+                ? 'bg-sky-50 text-sky-700 shadow-sm font-extrabold border border-sky-200'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <Sun className={`h-4 w-4 ${theme === 'light' ? 'text-amber-500' : ''}`} />
+            <span>Claro</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              theme === 'dark'
+                ? 'bg-slate-800 text-amber-300 shadow-sm font-extrabold border border-slate-700'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <Moon className={`h-4 w-4 ${theme === 'dark' ? 'text-sky-300' : ''}`} />
+            <span>Oscuro</span>
+          </button>
+        </div>
       </div>
 
       {/* ===================================================================== */}

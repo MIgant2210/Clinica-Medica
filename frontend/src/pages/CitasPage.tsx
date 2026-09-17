@@ -212,9 +212,9 @@ export const CitasPage: React.FC = () => {
     <div className="space-y-6">
       
       {/* 1. ENCABEZADO Y BOTÓN DE APERTURA DE WIZARD */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
+      <div className="bg-gradient-to-r from-white via-[#f8fafc] to-sky-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(2,132,199,0.06)] flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 text-xs font-bold mb-1 border border-sky-100 dark:border-sky-800">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 text-xs font-bold mb-1 border border-sky-200 dark:border-sky-800">
             <CalIcon className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
             Agenda y Turnos Clínicos
           </div>
@@ -229,7 +229,7 @@ export const CitasPage: React.FC = () => {
         {user?.rol !== 'PACIENTE' && (
           <button
             onClick={abrirModalNuevo}
-            className="px-5 py-3 bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-sky-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0"
+            className="px-5 py-3 bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-2xl text-sm font-bold shadow-lg shadow-sky-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0 cursor-pointer"
           >
             <Plus className="h-4 w-4 stroke-[3]" />
             <span>Programar Nueva Cita</span>
@@ -238,7 +238,7 @@ export const CitasPage: React.FC = () => {
       </div>
 
       {/* 2. TABLA PRINCIPAL DE CITAS CON FILTROS Y BÚSQUEDA */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+      <div className="bg-gradient-to-b from-white via-[#fafcff] to-[#f8fafc] dark:from-slate-900 dark:to-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_25px_rgba(15,23,42,0.05)] overflow-hidden transition-colors">
         
         {/* Barra de Filtros */}
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -143,7 +143,7 @@ export const PacientesPage: React.FC = () => {
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           placeholder="Buscar por nombre completo, número de DPI o código de expediente..."
-          className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium transition-all text-slate-800 dark:text-slate-100 placeholder-slate-400"
+          className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 rounded-2xl text-sm shadow-sm focus:outline-none focus:border-teal-500 font-medium transition-all text-slate-800 dark:text-slate-100 placeholder-slate-400"
         />
       </div>
 
@@ -161,7 +161,7 @@ export const PacientesPage: React.FC = () => {
             return (
               <div
                 key={p.id}
-                className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-teal-300 dark:hover:border-teal-500 transition-all duration-300 flex flex-col justify-between group"
+                className="bg-gradient-to-br from-white via-[#fafcff] to-[#f7fbfa] dark:from-slate-900 dark:to-slate-900 p-6 rounded-[32px] border border-slate-200/90 dark:border-slate-800 shadow-[0_4px_20px_rgba(15,23,42,0.05)] hover:shadow-xl hover:border-teal-400 dark:hover:border-teal-500 transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-4">

@@ -10,7 +10,7 @@ import {
 
 export const Sidebar: React.FC = () => {
   const { user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { isCollapsed, toggleCollapse, isMobileOpen, closeMobile } = useLayout();
 
   const navItems = [
@@ -154,35 +154,35 @@ export const Sidebar: React.FC = () => {
           </div>
         )}
 
-        {/* Toggle de Modo Claro / Oscuro en Sidebar */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
-          className={`w-full flex items-center ${
-            isCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-2'
-          } rounded-xl text-xs font-semibold border transition-all duration-200 cursor-pointer ${
-            theme === 'dark'
-              ? 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-amber-300'
-              : 'bg-white hover:bg-sky-50 border-slate-200 text-slate-700 hover:text-sky-700'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-amber-400" />
-            ) : (
-              <Moon className="h-4 w-4 text-sky-600" />
-            )}
-            {!isCollapsed && (
-              <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
-            )}
-          </div>
-          {!isCollapsed && (
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
-              {theme === 'dark' ? 'Oscuro' : 'Claro'}
-            </span>
-          )}
-        </button>
+        {/* Segmented Control de Tema en Sidebar */}
+        <div className="flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl border border-slate-200/70 dark:border-slate-700 text-xs">
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            title="Activar Modo Claro"
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              theme === 'light'
+                ? 'bg-white text-sky-700 shadow-sm border border-slate-200/80 font-extrabold'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <Sun className={`h-3.5 w-3.5 ${theme === 'light' ? 'text-amber-500' : ''}`} />
+            {!isCollapsed && <span>Claro</span>}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            title="Activar Modo Oscuro"
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              theme === 'dark'
+                ? 'bg-slate-700 text-amber-300 shadow-sm border border-slate-600 font-extrabold'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <Moon className={`h-3.5 w-3.5 ${theme === 'dark' ? 'text-sky-300' : ''}`} />
+            {!isCollapsed && <span>Oscuro</span>}
+          </button>
+        </div>
 
         {/* Botón de contraer/expandir para Desktop */}
         <button

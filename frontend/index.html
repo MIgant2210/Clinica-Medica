@@ -8,8 +8,9 @@
     <script>
       (function() {
         try {
+          var userSet = localStorage.getItem('clinica_theme_user_set');
           var theme = localStorage.getItem('clinica_theme');
-          if (theme === 'dark') {
+          if (userSet === 'true' && theme === 'dark') {
             document.documentElement.classList.add('dark');
           } else {
             document.documentElement.classList.remove('dark');

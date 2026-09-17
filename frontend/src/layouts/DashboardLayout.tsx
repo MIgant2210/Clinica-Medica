@@ -25,7 +25,7 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <LayoutProvider>
-      <div className="min-h-screen flex flex-col bg-slate-50/80 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+      <div className="min-h-screen flex flex-col bg-[#f1f5f9] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
         <Navbar />
         <div className="flex-1 flex overflow-hidden">
           <Sidebar />

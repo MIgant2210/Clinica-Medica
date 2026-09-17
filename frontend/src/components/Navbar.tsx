@@ -10,7 +10,7 @@ import {
 
 export const Navbar: React.FC = () => {
   const { user, logout, quickLogin } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { toggleMobileOpen } = useLayout();
   const location = useLocation();
   const navigate = useNavigate();
@@ -105,29 +105,35 @@ export const Navbar: React.FC = () => {
           ))}
         </div>
 
-        {/* Toggle de Modo Claro / Oscuro Funcional y Visible */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Activar Modo Claro' : 'Activar Modo Oscuro'}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all duration-200 shadow-sm cursor-pointer ${
-            theme === 'dark'
-              ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-750 hover:border-amber-400/40'
-              : 'bg-white border-slate-200/90 text-slate-700 hover:text-sky-700 hover:bg-sky-50/70 hover:border-sky-300'
-          }`}
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun className="h-4 w-4 text-amber-400" />
-              <span className="hidden sm:inline">Modo Claro</span>
-            </>
-          ) : (
-            <>
-              <Moon className="h-4 w-4 text-sky-600" />
-              <span className="hidden sm:inline">Modo Oscuro</span>
-            </>
-          )}
-        </button>
+        {/* Selector Visual de Tema: Claro / Oscuro */}
+        <div className="flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700 text-xs">
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            title="Activar Modo Claro"
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              theme === 'light'
+                ? 'bg-white text-sky-700 shadow-sm border border-slate-200/80 font-extrabold'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <Sun className={`h-3.5 w-3.5 ${theme === 'light' ? 'text-amber-500' : ''}`} />
+            <span className="hidden sm:inline">Claro</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            title="Activar Modo Oscuro"
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              theme === 'dark'
+                ? 'bg-slate-750 dark:bg-slate-700 text-amber-300 shadow-sm border border-slate-600 font-extrabold'
+                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <Moon className={`h-3.5 w-3.5 ${theme === 'dark' ? 'text-sky-300' : ''}`} />
+            <span className="hidden sm:inline">Oscuro</span>
+          </button>
+        </div>
 
         {/* Usuario Autenticado */}
         {user && (
