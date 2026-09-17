@@ -43,7 +43,7 @@ export const LoginPage: React.FC = () => {
     <div className={`relative min-h-screen overflow-hidden flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-500 ${
       theme === 'dark' 
         ? 'bg-slate-950 text-slate-100' 
-        : 'bg-gradient-to-br from-sky-100 via-teal-50 to-emerald-100 text-slate-800'
+        : 'bg-gradient-to-br from-white via-sky-50 to-white text-slate-800'
     }`}>
       
       {/* Selector de Modo Claro / Modo Oscuro en Login */}
