@@ -15,16 +15,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const saved = localStorage.getItem('clinica_theme');
       if (saved === 'dark' || saved === 'light') return saved;
-      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
     } catch (e) {}
+    // Por defecto modo claro clínico solicitado por el usuario
     return 'light';
   });
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
-    if (newTheme === 'dark') {
+    const isDark = newTheme === 'dark';
+    if (isDark) {
       root.classList.add('dark');
       document.body.classList.add('dark');
     } else {
@@ -40,25 +39,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (e) {}
   }, [theme]);
 
-  // Listener para cambios de tema del sistema operativo si no hay selección manual fijada
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      const userPreference = localStorage.getItem('clinica_theme');
-      if (!userPreference) {
-        setThemeState(e.matches ? 'dark' : 'light');
-      }
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setThemeState((prev) => {
+      const next: Theme = prev === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      try {
+        localStorage.setItem('clinica_theme', next);
+      } catch (e) {}
+      return next;
+    });
   };
 
   const setTheme = (newTheme: Theme) => {
+    applyTheme(newTheme);
+    try {
+      localStorage.setItem('clinica_theme', newTheme);
+    } catch (e) {}
     setThemeState(newTheme);
   };
 

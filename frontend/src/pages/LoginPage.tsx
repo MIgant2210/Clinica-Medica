@@ -43,7 +43,7 @@ export const LoginPage: React.FC = () => {
     <div className={`relative min-h-screen overflow-hidden flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-500 ${
       theme === 'dark' 
         ? 'bg-slate-950 text-slate-100' 
-        : 'bg-gradient-to-br from-sky-50 via-teal-50/50 to-emerald-50 text-slate-800'
+        : 'bg-gradient-to-br from-sky-100 via-teal-50 to-emerald-100 text-slate-800'
     }`}>
       
       {/* Botón de Modo Claro / Modo Oscuro en Login */}
@@ -51,20 +51,20 @@ export const LoginPage: React.FC = () => {
         <button
           onClick={toggleTheme}
           title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
-          className={`p-3 rounded-2xl border transition-all duration-300 shadow-lg flex items-center gap-2 text-xs font-bold ${
+          className={`p-3 rounded-2xl border transition-all duration-300 shadow-lg flex items-center gap-2 text-xs font-bold cursor-pointer ${
             theme === 'dark'
-              ? 'bg-slate-900/80 border-white/20 text-amber-300 hover:bg-slate-800 shadow-amber-500/10'
-              : 'bg-white/90 border-slate-200 text-slate-700 hover:bg-white shadow-slate-200'
+              ? 'bg-slate-900/85 border-white/20 text-amber-300 hover:bg-slate-800 shadow-amber-500/10'
+              : 'bg-white/95 border-emerald-200/80 text-slate-700 hover:bg-white shadow-md shadow-sky-500/10'
           }`}
         >
           {theme === 'dark' ? (
             <>
-              <Sun className="h-4 w-4 text-amber-400 animate-spin-slow" />
+              <Sun className="h-4 w-4 text-amber-400" />
               <span className="hidden sm:inline">Modo Claro</span>
             </>
           ) : (
             <>
-              <Moon className="h-4 w-4 text-indigo-600" />
+              <Moon className="h-4 w-4 text-sky-600" />
               <span className="hidden sm:inline">Modo Oscuro</span>
             </>
           )}
@@ -74,17 +74,31 @@ export const LoginPage: React.FC = () => {
       {/* ===================================================================== */}
       {/* FONDO MULTICOLOR: ORBES LUMINOSOS & ECG CARDÍACO DINÁMICO             */}
       {/* ===================================================================== */}
-      <div className="absolute top-[-10%] left-[-10%] w-[550px] h-[550px] rounded-full bg-emerald-500/20 blur-[140px] pointer-events-none animate-pulse-glow" />
-      <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-sky-500/25 blur-[150px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-[35%] right-[25%] w-[450px] h-[450px] rounded-full bg-teal-400/20 blur-[120px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-[20%] left-[20%] w-[400px] h-[400px] rounded-full bg-cyan-500/20 blur-[130px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '3s' }} />
+      <div className={`absolute top-[-10%] left-[-10%] w-[550px] h-[550px] rounded-full blur-[140px] pointer-events-none animate-pulse-glow ${
+        theme === 'dark' ? 'bg-emerald-500/20' : 'bg-emerald-400/40'
+      }`} />
+      <div className={`absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full blur-[150px] pointer-events-none animate-pulse-glow ${
+        theme === 'dark' ? 'bg-sky-500/25' : 'bg-sky-400/45'
+      }`} style={{ animationDelay: '2s' }} />
+      <div className={`absolute top-[35%] right-[25%] w-[450px] h-[450px] rounded-full blur-[120px] pointer-events-none animate-pulse-glow ${
+        theme === 'dark' ? 'bg-teal-400/20' : 'bg-teal-300/40'
+      }`} style={{ animationDelay: '1s' }} />
+      <div className={`absolute bottom-[20%] left-[20%] w-[400px] h-[400px] rounded-full blur-[130px] pointer-events-none animate-pulse-glow ${
+        theme === 'dark' ? 'bg-cyan-500/20' : 'bg-cyan-400/40'
+      }`} style={{ animationDelay: '3s' }} />
 
       {/* Malla médica de fondo interactiva */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0284c70d_1px,transparent_1px),linear-gradient(to_bottom,#10b9810d_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none" />
+      <div className={`absolute inset-0 bg-[size:36px_36px] pointer-events-none ${
+        theme === 'dark'
+          ? 'bg-[linear-gradient(to_right,#0284c70d_1px,transparent_1px),linear-gradient(to_bottom,#10b9810d_1px,transparent_1px)]'
+          : 'bg-[linear-gradient(to_right,#0284c720_1px,transparent_1px),linear-gradient(to_bottom,#10b98120_1px,transparent_1px)]'
+      }`} />
 
       {/* Onda ECG Continua en el Fondo */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden opacity-35">
-        <svg className="w-full h-48 stroke-emerald-500/70" fill="none" viewBox="0 0 1200 150">
+      <div className={`absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden ${
+        theme === 'dark' ? 'opacity-35' : 'opacity-60'
+      }`}>
+        <svg className={`w-full h-48 ${theme === 'dark' ? 'stroke-emerald-500/70' : 'stroke-emerald-600'}`} fill="none" viewBox="0 0 1200 150">
           <path
             className="ecg-line"
             strokeWidth="3"
@@ -100,32 +114,44 @@ export const LoginPage: React.FC = () => {
       {/* ===================================================================== */}
       
       {/* Corazón con pulso */}
-      <div className="absolute top-[8%] left-[8%] text-rose-500/35 animate-float pointer-events-none">
+      <div className={`absolute top-[8%] left-[8%] animate-float pointer-events-none ${
+        theme === 'dark' ? 'text-rose-500/35' : 'text-rose-500/75'
+      }`}>
         <HeartPulse className="h-16 w-16 drop-shadow-[0_0_25px_rgba(244,63,94,0.5)]" />
       </div>
 
       {/* Estetoscopio */}
-      <div className="absolute bottom-[10%] left-[5%] text-teal-400/35 animate-float-reverse pointer-events-none">
+      <div className={`absolute bottom-[10%] left-[5%] animate-float-reverse pointer-events-none ${
+        theme === 'dark' ? 'text-teal-400/35' : 'text-teal-600/70'
+      }`}>
         <Stethoscope className="h-20 w-20 drop-shadow-[0_0_25px_rgba(20,184,166,0.4)]" />
       </div>
 
       {/* Cadena de ADN */}
-      <div className="absolute top-[12%] right-[8%] text-sky-400/40 animate-float pointer-events-none" style={{ animationDelay: '1.5s' }}>
+      <div className={`absolute top-[12%] right-[8%] animate-float pointer-events-none ${
+        theme === 'dark' ? 'text-sky-400/40' : 'text-sky-600/70'
+      }`} style={{ animationDelay: '1.5s' }}>
         <Dna className="h-20 w-20 drop-shadow-[0_0_25px_rgba(56,189,248,0.5)]" />
       </div>
 
       {/* Píldora / Cápsula */}
-      <div className="absolute bottom-[10%] right-[8%] text-cyan-400/35 animate-float-reverse pointer-events-none" style={{ animationDelay: '2.5s' }}>
+      <div className={`absolute bottom-[10%] right-[8%] animate-float-reverse pointer-events-none ${
+        theme === 'dark' ? 'text-cyan-400/35' : 'text-cyan-600/70'
+      }`} style={{ animationDelay: '2.5s' }}>
         <Pill className="h-16 w-16 rotate-45 drop-shadow-[0_0_20px_rgba(6,182,212,0.4)]" />
       </div>
 
       {/* Microscopio (Nueva Figura) */}
-      <div className="absolute top-[48%] left-[3%] text-emerald-400/30 animate-float pointer-events-none" style={{ animationDelay: '3s' }}>
+      <div className={`absolute top-[48%] left-[3%] animate-float pointer-events-none ${
+        theme === 'dark' ? 'text-emerald-400/30' : 'text-emerald-600/65'
+      }`} style={{ animationDelay: '3s' }}>
         <Microscope className="h-16 w-16 drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]" />
       </div>
 
       {/* Jeringa Médica (Nueva Figura) */}
-      <div className="absolute top-[52%] right-[3%] text-purple-400/30 animate-float-reverse pointer-events-none" style={{ animationDelay: '4s' }}>
+      <div className={`absolute top-[52%] right-[3%] animate-float-reverse pointer-events-none ${
+        theme === 'dark' ? 'text-purple-400/30' : 'text-purple-600/65'
+      }`} style={{ animationDelay: '4s' }}>
         <Syringe className="h-14 w-14 -rotate-45 drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]" />
       </div>
 
@@ -137,7 +163,7 @@ export const LoginPage: React.FC = () => {
       <div className={`hidden xl:flex items-center gap-3 absolute top-16 left-16 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-xl animate-float pointer-events-none ${
         theme === 'dark' 
           ? 'bg-slate-900/80 border-emerald-500/30 text-emerald-300 shadow-emerald-500/10' 
-          : 'bg-white/90 border-emerald-200 text-emerald-900 shadow-slate-200'
+          : 'bg-white/95 border-emerald-300 text-emerald-950 shadow-md shadow-sky-500/10'
       }`}>
         <div className="h-9 w-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
           <Activity className="h-5 w-5 animate-pulse" />
@@ -155,9 +181,9 @@ export const LoginPage: React.FC = () => {
       <div className={`hidden xl:flex items-center gap-3 absolute bottom-16 left-20 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-xl animate-float-reverse pointer-events-none ${
         theme === 'dark' 
           ? 'bg-slate-900/80 border-teal-500/30 text-teal-300 shadow-teal-500/10' 
-          : 'bg-white/90 border-teal-200 text-teal-900 shadow-slate-200'
+          : 'bg-white/95 border-teal-300 text-teal-950 shadow-md shadow-teal-500/10'
       }`}>
-        <div className="h-9 w-9 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400">
+        <div className="h-9 w-9 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-500 dark:text-teal-400">
           <ShieldCheck className="h-5 w-5" />
         </div>
         <div className="text-left">
@@ -170,9 +196,9 @@ export const LoginPage: React.FC = () => {
       <div className={`hidden xl:flex items-center gap-3 absolute top-20 right-28 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-xl animate-float pointer-events-none ${
         theme === 'dark' 
           ? 'bg-slate-900/80 border-sky-500/30 text-sky-300 shadow-sky-500/10' 
-          : 'bg-white/90 border-sky-200 text-sky-900 shadow-slate-200'
+          : 'bg-white/95 border-sky-300 text-sky-950 shadow-md shadow-sky-500/10'
       }`} style={{ animationDelay: '2s' }}>
-        <div className="h-9 w-9 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400">
+        <div className="h-9 w-9 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-500 dark:text-sky-400">
           <Zap className="h-5 w-5" />
         </div>
         <div className="text-left">
@@ -184,10 +210,10 @@ export const LoginPage: React.FC = () => {
       {/* ===================================================================== */}
       {/* TARJETA CENTRAL DE LOGIN                                              */}
       {/* ===================================================================== */}
-      <div className={`relative z-10 w-full max-w-5xl rounded-[36px] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.4)] border backdrop-blur-2xl grid grid-cols-1 lg:grid-cols-12 transition-all duration-300 ${
+      <div className={`relative z-10 w-full max-w-5xl rounded-[36px] overflow-hidden border backdrop-blur-2xl grid grid-cols-1 lg:grid-cols-12 transition-all duration-300 ${
         theme === 'dark'
-          ? 'bg-slate-900/85 border-white/20'
-          : 'bg-white/90 border-white/80 shadow-teal-900/10'
+          ? 'bg-slate-900/85 border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.5)]'
+          : 'bg-white/95 border-white shadow-[0_25px_70px_rgba(2,132,199,0.16),0_10px_30px_rgba(16,185,129,0.1)]'
       }`}>
         
         {/* COLUMNA IZQUIERDA: FORMULARIO INTERACTIVO (7 Cols) */}
@@ -208,7 +234,7 @@ export const LoginPage: React.FC = () => {
                   theme === 'dark' ? 'text-white' : 'text-slate-900'
                 }`}>
                   ClinicMed
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 font-bold border border-emerald-500/30">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
                     ECE v1.0
                   </span>
                 </span>
@@ -223,7 +249,7 @@ export const LoginPage: React.FC = () => {
               <h2 className={`text-3xl font-black tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                 Iniciar Sesión
               </h2>
-              <p className={`text-sm mt-1.5 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className={`text-sm mt-1.5 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
                 Ingresa con tu cuenta para gestionar pacientes, citas y expedientes electrónicos.
               </p>
             </div>
@@ -255,7 +281,7 @@ export const LoginPage: React.FC = () => {
                     className={`w-full pl-12 pr-4 py-3.5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium ${
                       theme === 'dark'
                         ? 'bg-white/[0.06] border border-white/10 text-white placeholder-slate-500 focus:bg-white/[0.1]'
-                        : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white'
+                        : 'bg-white border-2 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-teal-500 shadow-sm'
                     }`}
                   />
                 </div>
@@ -278,7 +304,7 @@ export const LoginPage: React.FC = () => {
                     className={`w-full pl-12 pr-4 py-3.5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium ${
                       theme === 'dark'
                         ? 'bg-white/[0.06] border border-white/10 text-white placeholder-slate-500 focus:bg-white/[0.1]'
-                        : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white'
+                        : 'bg-white border-2 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-teal-500 shadow-sm'
                     }`}
                   />
                 </div>
@@ -287,7 +313,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={cargando}
-                className="w-full py-4 px-6 mt-2 rounded-2xl font-bold text-white text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-600 hover:from-emerald-400 hover:via-teal-400 hover:to-sky-500 shadow-[0_10px_30px_rgba(16,185,129,0.35)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.5)] transition-all duration-300 flex items-center justify-center gap-2.5 group disabled:opacity-50 active:scale-[0.99]"
+                className="w-full py-4 px-6 mt-2 rounded-2xl font-bold text-white text-sm bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-600 hover:from-emerald-400 hover:via-teal-400 hover:to-sky-500 shadow-[0_10px_30px_rgba(16,185,129,0.35)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.5)] transition-all duration-300 flex items-center justify-center gap-2.5 group disabled:opacity-50 active:scale-[0.99] cursor-pointer"
               >
                 {cargando ? (
                   <div className="flex items-center gap-2">
@@ -305,12 +331,12 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Footer de Seguridad */}
-          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-semibold">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
               <span>Autenticación JWT & Cifrado pgcrypto</span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-400 text-[11px] font-medium">
+            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px] font-medium">
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
               <span>Norma ISO/IEC 25010</span>
             </div>
@@ -321,19 +347,19 @@ export const LoginPage: React.FC = () => {
         <div className={`lg:col-span-5 p-8 sm:p-10 border-t lg:border-t-0 lg:border-l flex flex-col justify-between backdrop-blur-xl ${
           theme === 'dark'
             ? 'bg-gradient-to-br from-emerald-950/40 via-slate-900/60 to-sky-950/40 border-white/10'
-            : 'bg-gradient-to-br from-teal-50/70 via-sky-50/50 to-emerald-50/60 border-slate-200'
+            : 'bg-gradient-to-br from-sky-50/95 via-teal-50/70 to-emerald-50/80 border-sky-100'
         }`}>
           
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-600 dark:text-teal-300 text-xs font-bold mb-4 border border-teal-500/30">
-              <UserCheck className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs font-bold mb-4 border border-teal-500/30">
+              <UserCheck className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
               Demostración 1-Clic
             </div>
             
             <h3 className={`text-xl font-black tracking-tight mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               Perfiles Preconfigurados
             </h3>
-            <p className={`text-xs mb-6 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className={`text-xs mb-6 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
               Selecciona cualquier rol para ingresar automáticamente y verificar los permisos según la arquitectura RBAC:
             </p>
 
@@ -342,10 +368,10 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuick('ADMIN')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between ${
+                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
                   theme === 'dark'
                     ? 'bg-white/[0.04] hover:bg-purple-500/15 border-white/10 hover:border-purple-500/40'
-                    : 'bg-white hover:bg-purple-50/80 border-purple-100 hover:border-purple-300 shadow-sm'
+                    : 'bg-white hover:bg-purple-50/90 border-purple-200/80 hover:border-purple-400 shadow-sm'
                 }`}
               >
                 <div>
@@ -363,10 +389,10 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuick('MEDICO')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between ${
+                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
                   theme === 'dark'
                     ? 'bg-white/[0.04] hover:bg-emerald-500/15 border-white/10 hover:border-emerald-500/40'
-                    : 'bg-white hover:bg-emerald-50/80 border-emerald-100 hover:border-emerald-300 shadow-sm'
+                    : 'bg-white hover:bg-emerald-50/90 border-emerald-200/80 hover:border-emerald-400 shadow-sm'
                 }`}
               >
                 <div>
@@ -374,20 +400,20 @@ export const LoginPage: React.FC = () => {
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                     Dr. Carlos Mendoza (Médico)
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">dr.mendoza@redsalud.gt</div>
-                  <div className="text-[10px] text-emerald-600/80 dark:text-emerald-300/80 font-medium">Atención médica, ECE, diagnósticos CIE-10 y recetas</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">dr.mendoza@redsalud.gt</div>
+                  <div className="text-[10px] text-emerald-700/80 dark:text-emerald-300/80 font-medium">Atención médica, ECE, diagnósticos CIE-10 y recetas</div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-emerald-500 group-hover:translate-x-1 transition-all" />
               </button>
 
               {/* Recepcionista */}
               <button
                 type="button"
                 onClick={() => handleQuick('RECEPCIONISTA')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between ${
+                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
                   theme === 'dark'
                     ? 'bg-white/[0.04] hover:bg-sky-500/15 border-white/10 hover:border-sky-500/40'
-                    : 'bg-white hover:bg-sky-50/80 border-sky-100 hover:border-sky-300 shadow-sm'
+                    : 'bg-white hover:bg-sky-50/90 border-sky-200/80 hover:border-sky-400 shadow-sm'
                 }`}
               >
                 <div>
@@ -395,20 +421,20 @@ export const LoginPage: React.FC = () => {
                     <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
                     Ana Gómez (Recepción)
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">recepcion@redsalud.gt</div>
-                  <div className="text-[10px] text-sky-600/80 dark:text-sky-300/80 font-medium">Agendamiento, validación de turnos y alta de pacientes</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">recepcion@redsalud.gt</div>
+                  <div className="text-[10px] text-sky-700/80 dark:text-sky-300/80 font-medium">Agendamiento, validación de turnos y alta de pacientes</div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-sky-400 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-sky-500 group-hover:translate-x-1 transition-all" />
               </button>
 
               {/* Paciente */}
               <button
                 type="button"
                 onClick={() => handleQuick('PACIENTE')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between ${
+                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
                   theme === 'dark'
                     ? 'bg-white/[0.04] hover:bg-teal-500/15 border-white/10 hover:border-teal-500/40'
-                    : 'bg-white hover:bg-teal-50/80 border-teal-100 hover:border-teal-300 shadow-sm'
+                    : 'bg-white hover:bg-teal-50/90 border-teal-200/80 hover:border-teal-400 shadow-sm'
                 }`}
               >
                 <div>
@@ -416,10 +442,10 @@ export const LoginPage: React.FC = () => {
                     <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
                     Juan Pérez (Paciente)
                   </div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">juan.perez@gmail.com</div>
-                  <div className="text-[10px] text-teal-600/80 dark:text-teal-300/80 font-medium">Portal de citas y consulta de expediente personal</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">juan.perez@gmail.com</div>
+                  <div className="text-[10px] text-teal-700/80 dark:text-teal-300/80 font-medium">Portal de citas y consulta de expediente personal</div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-teal-400 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="h-4 w-4 text-teal-500 group-hover:translate-x-1 transition-all" />
               </button>
             </div>
           </div>

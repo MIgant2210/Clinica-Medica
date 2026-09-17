@@ -2,13 +2,15 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLayout } from '../context/LayoutContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   LayoutDashboard, Calendar, Users, FileText, ShieldAlert, 
-  Activity, ChevronLeft, ChevronRight, X, Sparkles
+  Activity, ChevronLeft, ChevronRight, X, Sparkles, Sun, Moon
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { isCollapsed, toggleCollapse, isMobileOpen, closeMobile } = useLayout();
 
   const navItems = [
@@ -151,6 +153,36 @@ export const Sidebar: React.FC = () => {
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" title="Sistema Online" />
           </div>
         )}
+
+        {/* Toggle de Modo Claro / Oscuro en Sidebar */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+          className={`w-full flex items-center ${
+            isCollapsed ? 'justify-center p-2' : 'justify-between px-3 py-2'
+          } rounded-xl text-xs font-semibold border transition-all duration-200 cursor-pointer ${
+            theme === 'dark'
+              ? 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-amber-300'
+              : 'bg-white hover:bg-sky-50 border-slate-200 text-slate-700 hover:text-sky-700'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4 text-amber-400" />
+            ) : (
+              <Moon className="h-4 w-4 text-sky-600" />
+            )}
+            {!isCollapsed && (
+              <span>{theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
+            )}
+          </div>
+          {!isCollapsed && (
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+              {theme === 'dark' ? 'Oscuro' : 'Claro'}
+            </span>
+          )}
+        </button>
 
         {/* Botón de contraer/expandir para Desktop */}
         <button

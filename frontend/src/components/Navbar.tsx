@@ -105,16 +105,27 @@ export const Navbar: React.FC = () => {
           ))}
         </div>
 
-        {/* Toggle de Modo Claro / Oscuro Funcional */}
+        {/* Toggle de Modo Claro / Oscuro Funcional y Visible */}
         <button
+          type="button"
           onClick={toggleTheme}
-          title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
-          className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 transition-colors"
+          title={theme === 'dark' ? 'Activar Modo Claro' : 'Activar Modo Oscuro'}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all duration-200 shadow-sm cursor-pointer ${
+            theme === 'dark'
+              ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-750 hover:border-amber-400/40'
+              : 'bg-white border-slate-200/90 text-slate-700 hover:text-sky-700 hover:bg-sky-50/70 hover:border-sky-300'
+          }`}
         >
           {theme === 'dark' ? (
-            <Sun className="h-4 w-4 text-amber-400" />
+            <>
+              <Sun className="h-4 w-4 text-amber-400" />
+              <span className="hidden sm:inline">Modo Claro</span>
+            </>
           ) : (
-            <Moon className="h-4 w-4 text-slate-700" />
+            <>
+              <Moon className="h-4 w-4 text-sky-600" />
+              <span className="hidden sm:inline">Modo Oscuro</span>
+            </>
           )}
         </button>
 
