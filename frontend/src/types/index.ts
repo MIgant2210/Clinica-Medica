@@ -50,10 +50,13 @@ export interface Paciente {
   codigo_paciente: string;
   nombre_completo: string;
   documento: string;
+  sexo?: 'MASCULINO' | 'FEMENINO' | 'OTRO';
+  fecha_nacimiento: string;
   tipo_sangre: string;
   telefono: string;
   correo: string;
   contacto_emergencia: string;
+  estado: string;
 }
 
 export interface Cita {

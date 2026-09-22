@@ -966,12 +966,59 @@ export const CitasPage: React.FC = () => {
                   </div>
                 </>
               )}
-
             </div>
           </div>
         </div>
       )}
 
+      {/* SIMI-CALL MODAL (TELEMEDICINA FAKE) */}
+      {simiCallActive && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-full max-w-4xl h-[80vh] flex flex-col md:flex-row gap-4 p-4">
+            {/* Pantalla del Médico (Simi) */}
+            <div className="flex-1 bg-slate-900 rounded-3xl overflow-hidden relative border border-slate-700 shadow-2xl flex items-center justify-center group">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent z-10" />
+              <div className="text-center z-20">
+                <div className="text-9xl animate-bounce mb-4">👨🏻‍⚕️</div>
+                <h3 className="text-2xl font-black text-white drop-shadow-md">Dr. Simi IA</h3>
+                <p className="text-indigo-300 font-medium animate-pulse">Analizando signos vitales...</p>
+              </div>
+              <div className="absolute top-4 left-4 z-20 bg-rose-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse flex items-center gap-2">
+                <span className="h-2 w-2 bg-white rounded-full" /> REC
+              </div>
+              <div className="absolute bottom-4 left-4 z-20 text-white font-bold drop-shadow-md">
+                Consultorio Virtual Seguro
+              </div>
+            </div>
+
+            {/* Panel de Controles / Chat / Paciente */}
+            <div className="w-full md:w-80 flex flex-col gap-4">
+              <div className="h-48 bg-slate-800 rounded-3xl overflow-hidden relative border border-slate-700 flex items-center justify-center">
+                <User className="h-16 w-16 text-slate-500" />
+                <div className="absolute bottom-3 left-3 bg-slate-950/50 px-2 py-1 rounded text-[10px] text-white font-bold backdrop-blur-md">
+                  Tú (Paciente)
+                </div>
+              </div>
+              <div className="flex-1 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-black text-slate-900 dark:text-white mb-2">Asistente Clínico IA</h4>
+                  <div className="space-y-3">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl text-xs text-slate-700 dark:text-slate-300 rounded-tl-none">
+                      ¡Hola! Soy el Dr. Simi IA. Estoy revisando tu expediente. ¿Cómo te sientes hoy?
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSimiCallActive(null)}
+                  className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl transition-colors shadow-lg shadow-rose-500/25 flex items-center justify-center gap-2"
+                >
+                  <X className="h-5 w-5 stroke-[3]" /> Finalizar Llamada
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

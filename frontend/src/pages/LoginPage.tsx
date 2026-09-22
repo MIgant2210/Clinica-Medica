@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { RolUsuario } from '../types';
 import { 
-  Activity, Lock, Mail, ShieldCheck, ArrowRight, UserCheck, 
-  HeartPulse, Stethoscope, Dna, Pill, Sparkles, Microscope, 
+  Activity, Lock, Mail, ShieldCheck, ArrowRight, 
+  HeartPulse, Stethoscope, Dna, Pill, Microscope, 
   Syringe, Sun, Moon, Zap
 } from 'lucide-react';
 
@@ -15,7 +14,7 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
-  const { login, quickLogin } = useAuth();
+  const { login } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -34,10 +33,7 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuick = async (rol: RolUsuario) => {
-    await quickLogin(rol);
-    navigate('/');
-  };
+
 
   return (
     <div className={`relative min-h-screen overflow-hidden flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-500 ${

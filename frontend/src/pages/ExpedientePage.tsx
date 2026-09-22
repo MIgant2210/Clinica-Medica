@@ -14,7 +14,6 @@ export const ExpedientePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [pacienteSeleccionadoId, setPacienteSeleccionadoId] = useState<string>('');
-  const [errorModal, setErrorModal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'HISTORIAL' | 'MATERNIDAD'>('HISTORIAL');
   const [pacienteActual, setPacienteActual] = useState<Paciente | null>(null);
   const [expediente, setExpediente] = useState<ExpedienteClinico | null>(null);
@@ -502,8 +501,6 @@ export const ExpedientePage: React.FC = () => {
                       Notas Clínicas de Evolución:
                     </strong>
                     <p className="leading-relaxed">{c.notas_evolucion}</p>
-                  </div>
-
                   </div>
                 </div>
               ))
