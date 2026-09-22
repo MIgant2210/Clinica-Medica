@@ -5,12 +5,16 @@ export const getPacientes = async (req: Request, res: Response) => {
   const { busqueda } = req.query;
 
   try {
-    let query = 'SELECT * FROM pacientes';
+    let query = `
+      SELECT p.*, per.sexo, per.fecha_nacimiento 
+      FROM pacientes p
+      JOIN personas per ON p.persona_id = per.id
+    `;
     let params: any[] = [];
 
     if (busqueda) {
       const termino = `%${String(busqueda).toLowerCase()}%`;
-      query += ' WHERE LOWER(nombre_completo) LIKE $1 OR documento LIKE $1 OR LOWER(codigo_paciente) LIKE $1';
+      query += ' WHERE LOWER(p.nombre_completo) LIKE $1 OR p.documento LIKE $1 OR LOWER(p.codigo_paciente) LIKE $1';
       params.push(termino);
     }
 
@@ -30,7 +34,13 @@ export const getPacienteById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const { rows } = await pool!.query('SELECT * FROM pacientes WHERE id = $1', [id]);
+    const query = `
+      SELECT p.*, per.sexo, per.fecha_nacimiento 
+      FROM pacientes p
+      JOIN personas per ON p.persona_id = per.id
+      WHERE p.id = $1
+    `;
+    const { rows } = await pool!.query(query, [id]);
     const paciente = rows[0];
 
     if (!paciente) {

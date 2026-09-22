@@ -714,6 +714,35 @@ export const ExpedientePage: React.FC = () => {
                 <span className="text-xs font-bold text-purple-900 dark:text-purple-300 block uppercase tracking-wider">
                   Diagnóstico (Estándar CIE-10)
                 </span>
+                
+                <div className="mb-3">
+                  <label className="block text-slate-500 dark:text-slate-400 mb-1 text-[10px] font-bold">Diagnósticos Frecuentes (Precargados)</label>
+                  <select 
+                    className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => {
+                      if(e.target.value) {
+                        const [codigo, ...desc] = e.target.value.split('|');
+                        setCie10(codigo);
+                        setDiagnosticoDesc(desc.join('|'));
+                      }
+                    }}
+                  >
+                    <option value="">-- Seleccionar diagnóstico frecuente --</option>
+                    <option value="J00|Rinofaringitis aguda (resfriado común)">J00 - Rinofaringitis aguda (resfriado común)</option>
+                    <option value="J02.9|Faringitis aguda, no especificada">J02.9 - Faringitis aguda, no especificada</option>
+                    <option value="J03.9|Amigdalitis aguda, no especificada">J03.9 - Amigdalitis aguda, no especificada</option>
+                    <option value="J20.9|Bronquitis aguda, no especificada">J20.9 - Bronquitis aguda, no especificada</option>
+                    <option value="I10|Hipertensión esencial (primaria)">I10 - Hipertensión esencial (primaria)</option>
+                    <option value="E11.9|Diabetes mellitus tipo 2 sin complicaciones">E11.9 - Diabetes mellitus tipo 2</option>
+                    <option value="A09.9|Gastroenteritis y colitis de origen no especificado">A09.9 - Gastroenteritis y colitis</option>
+                    <option value="R50.9|Fiebre, no especificada">R50.9 - Fiebre, no especificada</option>
+                    <option value="R51|Cefalea">R51 - Cefalea</option>
+                    <option value="M54.5|Lumbago no especificado">M54.5 - Lumbago no especificado</option>
+                    <option value="N39.0|Infección de vías urinarias">N39.0 - Infección de vías urinarias</option>
+                    <option value="O28.9|Hallazgo anormal en el examen prenatal">O28.9 - Hallazgo anormal en examen prenatal</option>
+                  </select>
+                </div>
+
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div>
                     <label className="block text-slate-500 dark:text-slate-400 mb-1">Código</label>
@@ -722,18 +751,18 @@ export const ExpedientePage: React.FC = () => {
                       value={cie10}
                       onChange={(e) => setCie10(e.target.value)}
                       placeholder="J00, I10"
-                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono font-bold"
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono font-bold focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
-                  <div className="col-span-2">
-                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Descripción</label>
+                  <div className="col-span-3">
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Descripción Manual</label>
                     <input
                       type="text"
                       required
                       value={diagnosticoDesc}
                       onChange={(e) => setDiagnosticoDesc(e.target.value)}
                       placeholder="Ej. Faringitis aguda"
-                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
                   <div className="col-span-4 mt-1">

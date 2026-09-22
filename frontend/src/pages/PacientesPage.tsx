@@ -5,7 +5,6 @@ import {
   Search, User, FileText, X, Heart, ArrowUpRight, 
   ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact
 } from 'lucide-react';
-import { CustomDatePicker } from '../components/CustomDatePicker';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const PacientesPage: React.FC = () => {
@@ -275,20 +274,20 @@ export const PacientesPage: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                        Primer Nombre *
+                        Nombres *
                       </label>
                       <input
                         type="text"
                         required
                         value={primerNombre}
                         onChange={(e) => setPrimerNombre(e.target.value)}
-                        placeholder="Ej. María"
+                        placeholder="Ej. María Fernanda"
                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                        Primer Apellido *
+                        Apellidos *
                       </label>
                       <input
                         type="text"
@@ -373,9 +372,12 @@ export const PacientesPage: React.FC = () => {
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                         Fecha de Nacimiento *
                       </label>
-                      <CustomDatePicker
+                      <input
+                        type="date"
+                        required
                         value={fechaNacimiento}
-                        onChange={(date) => setFechaNacimiento(date)}
+                        onChange={(e) => setFechaNacimiento(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
                       />
                     </div>
 
