@@ -13,7 +13,7 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
     let prompt = `Eres un asistente médico experto de ClinicMed...\n\n`;
     if (historial) prompt += `Contexto del paciente: ${historial}\n\n`;
     prompt += `Pregunta o comando del doctor: ${mensaje}\n\nRespuesta:`;
@@ -37,7 +37,7 @@ export const resumirExpediente = async (req: Request, res: Response) => {
   if (!expedienteData) return res.status(400).json({ ok: false, error: 'Datos requeridos' });
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
     const prompt = `Actúa como un asistente clínico. Resume brevemente:\n\n${JSON.stringify(expedienteData)}`;
 
     const result = await model.generateContent(prompt);
