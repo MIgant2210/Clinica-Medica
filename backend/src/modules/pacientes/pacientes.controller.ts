@@ -158,11 +158,73 @@ export const createPaciente = async (req: Request, res: Response) => {
       mensaje: 'Paciente registrado exitosamente con expediente clínico aperturado.',
       paciente: nuevoPaciente,
       expediente: nuevoExpediente,
+      expediente: nuevoExpediente,
     });
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Error al crear paciente:', error);
+    console.error('Error al registrar paciente:', error);
     return res.status(500).json({ ok: false, error: 'Error del servidor al registrar paciente.' });
+  } finally {
+    client.release();
+  }
+};
+
+export const updatePaciente = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { telefono, correo, tipo_sangre, contacto_emergencia, estado } = req.body;
+
+  try {
+    const { rows } = await pool!.query(
+      `UPDATE pacientes 
+       SET telefono = $1, correo = $2, tipo_sangre = $3, contacto_emergencia = $4, estado = $5 
+       WHERE id = $6 RETURNING *`,
+      [telefono, correo, tipo_sangre, contacto_emergencia, estado, id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ ok: false, error: 'Paciente no encontrado.' });
+    }
+
+    return res.json({
+      ok: true,
+      mensaje: 'Paciente actualizado correctamente.',
+      paciente: rows[0],
+    });
+  } catch (error) {
+    console.error('Error al actualizar paciente:', error);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al actualizar paciente.' });
+  }
+};
+
+export const deletePaciente = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const client = await pool!.connect();
+
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query('SELECT persona_id FROM pacientes WHERE id = $1', [id]);
+    
+    if (rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ ok: false, error: 'Paciente no encontrado.' });
+    }
+
+    const personaId = rows[0].persona_id;
+
+    // The foreign keys in DB might restrict this unless ON DELETE CASCADE is set.
+    // Assuming simple deletion for now, or just setting estado = 'INACTIVO'
+    // I will soft delete to be safe!
+    await client.query(`UPDATE pacientes SET estado = 'INACTIVO' WHERE id = $1`, [id]);
+    await client.query('COMMIT');
+
+    return res.json({
+      ok: true,
+      mensaje: 'Paciente inactivado correctamente.',
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al eliminar paciente:', error);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al eliminar paciente.' });
   } finally {
     client.release();
   }

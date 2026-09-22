@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
 import { Paciente } from '../types';
 import { 
-  Search, User, FileText, X, Heart, ArrowUpRight, 
+  Search, User, FileText, X, Heart, 
   ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -64,8 +64,8 @@ export const PacientesPage: React.FC = () => {
     cargarPacientes();
   }, [busqueda]);
 
-  const handleCrearPaciente = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCrearPaciente = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setErrorModal(null);
 
     try {
@@ -211,10 +211,24 @@ export const PacientesPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="w-full py-3.5 px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-[1.25rem] text-xs shadow-md transition-all duration-300 flex items-center justify-center gap-2 group-hover:bg-teal-600 dark:group-hover:bg-teal-500 dark:group-hover:text-white group-hover:scale-[1.02]">
-                  <FileText className="h-4 w-4" />
-                  <span>Abrir Expediente (ECE)</span>
-                  <ArrowUpRight className="h-4 w-4 opacity-70" />
+                <div className="flex gap-2 w-full mt-2">
+                  <div 
+                    className="flex-1 py-3.5 px-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-[1.25rem] text-xs shadow-md transition-all duration-300 flex items-center justify-center gap-2 hover:bg-teal-600 dark:hover:bg-teal-500 hover:text-white"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>Expediente (ECE)</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm(`¿Estás seguro de eliminar a ${p.nombre_completo}?`)) {
+                        apiClient.delete(`/pacientes/${p.id}`).then(() => cargarPacientes());
+                      }
+                    }}
+                    className="w-12 bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-200 hover:border-rose-500 rounded-[1.25rem] flex items-center justify-center transition-all duration-300"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             );
@@ -266,7 +280,7 @@ export const PacientesPage: React.FC = () => {
               </div>
             )}
 
-            <form onSubmit={handleCrearPaciente} className="space-y-4 text-sm">
+            <div className="space-y-4 text-sm">
               
               {/* PASO 1: IDENTIDAD & BIOGRAFÍA */}
               {pasoActual === 1 && (
@@ -547,7 +561,8 @@ export const PacientesPage: React.FC = () => {
                   </button>
                 ) : (
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleCrearPaciente}
                     className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/30 flex items-center gap-1.5 active:scale-95 transition-all"
                   >
                     <Check className="h-4 w-4 stroke-[3]" />
@@ -556,7 +571,7 @@ export const PacientesPage: React.FC = () => {
                 )}
               </div>
 
-            </form>
+            </div>
           </div>
         </div>
       )}

@@ -1,14 +1,14 @@
 import { Router } from 'express';
-import { getPacientes, getPacienteById, createPaciente } from './pacientes.controller';
+import { getPacientes, createPaciente, getPacienteById, updatePaciente, deletePaciente } from './pacientes.controller';
 import { autenticarJWT } from '../../middlewares/auth.middleware';
 import { autorizarRoles } from '../../middlewares/rbac.middleware';
 
 const router = Router();
 
-router.use(autenticarJWT);
-
-router.get('/', autorizarRoles('ADMIN', 'RECEPCIONISTA', 'MEDICO'), getPacientes);
-router.get('/:id', autorizarRoles('ADMIN', 'RECEPCIONISTA', 'MEDICO'), getPacienteById);
-router.post('/', autorizarRoles('ADMIN', 'RECEPCIONISTA'), createPaciente);
+router.get('/', autenticarJWT, getPacientes);
+router.get('/:id', autenticarJWT, getPacienteById);
+router.post('/', autenticarJWT, autorizarRoles('RECEPCIONISTA', 'MEDICO'), createPaciente);
+router.put('/:id', autenticarJWT, autorizarRoles('RECEPCIONISTA', 'MEDICO'), updatePaciente);
+router.delete('/:id', autenticarJWT, autorizarRoles('RECEPCIONISTA', 'MEDICO'), deletePaciente);
 
 export default router;

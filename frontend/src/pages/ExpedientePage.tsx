@@ -3,11 +3,39 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { Paciente, ExpedienteClinico } from '../types';
-import { 
-  FileText, Plus, Heart, Thermometer, Weight, Activity, Pill, User, X, 
-  Stethoscope, Clock, AlertTriangle, ShieldCheck, ChevronDown
+import {
+  Stethoscope, Clock, User, FileText, Plus, Heart, Activity, X, Pill, Thermometer, Weight, AlertTriangle, ShieldCheck, ChevronDown
 } from 'lucide-react';
+import Select from 'react-select';
 import { MedicalAICopilot } from '../components/MedicalAICopilot';
+
+const CIE10_OPTIONS = [
+  { value: 'J00|Rinofaringitis aguda (resfriado común)', label: 'J00 - Rinofaringitis aguda (resfriado común)' },
+  { value: 'J02.9|Faringitis aguda, no especificada', label: 'J02.9 - Faringitis aguda, no especificada' },
+  { value: 'J03.9|Amigdalitis aguda, no especificada', label: 'J03.9 - Amigdalitis aguda, no especificada' },
+  { value: 'J20.9|Bronquitis aguda, no especificada', label: 'J20.9 - Bronquitis aguda, no especificada' },
+  { value: 'I10|Hipertensión esencial (primaria)', label: 'I10 - Hipertensión esencial (primaria)' },
+  { value: 'E11.9|Diabetes mellitus tipo 2 sin complicaciones', label: 'E11.9 - Diabetes mellitus tipo 2' },
+  { value: 'A09.9|Gastroenteritis y colitis de origen no especificado', label: 'A09.9 - Gastroenteritis y colitis' },
+  { value: 'R50.9|Fiebre, no especificada', label: 'R50.9 - Fiebre, no especificada' },
+  { value: 'R51|Cefalea', label: 'R51 - Cefalea' },
+  { value: 'M54.5|Lumbago no especificado', label: 'M54.5 - Lumbago no especificado' },
+  { value: 'N39.0|Infección de vías urinarias', label: 'N39.0 - Infección de vías urinarias' },
+  { value: 'O28.9|Hallazgo anormal en el examen prenatal', label: 'O28.9 - Hallazgo anormal prenatal' }
+];
+
+const MEDICAMENTOS_OPTIONS = [
+  { value: 'Paracetamol 500mg', label: 'Paracetamol 500mg' },
+  { value: 'Ibuprofeno 400mg', label: 'Ibuprofeno 400mg' },
+  { value: 'Amoxicilina 500mg', label: 'Amoxicilina 500mg' },
+  { value: 'Azitromicina 500mg', label: 'Azitromicina 500mg' },
+  { value: 'Loratadina 10mg', label: 'Loratadina 10mg' },
+  { value: 'Omeprazol 20mg', label: 'Omeprazol 20mg' },
+  { value: 'Losartán 50mg', label: 'Losartán 50mg' },
+  { value: 'Metformina 850mg', label: 'Metformina 850mg' },
+  { value: 'Diclofenaco 50mg', label: 'Diclofenaco 50mg' },
+  { value: 'Ciprofloxacino 500mg', label: 'Ciprofloxacino 500mg' }
+];
 
 export const ExpedientePage: React.FC = () => {
   const { user } = useAuth();
@@ -716,31 +744,23 @@ export const ExpedientePage: React.FC = () => {
                 </span>
                 
                 <div className="mb-3">
-                  <label className="block text-slate-500 dark:text-slate-400 mb-1 text-[10px] font-bold">Diagnósticos Frecuentes (Precargados)</label>
-                  <select 
-                    className="w-full px-3 py-2 border border-purple-200 dark:border-purple-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-purple-500"
-                    onChange={(e) => {
-                      if(e.target.value) {
-                        const [codigo, ...desc] = e.target.value.split('|');
+                  <label className="block text-slate-500 dark:text-slate-400 mb-1 text-[10px] font-bold">Buscar Diagnóstico Frecuente</label>
+                  <Select
+                    options={CIE10_OPTIONS}
+                    placeholder="Escribe para buscar (Ej. Faringitis, J00)..."
+                    isClearable
+                    onChange={(selectedOption) => {
+                      if(selectedOption) {
+                        const [codigo, ...desc] = selectedOption.value.split('|');
                         setCie10(codigo);
                         setDiagnosticoDesc(desc.join('|'));
+                      } else {
+                        setCie10('');
+                        setDiagnosticoDesc('');
                       }
                     }}
-                  >
-                    <option value="">-- Seleccionar diagnóstico frecuente --</option>
-                    <option value="J00|Rinofaringitis aguda (resfriado común)">J00 - Rinofaringitis aguda (resfriado común)</option>
-                    <option value="J02.9|Faringitis aguda, no especificada">J02.9 - Faringitis aguda, no especificada</option>
-                    <option value="J03.9|Amigdalitis aguda, no especificada">J03.9 - Amigdalitis aguda, no especificada</option>
-                    <option value="J20.9|Bronquitis aguda, no especificada">J20.9 - Bronquitis aguda, no especificada</option>
-                    <option value="I10|Hipertensión esencial (primaria)">I10 - Hipertensión esencial (primaria)</option>
-                    <option value="E11.9|Diabetes mellitus tipo 2 sin complicaciones">E11.9 - Diabetes mellitus tipo 2</option>
-                    <option value="A09.9|Gastroenteritis y colitis de origen no especificado">A09.9 - Gastroenteritis y colitis</option>
-                    <option value="R50.9|Fiebre, no especificada">R50.9 - Fiebre, no especificada</option>
-                    <option value="R51|Cefalea">R51 - Cefalea</option>
-                    <option value="M54.5|Lumbago no especificado">M54.5 - Lumbago no especificado</option>
-                    <option value="N39.0|Infección de vías urinarias">N39.0 - Infección de vías urinarias</option>
-                    <option value="O28.9|Hallazgo anormal en el examen prenatal">O28.9 - Hallazgo anormal en examen prenatal</option>
-                  </select>
+                    className="text-slate-900"
+                  />
                 </div>
 
                 <div className="grid grid-cols-4 gap-2 text-xs">
@@ -797,18 +817,37 @@ export const ExpedientePage: React.FC = () => {
 
               {/* Prescripción Médica */}
               <div className="p-4 bg-teal-50/60 dark:bg-teal-950/25 rounded-2xl border border-teal-100 dark:border-teal-900/40 space-y-2">
-                <span className="text-xs font-bold text-teal-900 dark:text-teal-300 block uppercase tracking-wider">
-                  Receta Médica Digitalizada
+                <span className="text-xs font-bold text-teal-700 dark:text-teal-300 block uppercase tracking-wider mb-2">
+                  Plan Terapéutico (Receta Digitalizada)
                 </span>
-                <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div>
-                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Medicamento</label>
+
+                <div className="mb-3">
+                  <label className="block text-slate-500 dark:text-slate-400 mb-1 text-[10px] font-bold">Buscar Medicamentos Frecuentes</label>
+                  <Select
+                    options={MEDICAMENTOS_OPTIONS}
+                    placeholder="Escribe para buscar (Ej. Paracetamol)..."
+                    isClearable
+                    onChange={(selectedOption) => {
+                      if(selectedOption) {
+                        setMedicamento(selectedOption.value);
+                      } else {
+                        setMedicamento('');
+                      }
+                    }}
+                    className="text-slate-900"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="col-span-3">
+                    <label className="block text-slate-500 dark:text-slate-400 mb-1">Medicamento (Fórmula)</label>
                     <input
                       type="text"
+                      required
                       value={medicamento}
                       onChange={(e) => setMedicamento(e.target.value)}
-                      placeholder="Ej. Amoxicilina 500mg"
-                      className="w-full px-3 py-2 border border-teal-200 dark:border-teal-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
+                      placeholder="Ej. Paracetamol 500mg"
+                      className="w-full px-3 py-2 border border-teal-200 dark:border-teal-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-teal-500"
                     />
                   </div>
                   <div>
