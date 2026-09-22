@@ -25,9 +25,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Si expira la sesión, limpiar almacenamiento
+      // Si expira la sesión, limpiar almacenamiento y forzar recarga
       localStorage.removeItem('token_clinica');
       localStorage.removeItem('usuario_clinica');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

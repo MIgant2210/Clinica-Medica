@@ -26,7 +26,7 @@ export const autenticarJWT = (
     req.user = payload;
     next();
   } catch (error) {
-    return res.status(403).json({
+    return res.status(401).json({
       ok: false,
       error: 'Token inválido o expirado. Inicie sesión nuevamente.',
     });
