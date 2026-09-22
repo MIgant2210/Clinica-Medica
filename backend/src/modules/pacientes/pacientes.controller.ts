@@ -1,43 +1,53 @@
 import { Request, Response } from 'express';
-import { inMemoryStore } from '../../config/db';
-import { v4 as uuidv4 } from 'uuid';
+import { pool } from '../../config/db';
 
 export const getPacientes = async (req: Request, res: Response) => {
   const { busqueda } = req.query;
 
-  let listado = inMemoryStore.pacientes;
+  try {
+    let query = 'SELECT * FROM pacientes';
+    let params: any[] = [];
 
-  if (busqueda) {
-    const termino = String(busqueda).toLowerCase();
-    listado = listado.filter(
-      (p) =>
-        p.nombre_completo.toLowerCase().includes(termino) ||
-        p.documento.includes(termino) ||
-        p.codigo_paciente.toLowerCase().includes(termino)
-    );
+    if (busqueda) {
+      const termino = `%${String(busqueda).toLowerCase()}%`;
+      query += ' WHERE LOWER(nombre_completo) LIKE $1 OR documento LIKE $1 OR LOWER(codigo_paciente) LIKE $1';
+      params.push(termino);
+    }
+
+    const { rows } = await pool!.query(query, params);
+
+    return res.json({
+      ok: true,
+      pacientes: rows,
+    });
+  } catch (error) {
+    console.error('Error al obtener pacientes:', error);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al obtener pacientes.' });
   }
-
-  return res.json({
-    ok: true,
-    pacientes: listado,
-  });
 };
 
 export const getPacienteById = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const paciente = inMemoryStore.pacientes.find((p) => p.id === id);
 
-  if (!paciente) {
-    return res.status(404).json({
-      ok: false,
-      error: 'Paciente no encontrado.',
+  try {
+    const { rows } = await pool!.query('SELECT * FROM pacientes WHERE id = $1', [id]);
+    const paciente = rows[0];
+
+    if (!paciente) {
+      return res.status(404).json({
+        ok: false,
+        error: 'Paciente no encontrado.',
+      });
+    }
+
+    return res.json({
+      ok: true,
+      paciente,
     });
+  } catch (error) {
+    console.error('Error al obtener paciente:', error);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al obtener paciente.' });
   }
-
-  return res.json({
-    ok: true,
-    paciente,
-  });
 };
 
 export const createPaciente = async (req: Request, res: Response) => {
@@ -62,79 +72,80 @@ export const createPaciente = async (req: Request, res: Response) => {
     });
   }
 
-  // Verificar documento único (Regla del negocio RF-02)
-  const existePersona = inMemoryStore.personas.find(
-    (p) => p.tipo_documento === tipo_documento && p.numero_documento === numero_documento
-  );
+  const client = await pool!.connect();
 
-  if (existePersona) {
-    return res.status(409).json({
-      ok: false,
-      error: 'Ya existe una persona registrada con ese número de documento.',
+  try {
+    await client.query('BEGIN');
+
+    // Verificar documento único (Regla del negocio RF-02)
+    const existeResult = await client.query(
+      'SELECT id FROM personas WHERE tipo_documento = $1 AND numero_documento = $2',
+      [tipo_documento, numero_documento]
+    );
+
+    if (existeResult.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        ok: false,
+        error: 'Ya existe una persona registrada con ese número de documento.',
+      });
+    }
+
+    // Insertar Persona
+    const personaResult = await client.query(
+      `INSERT INTO personas (tipo_documento, numero_documento, primer_nombre, primer_apellido, fecha_nacimiento, sexo, telefono, correo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+      [tipo_documento, numero_documento, primer_nombre, primer_apellido, fecha_nacimiento, sexo, telefono, correo]
+    );
+    const personaId = personaResult.rows[0].id;
+
+    // Generar código de paciente
+    const countPacientes = await client.query('SELECT COUNT(*) FROM pacientes');
+    const codigoPaciente = `PAC-${new Date().getFullYear()}-${String(parseInt(countPacientes.rows[0].count) + 1).padStart(4, '0')}`;
+
+    // Insertar Paciente
+    const nombre_completo = `${primer_nombre} ${primer_apellido}`;
+    const contacto_emergencia = contacto_emergencia_nombre ? `${contacto_emergencia_nombre} (${contacto_emergencia_telefono || 'S/T'})` : 'No registrado';
+    
+    const pacienteResult = await client.query(
+      `INSERT INTO pacientes (persona_id, codigo_paciente, nombre_completo, documento, tipo_sangre, telefono, correo, contacto_emergencia)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [personaId, codigoPaciente, nombre_completo, numero_documento, tipo_sangre || 'N/A', telefono || 'N/A', correo || 'N/A', contacto_emergencia]
+    );
+    const nuevoPaciente = pacienteResult.rows[0];
+
+    // Generar número de expediente
+    const countExpedientes = await client.query('SELECT COUNT(*) FROM expedientes');
+    const numeroExpediente = `EXP-${new Date().getFullYear()}-${String(parseInt(countExpedientes.rows[0].count) + 1).padStart(4, '0')}`;
+
+    // Insertar Expediente
+    const expedienteResult = await client.query(
+      `INSERT INTO expedientes (paciente_id, numero_expediente, antecedentes_patologicos, antecedentes_alergias, antecedentes_familiares)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [nuevoPaciente.id, numeroExpediente, 'Ninguno registrado', 'Ninguna conocida', 'No referidos']
+    );
+    const nuevoExpediente = expedienteResult.rows[0];
+
+    // Registro en auditoría
+    await client.query(
+      `INSERT INTO auditoria (tabla, registro_id, accion, usuario_nombre, detalles)
+       VALUES ($1, $2, $3, $4, $5)`,
+      ['paciente', nuevoPaciente.id, 'INSERT', 'Sistema / Recepción', `Registro de nuevo paciente ${codigoPaciente} (${nombre_completo})`]
+    );
+
+    await client.query('COMMIT');
+
+    return res.status(201).json({
+      ok: true,
+      mensaje: 'Paciente registrado exitosamente con expediente clínico aperturado.',
+      paciente: nuevoPaciente,
+      expediente: nuevoExpediente,
     });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al crear paciente:', error);
+    return res.status(500).json({ ok: false, error: 'Error del servidor al registrar paciente.' });
+  } finally {
+    client.release();
   }
-
-  const personaId = uuidv4();
-  const pacienteId = uuidv4();
-  const expedienteId = uuidv4();
-  const codigoPaciente = `PAC-${new Date().getFullYear()}-${String(inMemoryStore.pacientes.length + 1).padStart(4, '0')}`;
-  const numeroExpediente = `EXP-${new Date().getFullYear()}-${String(inMemoryStore.expedientes.length + 1).padStart(4, '0')}`;
-
-  const nuevaPersona = {
-    id: personaId,
-    tipo_documento,
-    numero_documento,
-    primer_nombre,
-    primer_apellido,
-    fecha_nacimiento,
-    sexo,
-    telefono,
-    correo,
-  };
-
-  const nuevoPaciente = {
-    id: pacienteId,
-    persona_id: personaId,
-    codigo_paciente: codigoPaciente,
-    nombre_completo: `${primer_nombre} ${primer_apellido}`,
-    documento: numero_documento,
-    tipo_sangre: tipo_sangre || 'N/A',
-    telefono: telefono || 'N/A',
-    correo: correo || 'N/A',
-    contacto_emergencia: contacto_emergencia_nombre
-      ? `${contacto_emergencia_nombre} (${contacto_emergencia_telefono || 'S/T'})`
-      : 'No registrado',
-  };
-
-  const nuevoExpediente = {
-    id: expedienteId,
-    paciente_id: pacienteId,
-    numero_expediente: numeroExpediente,
-    antecedentes_patologicos: 'Ninguno registrado',
-    antecedentes_alergias: 'Ninguna conocida',
-    antecedentes_familiares: 'No referidos',
-    consultas: [],
-  };
-
-  inMemoryStore.personas.push(nuevaPersona);
-  inMemoryStore.pacientes.push(nuevoPaciente);
-  inMemoryStore.expedientes.push(nuevoExpediente);
-
-  // Registro en auditoría
-  inMemoryStore.auditoria.push({
-    id: uuidv4(),
-    tabla: 'paciente',
-    registro_id: pacienteId,
-    accion: 'INSERT',
-    usuario_nombre: 'Sistema / Recepción',
-    fecha_accion: new Date().toISOString(),
-    detalles: `Registro de nuevo paciente ${codigoPaciente} (${primer_nombre} ${primer_apellido})`,
-  });
-
-  return res.status(201).json({
-    ok: true,
-    mensaje: 'Paciente registrado exitosamente con expediente clínico aperturado.',
-    paciente: nuevoPaciente,
-    expediente: nuevoExpediente,
-  });
 };

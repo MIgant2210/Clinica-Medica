@@ -1,39 +1,57 @@
 import { Request, Response } from 'express';
-import { inMemoryStore } from '../../config/db';
-import { v4 as uuidv4 } from 'uuid';
+import { pool } from '../../config/db';
 import { AuthenticatedRequest } from '../../middlewares/auth.middleware';
 
 export const getCitas = async (req: AuthenticatedRequest, res: Response) => {
   const { profesionalId, pacienteId, estado, fecha } = req.query;
 
-  let listado = inMemoryStore.citas;
+  try {
+    let query = 'SELECT * FROM citas WHERE 1=1';
+    let params: any[] = [];
+    let paramIndex = 1;
 
-  // Si el usuario es médico y no es admin, solo puede ver sus citas
-  if (req.user?.rol === 'MEDICO' && req.user?.profesionalId) {
-    listado = listado.filter((c) => c.profesional_id === req.user?.profesionalId);
-  } else if (profesionalId) {
-    listado = listado.filter((c) => c.profesional_id === profesionalId);
+    // Si el usuario es médico y no es admin, solo puede ver sus citas
+    if (req.user?.rol === 'MEDICO' && req.user?.profesionalId) {
+      query += ` AND profesional_id = $${paramIndex++}`;
+      params.push(req.user.profesionalId);
+    } else if (profesionalId) {
+      query += ` AND profesional_id = $${paramIndex++}`;
+      params.push(profesionalId);
+    }
+
+    // Si el usuario es paciente, solo ve sus citas
+    if (req.user?.rol === 'PACIENTE' && req.user?.pacienteId) {
+      query += ` AND paciente_id = $${paramIndex++}`;
+      params.push(req.user.pacienteId);
+    } else if (pacienteId) {
+      query += ` AND paciente_id = $${paramIndex++}`;
+      params.push(pacienteId);
+    }
+
+    if (estado) {
+      query += ` AND estado = $${paramIndex++}`;
+      params.push(estado);
+    }
+
+    if (fecha) {
+      // Comparar solo la fecha, ignorando la hora
+      query += ` AND DATE(fecha_inicio) = $${paramIndex++}`;
+      params.push(fecha);
+    }
+
+    // Ordenar citas por fecha
+    query += ` ORDER BY fecha_inicio ASC`;
+
+    const { rows } = await pool!.query(query, params);
+
+    return res.json({
+      ok: true,
+      citas: rows,
+    });
+  } catch (error) {
+    console.error('Error al obtener citas:', error);
+    return res.status(500).json({ ok: false, error: 'Error interno al obtener las citas' });
   }
-
-  // Si el usuario es paciente, solo ve sus citas
-  if (req.user?.rol === 'PACIENTE' && req.user?.pacienteId) {
-    listado = listado.filter((c) => c.paciente_id === req.user?.pacienteId);
-  } else if (pacienteId) {
-    listado = listado.filter((c) => c.paciente_id === pacienteId);
-  }
-
-  if (estado) {
-    listado = listado.filter((c) => c.estado === estado);
-  }
-
-  if (fecha) {
-    listado = listado.filter((c) => c.fecha_inicio.startsWith(String(fecha)));
-  }
-
-  return res.json({
-    ok: true,
-    citas: listado,
-  });
 };
 
 export const createCita = async (req: AuthenticatedRequest, res: Response) => {
@@ -78,70 +96,80 @@ export const createCita = async (req: AuthenticatedRequest, res: Response) => {
     });
   }
 
-  // RN-02: Prevenir traslape de horario para el mismo profesional
-  const tieneConflicto = inMemoryStore.citas.some((c) => {
-    if (c.profesional_id !== profesional_id) return false;
-    if (c.estado !== 'PROGRAMADA' && c.estado !== 'CONFIRMADA') return false;
+  const client = await pool!.connect();
 
-    const cInicio = new Date(c.fecha_inicio);
-    const cFin = new Date(c.fecha_fin);
+  try {
+    await client.query('BEGIN');
 
-    return (
-      (inicioDate >= cInicio && inicioDate < cFin) ||
-      (finDate > cInicio && finDate <= cFin) ||
-      (inicioDate <= cInicio && finDate >= cFin)
+    // RN-02: Prevenir traslape de horario para el mismo profesional
+    const traslapeResult = await client.query(
+      `SELECT id FROM citas 
+       WHERE profesional_id = $1 
+       AND estado IN ('PROGRAMADA', 'CONFIRMADA')
+       AND (
+         ($2 >= fecha_inicio AND $2 < fecha_fin) OR 
+         ($3 > fecha_inicio AND $3 <= fecha_fin) OR
+         ($2 <= fecha_inicio AND $3 >= fecha_fin)
+       )`,
+      [profesional_id, inicioDate.toISOString(), finDate.toISOString()]
     );
-  });
 
-  if (tieneConflicto) {
-    return res.status(409).json({
-      ok: false,
-      codigo_error: 'RN_02_TRASLAPE_HORARIO',
-      error: 'Conflicto de agenda: El profesional de la salud ya tiene una cita activa asignada en ese horario.',
+    if (traslapeResult.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        ok: false,
+        codigo_error: 'RN_02_TRASLAPE_HORARIO',
+        error: 'Conflicto de agenda: El profesional de la salud ya tiene una cita activa asignada en ese horario.',
+      });
+    }
+
+    // Resolver nombres legibles
+    const pacienteRes = await client.query('SELECT nombre_completo FROM pacientes WHERE id = $1', [paciente_id]);
+    const profesionalRes = await client.query('SELECT nombre FROM profesionales WHERE id = $1', [profesional_id]);
+    const sedeRes = await client.query('SELECT nombre FROM sedes WHERE id = $1', [sede_id]);
+    const servicioRes = await client.query('SELECT nombre FROM servicios WHERE id = $1', [servicio_id]);
+
+    const pacienteNombre = pacienteRes.rows[0]?.nombre_completo || 'Paciente';
+    const profesionalNombre = profesionalRes.rows[0]?.nombre || 'Profesional Médico';
+    const sedeNombre = sedeRes.rows[0]?.nombre || 'Sede';
+    const servicioNombre = servicioRes.rows[0]?.nombre || 'Consulta General';
+
+    // Insertar cita
+    const citaResult = await client.query(
+      `INSERT INTO citas (
+        paciente_id, paciente_nombre, profesional_id, profesional_nombre, 
+        sede_id, sede_nombre, servicio_id, servicio_nombre, 
+        fecha_inicio, fecha_fin, duracion_minutos, estado, motivo
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+      [
+        paciente_id, pacienteNombre, profesional_id, profesionalNombre,
+        sede_id, sedeNombre, servicio_id, servicioNombre,
+        inicioDate.toISOString(), finDate.toISOString(), duracion, 'PROGRAMADA', motivo
+      ]
+    );
+    const nuevaCita = citaResult.rows[0];
+
+    // Registro en auditoría
+    await client.query(
+      `INSERT INTO auditoria (tabla, registro_id, accion, usuario_nombre, detalles)
+       VALUES ($1, $2, $3, $4, $5)`,
+      ['cita', nuevaCita.id, 'INSERT', req.user?.nombreCompleto || 'Usuario', `Cita agendada para ${nuevaCita.paciente_nombre} el ${nuevaCita.fecha_inicio}`]
+    );
+
+    await client.query('COMMIT');
+
+    return res.status(201).json({
+      ok: true,
+      mensaje: 'Cita programada exitosamente.',
+      cita: nuevaCita,
     });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al agendar cita:', error);
+    return res.status(500).json({ ok: false, error: 'Error interno al agendar cita' });
+  } finally {
+    client.release();
   }
-
-  // Resolver nombres legibles
-  const paciente = inMemoryStore.pacientes.find((p) => p.id === paciente_id);
-  const profesional = inMemoryStore.profesionales.find((p) => p.id === profesional_id);
-  const sede = inMemoryStore.sedes.find((s) => s.id === sede_id);
-  const servicio = inMemoryStore.servicios.find((s) => s.id === servicio_id);
-
-  const nuevaCita = {
-    id: uuidv4(),
-    paciente_id,
-    paciente_nombre: paciente?.nombre_completo || 'Paciente',
-    profesional_id,
-    profesional_nombre: profesional?.nombre || 'Profesional Médico',
-    sede_id,
-    sede_nombre: sede?.nombre || 'Sede',
-    servicio_id,
-    servicio_nombre: servicio?.nombre || 'Consulta General',
-    fecha_inicio: inicioDate.toISOString(),
-    fecha_fin: finDate.toISOString(),
-    duracion_minutos: duracion,
-    estado: 'PROGRAMADA',
-    motivo,
-  };
-
-  inMemoryStore.citas.push(nuevaCita);
-
-  // Registro en auditoría
-  inMemoryStore.auditoria.push({
-    id: uuidv4(),
-    tabla: 'cita',
-    registro_id: nuevaCita.id,
-    accion: 'INSERT',
-    usuario_nombre: req.user?.nombreCompleto || 'Usuario',
-    fecha_accion: new Date().toISOString(),
-    detalles: `Cita agendada para ${nuevaCita.paciente_nombre} el ${nuevaCita.fecha_inicio}`,
-  });
-
-  return res.status(201).json({
-    ok: true,
-    mensaje: 'Cita programada exitosamente.',
-    cita: nuevaCita,
-  });
 };
 
 export const updateEstadoCita = async (req: AuthenticatedRequest, res: Response) => {
@@ -158,28 +186,41 @@ export const updateEstadoCita = async (req: AuthenticatedRequest, res: Response)
     });
   }
 
-  const cita = inMemoryStore.citas.find((c) => c.id === id);
-  if (!cita) {
-    return res.status(404).json({ ok: false, error: 'Cita médica no encontrada.' });
+  const client = await pool!.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const citaResult = await client.query('SELECT estado, id FROM citas WHERE id = $1', [id]);
+    if (citaResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ ok: false, error: 'Cita médica no encontrada.' });
+    }
+
+    const estadoAnterior = citaResult.rows[0].estado;
+
+    const updateResult = await client.query('UPDATE citas SET estado = $1 WHERE id = $2 RETURNING *', [estado, id]);
+    const citaActualizada = updateResult.rows[0];
+
+    // QA-10: Auditoría automática tras UPDATE
+    await client.query(
+      `INSERT INTO auditoria (tabla, registro_id, accion, usuario_nombre, detalles)
+       VALUES ($1, $2, $3, $4, $5)`,
+      ['cita', id, 'UPDATE', req.user?.nombreCompleto || 'Usuario', `Cambio de estado de cita: de ${estadoAnterior} a ${estado}`]
+    );
+
+    await client.query('COMMIT');
+
+    return res.json({
+      ok: true,
+      mensaje: `Estado de la cita actualizado a ${estado}.`,
+      cita: citaActualizada,
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al actualizar cita:', error);
+    return res.status(500).json({ ok: false, error: 'Error interno al actualizar la cita' });
+  } finally {
+    client.release();
   }
-
-  const estadoAnterior = cita.estado;
-  cita.estado = estado;
-
-  // QA-10: Auditoría automática tras UPDATE
-  inMemoryStore.auditoria.push({
-    id: uuidv4(),
-    tabla: 'cita',
-    registro_id: cita.id,
-    accion: 'UPDATE',
-    usuario_nombre: req.user?.nombreCompleto || 'Usuario',
-    fecha_accion: new Date().toISOString(),
-    detalles: `Cambio de estado de cita: de ${estadoAnterior} a ${estado}`,
-  });
-
-  return res.json({
-    ok: true,
-    mensaje: `Estado de la cita actualizado a ${estado}.`,
-    cita,
-  });
 };

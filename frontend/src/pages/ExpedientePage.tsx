@@ -7,6 +7,7 @@ import {
   FileText, Plus, Heart, Thermometer, Weight, Activity, Pill, User, X, 
   Stethoscope, Clock, AlertTriangle, ShieldCheck, ChevronDown
 } from 'lucide-react';
+import { MedicalAICopilot } from '../components/MedicalAICopilot';
 
 export const ExpedientePage: React.FC = () => {
   const { user } = useAuth();
@@ -720,6 +721,11 @@ export const ExpedientePage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* IA Copilot Integration */}
+      {expediente && pacienteActual && (
+        <MedicalAICopilot expediente={expediente} paciente={pacienteActual} />
       )}
     </div>
   );

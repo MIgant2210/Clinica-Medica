@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import { inMemoryStore } from '../../config/db';
+import { pool } from '../../config/db';
 
 export const getAuditoria = async (req: Request, res: Response) => {
+  const { rows } = await pool!.query('SELECT * FROM auditoria ORDER BY fecha_accion DESC');
   return res.json({
     ok: true,
-    total: inMemoryStore.auditoria.length,
-    trazas: [...inMemoryStore.auditoria].reverse(),
+    total: rows.length,
+    trazas: rows,
   });
 };

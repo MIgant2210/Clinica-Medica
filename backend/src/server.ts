@@ -8,6 +8,7 @@ import pacientesRoutes from './modules/pacientes/pacientes.routes';
 import citasRoutes from './modules/citas/citas.routes';
 import clinicoRoutes from './modules/clinico/clinico.routes';
 import auditoriaRoutes from './modules/auditoria/auditoria.routes';
+import iaRoutes from './modules/ia/ia.routes';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/citas', citasRoutes);
 app.use('/api/clinico', clinicoRoutes);
 app.use('/api/auditoria', auditoriaRoutes);
+app.use('/api/ia', iaRoutes);
 
 // Manejador de rutas no encontradas
 app.use((req: Request, res: Response) => {
