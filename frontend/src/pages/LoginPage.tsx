@@ -217,18 +217,18 @@ export const LoginPage: React.FC = () => {
       {/* ===================================================================== */}
       {/* TARJETA CENTRAL DE LOGIN                                              */}
       {/* ===================================================================== */}
-      <div className={`relative z-10 w-full max-w-5xl rounded-[36px] overflow-hidden border backdrop-blur-2xl grid grid-cols-1 lg:grid-cols-12 transition-all duration-300 ${
+      <div className={`relative z-10 w-full max-w-md mx-auto rounded-[36px] overflow-hidden border backdrop-blur-2xl transition-all duration-300 ${
         theme === 'dark'
           ? 'bg-slate-900/85 border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.5)]'
           : 'bg-white/95 border-white shadow-[0_25px_70px_rgba(2,132,199,0.16),0_10px_30px_rgba(16,185,129,0.1)]'
       }`}>
         
-        {/* COLUMNA IZQUIERDA: FORMULARIO INTERACTIVO (7 Cols) */}
-        <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between relative">
+        {/* FORMULARIO INTERACTIVO */}
+        <div className="p-8 sm:p-12 flex flex-col justify-between relative">
           
           <div>
             {/* Logo de la Clínica */}
-            <div className="flex items-center gap-3.5 mb-8">
+            <div className="flex items-center gap-3.5 mb-8 justify-center">
               <div className="relative">
                 <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-sky-500 flex items-center justify-center text-white shadow-[0_0_25px_rgba(16,185,129,0.5)]">
                   <Activity className="h-7 w-7 stroke-[2.5]" />
@@ -236,7 +236,7 @@ export const LoginPage: React.FC = () => {
                 <div className="absolute -top-1 -right-1 h-3.5 w-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 animate-ping" />
                 <div className="absolute -top-1 -right-1 h-3.5 w-3.5 bg-emerald-400 rounded-full border-2 border-slate-900" />
               </div>
-              <div>
+              <div className="text-left">
                 <span className={`text-2xl font-black tracking-tight flex items-center gap-2 ${
                   theme === 'dark' ? 'text-white' : 'text-slate-900'
                 }`}>
@@ -246,13 +246,13 @@ export const LoginPage: React.FC = () => {
                   </span>
                 </span>
                 <span className="block text-xs font-semibold text-teal-600 dark:text-teal-400 tracking-wide uppercase">
-                  Gestión Clínica &bull; UMG SQA
+                  Gestión Clínica
                 </span>
               </div>
             </div>
 
             {/* Título */}
-            <div className="mb-6">
+            <div className="mb-6 text-center">
               <h2 className={`text-3xl font-black tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                 Iniciar Sesión
               </h2>
@@ -338,136 +338,19 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* Footer de Seguridad */}
-          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-            <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-semibold">
+          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400 text-center">
+            <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-semibold justify-center">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span>Autenticación JWT & Cifrado pgcrypto</span>
+              <span>Autenticación JWT & Cifrado AES</span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px] font-medium">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              <span>Norma ISO/IEC 25010</span>
+            <div className="text-[11px] font-semibold text-slate-400">
+              Universidad Mariano Gálvez de Guatemala <br/>
+              <span className="text-[10px] text-teal-600 dark:text-teal-400 font-mono mt-0.5">
+                Ingeniería en Sistemas &bull; Villa Nueva &bull; SQA
+              </span>
             </div>
           </div>
         </div>
-
-        {/* COLUMNA DERECHA: DEMO 1-CLIC */}
-        <div className={`lg:col-span-5 p-8 sm:p-10 border-t lg:border-t-0 lg:border-l flex flex-col justify-between backdrop-blur-xl ${
-          theme === 'dark'
-            ? 'bg-gradient-to-br from-emerald-950/40 via-slate-900/60 to-sky-950/40 border-white/10'
-            : 'bg-gradient-to-br from-sky-50/95 via-teal-50/70 to-emerald-50/80 border-sky-100'
-        }`}>
-          
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs font-bold mb-4 border border-teal-500/30">
-              <UserCheck className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
-              Demostración 1-Clic
-            </div>
-            
-            <h3 className={`text-xl font-black tracking-tight mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Perfiles Preconfigurados
-            </h3>
-            <p className={`text-xs mb-6 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-              Selecciona cualquier rol para ingresar automáticamente y verificar los permisos según la arquitectura RBAC:
-            </p>
-
-            <div className="space-y-3">
-              {/* Administrador */}
-              <button
-                type="button"
-                onClick={() => handleQuick('ADMIN')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white/[0.04] hover:bg-purple-500/15 border-white/10 hover:border-purple-500/40'
-                    : 'bg-white hover:bg-purple-50/90 border-purple-200/80 hover:border-purple-400 shadow-sm'
-                }`}
-              >
-                <div>
-                  <div className="font-bold text-sm text-purple-700 dark:text-purple-300 flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse" />
-                    Administrador General
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">admin@clinica.com</div>
-                  <div className="text-[10px] text-purple-600/80 dark:text-purple-300/80 font-medium">Control total, configuraciones y bitácora SQA</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-purple-400 group-hover:translate-x-1 transition-all" />
-              </button>
-
-              {/* Médico */}
-              <button
-                type="button"
-                onClick={() => handleQuick('MEDICO')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white/[0.04] hover:bg-emerald-500/15 border-white/10 hover:border-emerald-500/40'
-                    : 'bg-white hover:bg-emerald-50/90 border-emerald-200/80 hover:border-emerald-400 shadow-sm'
-                }`}
-              >
-                <div>
-                  <div className="font-bold text-sm text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Dr. Carlos Mendoza (Médico)
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">dr.mendoza@redsalud.gt</div>
-                  <div className="text-[10px] text-emerald-700/80 dark:text-emerald-300/80 font-medium">Atención médica, ECE, diagnósticos CIE-10 y recetas</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-emerald-500 group-hover:translate-x-1 transition-all" />
-              </button>
-
-              {/* Recepcionista */}
-              <button
-                type="button"
-                onClick={() => handleQuick('RECEPCIONISTA')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white/[0.04] hover:bg-sky-500/15 border-white/10 hover:border-sky-500/40'
-                    : 'bg-white hover:bg-sky-50/90 border-sky-200/80 hover:border-sky-400 shadow-sm'
-                }`}
-              >
-                <div>
-                  <div className="font-bold text-sm text-sky-700 dark:text-sky-300 flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-                    Ana Gómez (Recepción)
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">recepcion@redsalud.gt</div>
-                  <div className="text-[10px] text-sky-700/80 dark:text-sky-300/80 font-medium">Agendamiento, validación de turnos y alta de pacientes</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-sky-500 group-hover:translate-x-1 transition-all" />
-              </button>
-
-              {/* Paciente */}
-              <button
-                type="button"
-                onClick={() => handleQuick('PACIENTE')}
-                className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 group flex items-center justify-between cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-white/[0.04] hover:bg-teal-500/15 border-white/10 hover:border-teal-500/40'
-                    : 'bg-white hover:bg-teal-50/90 border-teal-200/80 hover:border-teal-400 shadow-sm'
-                }`}
-              >
-                <div>
-                  <div className="font-bold text-sm text-teal-700 dark:text-teal-300 flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
-                    Juan Pérez (Paciente)
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">juan.perez@gmail.com</div>
-                  <div className="text-[10px] text-teal-700/80 dark:text-teal-300/80 font-medium">Portal de citas y consulta de expediente personal</div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-teal-500 group-hover:translate-x-1 transition-all" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 text-center">
-            <p className="text-[11px] font-semibold text-slate-400">
-              Universidad Mariano Gálvez de Guatemala
-            </p>
-            <p className="text-[10px] text-teal-600 dark:text-teal-400 font-mono mt-0.5">
-              Ingeniería en Sistemas &bull; Villa Nueva &bull; SQA
-            </p>
-          </div>
-
-        </div>
-
       </div>
     </div>
   );
