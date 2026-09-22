@@ -75,14 +75,14 @@ export const MedicalAICopilot: React.FC<MedicalAICopilotProps> = ({ expediente, 
       {isOpen && (
         <div className="fixed inset-y-0 right-0 w-full md:w-96 bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border-l border-white/40 dark:border-slate-800 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
           
-          <div className="p-5 border-b border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between bg-gradient-to-r from-violet-500/10 to-indigo-500/10">
+          <div className="p-5 border-b border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between bg-gradient-to-r from-teal-500/10 to-emerald-500/10">
             <div className="flex items-center gap-3">
-              <div className="bg-indigo-500 text-white p-2 rounded-xl">
-                <Sparkles className="h-5 w-5" />
+              <div className="h-10 w-10 rounded-xl bg-teal-500 flex items-center justify-center text-white font-bold shadow-inner text-2xl">
+                👨🏻‍⚕️
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 dark:text-white text-lg">ClinicMed AI</h3>
-                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">Asistente Copilot</p>
+                <h3 className="text-base font-black text-slate-900 dark:text-white leading-tight">Dr. Simi IA</h3>
+                <span className="text-[11px] font-bold text-teal-700 dark:text-teal-400">Asistente Clínico Inteligente</span>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-white/50 dark:bg-slate-800/50 p-2 rounded-full">

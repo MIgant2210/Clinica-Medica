@@ -51,7 +51,7 @@ export const getPacienteById = async (req: Request, res: Response) => {
 };
 
 export const createPaciente = async (req: Request, res: Response) => {
-  const {
+    const {
     tipo_documento,
     numero_documento,
     primer_nombre,
@@ -63,6 +63,8 @@ export const createPaciente = async (req: Request, res: Response) => {
     tipo_sangre,
     contacto_emergencia_nombre,
     contacto_emergencia_telefono,
+    antecedentes_alergias,
+    antecedentes_patologicos,
   } = req.body;
 
   if (!tipo_documento || !numero_documento || !primer_nombre || !primer_apellido || !fecha_nacimiento || !sexo) {
@@ -122,7 +124,13 @@ export const createPaciente = async (req: Request, res: Response) => {
     const expedienteResult = await client.query(
       `INSERT INTO expedientes (paciente_id, numero_expediente, antecedentes_patologicos, antecedentes_alergias, antecedentes_familiares)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [nuevoPaciente.id, numeroExpediente, 'Ninguno registrado', 'Ninguna conocida', 'No referidos']
+      [
+        nuevoPaciente.id, 
+        numeroExpediente, 
+        antecedentes_patologicos || 'Ninguno registrado', 
+        antecedentes_alergias || 'Ninguna conocida', 
+        'No referidos'
+      ]
     );
     const nuevoExpediente = expedienteResult.rows[0];
 

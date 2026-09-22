@@ -29,6 +29,8 @@ export const PacientesPage: React.FC = () => {
   const [correo, setCorreo] = useState('');
   const [tipoSangre, setTipoSangre] = useState('O+');
   const [contactoEmergencia, setContactoEmergencia] = useState('');
+  const [antecedentesAlergias, setAntecedentesAlergias] = useState('');
+  const [antecedentesPatologicos, setAntecedentesPatologicos] = useState('');
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -79,6 +81,8 @@ export const PacientesPage: React.FC = () => {
         correo,
         tipo_sangre: tipoSangre,
         contacto_emergencia_nombre: contactoEmergencia,
+        antecedentes_alergias: antecedentesAlergias,
+        antecedentes_patologicos: antecedentesPatologicos,
       });
 
       if (res.data.ok) {
@@ -395,6 +399,34 @@ export const PacientesPage: React.FC = () => {
                           </button>
                         ))}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Alergias y Patologías */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider text-rose-600">
+                        Alergias Conocidas
+                      </label>
+                      <input
+                        type="text"
+                        value={antecedentesAlergias}
+                        onChange={(e) => setAntecedentesAlergias(e.target.value)}
+                        placeholder="Ej. Penicilina, Ninguna"
+                        className="w-full px-4 py-2.5 bg-rose-50/50 dark:bg-rose-950/20 border rounded-2xl border-rose-200 dark:border-rose-900/50 focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium placeholder-rose-300 dark:placeholder-rose-800/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider text-amber-600">
+                        Antecedentes Patológicos
+                      </label>
+                      <input
+                        type="text"
+                        value={antecedentesPatologicos}
+                        onChange={(e) => setAntecedentesPatologicos(e.target.value)}
+                        placeholder="Ej. Hipertensión, Asma"
+                        className="w-full px-4 py-2.5 bg-amber-50/50 dark:bg-amber-950/20 border rounded-2xl border-amber-200 dark:border-amber-900/50 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium placeholder-amber-300 dark:placeholder-amber-800/50"
+                      />
                     </div>
                   </div>
                 </div>

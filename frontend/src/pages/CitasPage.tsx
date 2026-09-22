@@ -49,6 +49,8 @@ export const CitasPage: React.FC = () => {
   const [horaSeleccionada, setHoraSeleccionada] = useState('09:00');
   const [duracionMinutos, setDuracionMinutos] = useState(30);
   const [motivo, setMotivo] = useState('');
+  const [modalidad, setModalidad] = useState<'PRESENCIAL' | 'VIRTUAL'>('PRESENCIAL');
+  const [simiCallActive, setSimiCallActive] = useState<string | null>(null);
 
   const bloquesHorarios = [
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
@@ -158,6 +160,10 @@ export const CitasPage: React.FC = () => {
     const inicio = new Date(fechaHoraCompleta);
     const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
 
+    const motivoFinal = modalidad === 'VIRTUAL' 
+      ? `[Telemedicina] ${motivo.trim() || 'Consulta médica virtual'}`
+      : motivo.trim() || 'Consulta médica de rutina';
+
     try {
       const res = await apiClient.post('/citas', {
         paciente_id: pacienteSeleccionado.id,
@@ -167,7 +173,7 @@ export const CitasPage: React.FC = () => {
         fecha_inicio: inicio.toISOString(),
         fecha_fin: fin.toISOString(),
         duracion_minutos: duracionMinutos,
-        motivo: motivo.trim() || 'Consulta médica de rutina',
+        motivo: motivoFinal,
       });
 
       if (res.data.ok) {
@@ -334,33 +340,43 @@ export const CitasPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {user?.rol !== 'PACIENTE' && c.estado !== 'CANCELADA' && (
-                          <div className="flex items-center justify-end gap-1.5">
-                            {c.estado === 'PROGRAMADA' && (
-                              <button
-                                onClick={() => handleCambiarEstado(c.id, 'CONFIRMADA')}
-                                className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs font-semibold border border-emerald-200 dark:border-emerald-800"
-                              >
-                                Confirmar
-                              </button>
-                            )}
-                            {c.estado !== 'ATENDIDA' && (
-                              <button
-                                onClick={() => handleCambiarEstado(c.id, 'ATENDIDA')}
-                                className="px-2.5 py-1 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-teal-700 dark:text-teal-300 rounded-lg text-xs font-semibold border border-teal-200 dark:border-teal-800"
-                              >
-                                Atender
-                              </button>
-                            )}
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {c.motivo?.includes('[Telemedicina]') && c.estado !== 'CANCELADA' && c.estado !== 'ATENDIDA' && (
                             <button
-                              onClick={() => handleCambiarEstado(c.id, 'CANCELADA')}
-                              className="px-2 py-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg text-xs"
-                              title="Cancelar cita"
+                              onClick={() => setSimiCallActive(c.id)}
+                              className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-semibold border border-indigo-200 dark:border-indigo-800 flex items-center gap-1"
                             >
-                              <X className="h-3.5 w-3.5" />
+                              <span className="text-base">👨🏻‍⚕️</span> Unirse
                             </button>
-                          </div>
-                        )}
+                          )}
+                          {user?.rol !== 'PACIENTE' && c.estado !== 'CANCELADA' && (
+                            <>
+                              {c.estado === 'PROGRAMADA' && (
+                                <button
+                                  onClick={() => handleCambiarEstado(c.id, 'CONFIRMADA')}
+                                  className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs font-semibold border border-emerald-200 dark:border-emerald-800"
+                                >
+                                  Confirmar
+                                </button>
+                              )}
+                              {c.estado !== 'ATENDIDA' && (
+                                <button
+                                  onClick={() => handleCambiarEstado(c.id, 'ATENDIDA')}
+                                  className="px-2.5 py-1 bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-teal-700 dark:text-teal-300 rounded-lg text-xs font-semibold border border-teal-200 dark:border-teal-800"
+                                >
+                                  Atender
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleCambiarEstado(c.id, 'CANCELADA')}
+                                className="px-2 py-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg text-xs"
+                                title="Cancelar cita"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -779,6 +795,36 @@ export const CitasPage: React.FC = () => {
                             placeholder="Ej. Chequeo preventivo, control de hipertensión, cefalea..."
                             className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
                           />
+                        </div>
+
+                        <div className="sm:col-span-3">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                            Modalidad de Atención
+                          </label>
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setModalidad('PRESENCIAL')}
+                              className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
+                                modalidad === 'PRESENCIAL'
+                                  ? 'bg-sky-50 border-sky-500 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 shadow-sm ring-1 ring-sky-500/50'
+                                  : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500'
+                              }`}
+                            >
+                              <Building2 className="h-5 w-5" /> Presencial
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setModalidad('VIRTUAL')}
+                              className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
+                                modalidad === 'VIRTUAL'
+                                  ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 shadow-sm ring-1 ring-indigo-500/50'
+                                  : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500'
+                              }`}
+                            >
+                              <span className="text-xl">👨🏻‍⚕️</span> Telemedicina (Dr. Simi IA)
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

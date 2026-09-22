@@ -14,6 +14,8 @@ export const ExpedientePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [pacienteSeleccionadoId, setPacienteSeleccionadoId] = useState<string>('');
+  const [errorModal, setErrorModal] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'HISTORIAL' | 'MATERNIDAD'>('HISTORIAL');
   const [pacienteActual, setPacienteActual] = useState<Paciente | null>(null);
   const [expediente, setExpediente] = useState<ExpedienteClinico | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -226,8 +228,36 @@ export const ExpedientePage: React.FC = () => {
       ) : (
         <div className="space-y-6">
           
-          {/* Tarjetas de Ficha Técnica y Antecedentes */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* TABS DE NAVEGACIÓN */}
+          <div className="flex gap-2 p-1.5 bg-white/60 dark:bg-slate-900/50 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-[1.25rem] w-fit shadow-sm overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('HISTORIAL')}
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                activeTab === 'HISTORIAL'
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <FileText className="h-4 w-4" /> Historial General
+            </button>
+            {pacienteActual.sexo === 'FEMENINO' && (
+              <button
+                onClick={() => setActiveTab('MATERNIDAD')}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                  activeTab === 'MATERNIDAD'
+                    ? 'bg-pink-600 text-white shadow-md shadow-pink-500/20 ring-1 ring-pink-500/50'
+                    : 'text-pink-600/70 dark:text-pink-400/70 hover:bg-pink-50 dark:hover:bg-pink-950/30 hover:text-pink-600 dark:hover:text-pink-400'
+                }`}
+              >
+                <span className="text-base">🤰</span> Maternidad
+              </button>
+            )}
+          </div>
+
+          {activeTab === 'HISTORIAL' ? (
+            <>
+              {/* Tarjetas de Ficha Técnica y Antecedentes */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             
             {/* Ficha Resumen Paciente */}
             <div className="lg:col-span-4 bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-colors">
@@ -474,10 +504,107 @@ export const ExpedientePage: React.FC = () => {
                     <p className="leading-relaxed">{c.notas_evolucion}</p>
                   </div>
 
+                  </div>
                 </div>
               ))
             )}
           </div>
+          </>
+          ) : (
+            /* ======================================================== */
+            /* VISTA DE MATERNIDAD (CONTROL PRENATAL)                    */
+            /* ======================================================== */
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 p-6 sm:p-8 rounded-[32px] border border-pink-200/60 dark:border-pink-900/40 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-pink-400/10 dark:bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+                
+                <div className="relative z-10">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                    <div>
+                      <h2 className="text-2xl font-black text-pink-900 dark:text-pink-300 tracking-tight flex items-center gap-2">
+                        <span className="text-3xl">🤰</span> Control Prenatal y Maternidad
+                      </h2>
+                      <p className="text-sm font-medium text-pink-700/80 dark:text-pink-400/80 mt-1">
+                        Programa integral de seguimiento obstétrico para paciente femenina
+                      </p>
+                    </div>
+                    
+                    <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-pink-100 dark:border-pink-900/30 flex items-center gap-4">
+                      <div>
+                        <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Estado Actual</span>
+                        <span className="font-bold text-slate-900 dark:text-white">Embarazo Activo</span>
+                      </div>
+                      <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+                      <div>
+                        <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Semanas de Gestación</span>
+                        <span className="font-black text-pink-600 dark:text-pink-400 text-lg">24.5 SDG</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-pink-100 dark:border-pink-900/30">
+                      <span className="block text-xs font-bold text-pink-700/70 dark:text-pink-400/70 uppercase mb-1">Fecha de Última Menstruación (FUM)</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-base">14 Abril, 2026</span>
+                    </div>
+                    <div className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-pink-100 dark:border-pink-900/30">
+                      <span className="block text-xs font-bold text-pink-700/70 dark:text-pink-400/70 uppercase mb-1">Fecha Probable de Parto (FPP)</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-base">20 Enero, 2027</span>
+                    </div>
+                    <div className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md p-4 rounded-2xl border border-pink-100 dark:border-pink-900/30">
+                      <span className="block text-xs font-bold text-pink-700/70 dark:text-pink-400/70 uppercase mb-1">Trimestre Actual</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-base">Segundo Trimestre</span>
+                    </div>
+                  </div>
+
+                  {/* Línea de Tiempo del Control Prenatal */}
+                  <h3 className="text-sm font-black text-pink-900 dark:text-pink-300 uppercase tracking-wider mb-4 border-b border-pink-200/50 dark:border-pink-900/50 pb-2">
+                    Cronograma de Chequeos Prenatales
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    {[
+                      { num: 1, semana: 'Semana 8-12', estado: 'COMPLETADO', fecha: '28 Mayo, 2026', notas: 'Ultrasonido transvaginal normal. Actividad cardíaca fetal (+).' },
+                      { num: 2, semana: 'Semana 16-20', estado: 'COMPLETADO', fecha: '15 Julio, 2026', notas: 'Ultrasonido estructural anatómico. Desarrollo morfológico adecuado.' },
+                      { num: 3, semana: 'Semana 24-28', estado: 'PROGRAMADO', fecha: '25 Septiembre, 2026', notas: 'Prueba de tolerancia oral a la glucosa y control de peso.' },
+                      { num: 4, semana: 'Semana 32-34', estado: 'PENDIENTE', fecha: '---', notas: 'Evaluación de crecimiento fetal y presentación.' },
+                      { num: 5, semana: 'Semana 36-38', estado: 'PENDIENTE', fecha: '---', notas: 'Cultivo estreptococo grupo B y planeación de vía de resolución.' },
+                    ].map((c) => (
+                      <div key={c.num} className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-all ${
+                        c.estado === 'COMPLETADO' ? 'bg-white/60 dark:bg-slate-900/40 border-emerald-200/60 dark:border-emerald-900/40' :
+                        c.estado === 'PROGRAMADO' ? 'bg-pink-50 dark:bg-pink-950/30 border-pink-300 dark:border-pink-800 ring-1 ring-pink-500/20' :
+                        'bg-slate-50/50 dark:bg-slate-800/30 border-slate-200/50 dark:border-slate-700/50 opacity-70'
+                      }`}>
+                        <div className="flex items-start gap-4">
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${
+                            c.estado === 'COMPLETADO' ? 'bg-emerald-500 text-white' :
+                            c.estado === 'PROGRAMADO' ? 'bg-pink-500 text-white' :
+                            'bg-slate-200 dark:bg-slate-700 text-slate-500'
+                          }`}>
+                            {c.estado === 'COMPLETADO' ? '✓' : c.num}
+                          </div>
+                          <div>
+                            <strong className="text-slate-900 dark:text-white font-bold block mb-0.5">{c.semana}</strong>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">{c.notas}</p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider mb-1 block w-fit ml-auto ${
+                            c.estado === 'COMPLETADO' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400' :
+                            c.estado === 'PROGRAMADO' ? 'bg-pink-200 text-pink-800 dark:bg-pink-900 dark:text-pink-300' :
+                            'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                          }`}>
+                            {c.estado}
+                          </span>
+                          <span className="text-xs font-mono text-slate-500">{c.fecha}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

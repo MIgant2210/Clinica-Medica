@@ -14,9 +14,9 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
 
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
-    let prompt = `Eres un asistente médico experto de ClinicMed...\n\n`;
+    let prompt = `Eres el Dr. Simi IA, el asistente médico de ClinicMed...\n\n`;
     if (historial) prompt += `Contexto del paciente: ${historial}\n\n`;
-    prompt += `Pregunta o comando del doctor: ${mensaje}\n\nRespuesta:`;
+    prompt += `Pregunta o comando del paciente/doctor: ${mensaje}\n\nRespuesta de Dr. Simi IA:`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
@@ -27,7 +27,9 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
     // FALLBACK SIMULADO
     return res.json({
       ok: true,
-      respuesta: `(Simulación) Hola, he notado que tu API Key arrojó un error de Google, pero aquí estoy. Basado en los síntomas, te sugiero revisar la posibilidad de faringitis (CIE-10: J02.9).`
+      respuesta: `[Simulador] ¡Hola! Soy el Dr. Simi IA. Google Gemini está teniendo un pico de alta demanda en este momento (Error 503). Pero no te preocupes, como tu asistente de respaldo, sigo aquí. ${
+        historial ? 'Veo el historial del paciente.' : '¿En qué te puedo ayudar hoy?'
+      }`
     });
   }
 };
