@@ -6,7 +6,7 @@ import { Cita, Paciente, Profesional, Sede, Servicio } from '../types';
 import { 
   Plus, Check, X, Calendar as CalIcon, Clock, 
   Stethoscope, Building2, AlertCircle, CheckCircle2, 
-  Search, ChevronRight, ChevronLeft, User
+  Search, ChevronRight, ChevronLeft, User, Phone, Video
 } from 'lucide-react';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 
@@ -49,7 +49,7 @@ export const CitasPage: React.FC = () => {
   const [horaSeleccionada, setHoraSeleccionada] = useState('09:00');
   const [duracionMinutos, setDuracionMinutos] = useState(30);
   const [motivo, setMotivo] = useState('');
-  const [modalidad, setModalidad] = useState<'PRESENCIAL' | 'VIRTUAL'>('PRESENCIAL');
+  const [modalidad, setModalidad] = useState<'PRESENCIAL' | 'LLAMADA' | 'TELEMEDICINA'>('PRESENCIAL');
   const [simiCallActive, setSimiCallActive] = useState<string | null>(null);
 
   const bloquesHorarios = [
@@ -160,9 +160,7 @@ export const CitasPage: React.FC = () => {
     const inicio = new Date(fechaHoraCompleta);
     const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
 
-    const motivoFinal = modalidad === 'VIRTUAL' 
-      ? `[Telemedicina] ${motivo.trim() || 'Consulta médica virtual'}`
-      : motivo.trim() || 'Consulta médica de rutina';
+    const motivoFinal = motivo.trim() || 'Consulta médica de rutina';
 
     try {
       const res = await apiClient.post('/citas', {
@@ -174,6 +172,8 @@ export const CitasPage: React.FC = () => {
         fecha_fin: fin.toISOString(),
         duracion_minutos: duracionMinutos,
         motivo: motivoFinal,
+        modalidad,
+        enlace_telemedicina: modalidad === 'TELEMEDICINA' ? 'https://meet.clinicmed.com/room-' + Date.now() : null,
       });
 
       if (res.data.ok) {
@@ -805,24 +805,38 @@ export const CitasPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => setModalidad('PRESENCIAL')}
-                              className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
+                              className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 font-bold ${
                                 modalidad === 'PRESENCIAL'
                                   ? 'bg-sky-50 border-sky-500 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 shadow-sm ring-1 ring-sky-500/50'
                                   : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500'
                               }`}
                             >
-                              <Building2 className="h-5 w-5" /> Presencial
+                              <Building2 className="h-5 w-5" />
+                              <span className="text-[10px] uppercase">Presencial</span>
                             </button>
                             <button
                               type="button"
-                              onClick={() => setModalidad('VIRTUAL')}
-                              className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
-                                modalidad === 'VIRTUAL'
+                              onClick={() => setModalidad('LLAMADA')}
+                              className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 font-bold ${
+                                modalidad === 'LLAMADA'
+                                  ? 'bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 shadow-sm ring-1 ring-emerald-500/50'
+                                  : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500'
+                              }`}
+                            >
+                              <Phone className="h-5 w-5" />
+                              <span className="text-[10px] uppercase">Llamada</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setModalidad('TELEMEDICINA')}
+                              className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 font-bold ${
+                                modalidad === 'TELEMEDICINA'
                                   ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 shadow-sm ring-1 ring-indigo-500/50'
                                   : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500'
                               }`}
                             >
-                              <span className="text-xl">👨🏻‍⚕️</span> Telemedicina (Dr. Simi IA)
+                              <Video className="h-5 w-5" />
+                              <span className="text-[10px] uppercase">Telemedicina</span>
                             </button>
                           </div>
                         </div>

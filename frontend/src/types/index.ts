@@ -107,6 +107,11 @@ export interface Consulta {
   diagnosticos: Diagnostico[];
   tratamiento: Tratamiento[];
   notas_evolucion: string;
+  tipo_consulta?: string;
+  modalidad?: string;
+  datos_obstetricos?: any;
+  datos_pediatricos?: any;
+  datos_remotos?: any;
 }
 
 export interface ExpedienteClinico {
@@ -116,6 +121,9 @@ export interface ExpedienteClinico {
   antecedentes_patologicos: string;
   antecedentes_alergias: string;
   antecedentes_familiares: string;
+  antecedentes_obstetricos?: any;
+  antecedentes_pediatricos?: any;
+  vacunas?: any;
   consultas: Consulta[];
 }
 

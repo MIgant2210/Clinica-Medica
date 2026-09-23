@@ -59,6 +59,11 @@ export const createConsulta = async (req: AuthenticatedRequest, res: Response) =
     diagnosticos,
     tratamiento,
     notas_evolucion,
+    tipo_consulta = 'GENERAL',
+    modalidad = 'PRESENCIAL',
+    datos_obstetricos = {},
+    datos_pediatricos = {},
+    datos_remotos = {},
   } = req.body;
 
   if (!expediente_id || !motivo_consulta) {
@@ -104,9 +109,14 @@ export const createConsulta = async (req: AuthenticatedRequest, res: Response) =
     const insertResult = await client.query(
       `INSERT INTO consultas (
         expediente_id, fecha_atencion, profesional_nombre, motivo_consulta,
-        signos_vitales, diagnosticos, tratamiento, notas_evolucion
-      ) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [expediente_id, profesional_nombre, motivo_consulta, JSON.stringify(sv), JSON.stringify(diag), JSON.stringify(trat), notasFull]
+        signos_vitales, diagnosticos, tratamiento, notas_evolucion,
+        tipo_consulta, modalidad, datos_obstetricos, datos_pediatricos, datos_remotos
+      ) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+      [
+        expediente_id, profesional_nombre, motivo_consulta, 
+        JSON.stringify(sv), JSON.stringify(diag), JSON.stringify(trat), notasFull,
+        tipo_consulta, modalidad, JSON.stringify(datos_obstetricos), JSON.stringify(datos_pediatricos), JSON.stringify(datos_remotos)
+      ]
     );
 
     const nuevaConsulta = insertResult.rows[0];
@@ -136,5 +146,45 @@ export const createConsulta = async (req: AuthenticatedRequest, res: Response) =
     return res.status(500).json({ ok: false, error: 'Error interno al registrar la consulta' });
   } finally {
     client.release();
+  }
+};
+
+export const updateAntecedentesExpediente = async (req: AuthenticatedRequest, res: Response) => {
+  const { expedienteId } = req.params;
+  const { antecedentes_obstetricos, antecedentes_pediatricos, vacunas } = req.body;
+
+  try {
+    const updateFields = [];
+    const values = [expedienteId];
+    let paramIndex = 2;
+
+    if (antecedentes_obstetricos !== undefined) {
+      updateFields.push(`antecedentes_obstetricos = $${paramIndex++}`);
+      values.push(JSON.stringify(antecedentes_obstetricos));
+    }
+    if (antecedentes_pediatricos !== undefined) {
+      updateFields.push(`antecedentes_pediatricos = $${paramIndex++}`);
+      values.push(JSON.stringify(antecedentes_pediatricos));
+    }
+    if (vacunas !== undefined) {
+      updateFields.push(`vacunas = $${paramIndex++}`);
+      values.push(JSON.stringify(vacunas));
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ ok: false, error: 'No se enviaron campos para actualizar.' });
+    }
+
+    const query = `UPDATE expedientes SET ${updateFields.join(', ')} WHERE id = $1 RETURNING *`;
+    const result = await pool!.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ ok: false, error: 'Expediente no encontrado.' });
+    }
+
+    return res.json({ ok: true, expediente: result.rows[0], mensaje: 'Antecedentes actualizados' });
+  } catch (error) {
+    console.error('Error al actualizar antecedentes:', error);
+    return res.status(500).json({ ok: false, error: 'Error interno al actualizar antecedentes.' });
   }
 };

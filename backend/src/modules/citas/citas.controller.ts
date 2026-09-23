@@ -64,6 +64,8 @@ export const createCita = async (req: AuthenticatedRequest, res: Response) => {
     fecha_fin,
     duracion_minutos,
     motivo,
+    modalidad = 'PRESENCIAL',
+    enlace_telemedicina = null,
   } = req.body;
 
   // QA-03: Obligatoriedad de datos
@@ -139,12 +141,12 @@ export const createCita = async (req: AuthenticatedRequest, res: Response) => {
       `INSERT INTO citas (
         paciente_id, paciente_nombre, profesional_id, profesional_nombre, 
         sede_id, sede_nombre, servicio_id, servicio_nombre, 
-        fecha_inicio, fecha_fin, duracion_minutos, estado, motivo
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+        fecha_inicio, fecha_fin, duracion_minutos, estado, motivo, modalidad, enlace_telemedicina
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
       [
         paciente_id, pacienteNombre, profesional_id, profesionalNombre,
         sede_id, sedeNombre, servicio_id, servicioNombre,
-        inicioDate.toISOString(), finDate.toISOString(), duracion, 'PROGRAMADA', motivo
+        inicioDate.toISOString(), finDate.toISOString(), duracion, 'PROGRAMADA', motivo, modalidad, enlace_telemedicina
       ]
     );
     const nuevaCita = citaResult.rows[0];
