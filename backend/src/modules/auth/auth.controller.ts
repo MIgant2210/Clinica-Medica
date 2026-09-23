@@ -43,6 +43,8 @@ export const login = async (req: Request, res: Response) => {
       rol: usuario.rol,
       personaId: usuario.persona_id,
       nombreCompleto: usuario.nombre_completo,
+      profesionalId: usuario.profesional_id,
+      pacienteId: usuario.paciente_id,
       sedesAutorizadas: usuario.sedes_autorizadas || [],
     });
 
