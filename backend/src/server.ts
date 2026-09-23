@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 import authRoutes from './modules/auth/auth.routes';
 import organizacionRoutes from './modules/organizacion/organizacion.routes';
@@ -10,8 +12,6 @@ import clinicoRoutes from './modules/clinico/clinico.routes';
 import auditoriaRoutes from './modules/auditoria/auditoria.routes';
 import iaRoutes from './modules/ia/ia.routes';
 import usuariosRoutes from './modules/usuarios/usuarios.routes';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;

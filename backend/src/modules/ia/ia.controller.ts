@@ -1,9 +1,18 @@
 import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
 
-// Usamos la llave que configuramos en .env
-const API_KEY = process.env.GEMINI_API_KEY || '';
-const genAI = new GoogleGenerativeAI(API_KEY);
+dotenv.config();
+
+function getGeminiModel() {
+  const apiKey = process.env.GEMINI_API_KEY || '';
+  if (!apiKey) {
+    console.error('⚠️ [ClinicMed IA] Error: GEMINI_API_KEY no encontrada en process.env');
+    throw new Error('API Key de Gemini no configurada');
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+}
 
 export const procesarPreguntaMedica = async (req: Request, res: Response) => {
   const { mensaje, historial } = req.body;
@@ -13,21 +22,20 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    let prompt = `Eres el asistente médico IA de ClinicMed, experto en análisis de datos clínicos.\n\n`;
-    if (historial) prompt += `Contexto del paciente: ${historial}\n\n`;
-    prompt += `Pregunta o comando: ${mensaje}\n\nRespuesta de la IA:`;
+    const model = getGeminiModel();
+    let prompt = `Eres el asistente médico IA oficial de ClinicMed. Brinda respuestas médicas profesionales, claras, empáticas y fundamentadas en guías clínicas.\n\n`;
+    if (historial) prompt += `Contexto del paciente:\n${historial}\n\n`;
+    prompt += `Pregunta o consulta clínica: ${mensaje}\n\nRespuesta:`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
     return res.json({ ok: true, respuesta: text });
-  } catch (error) {
-    console.error('Error en Gemini AI:', error);
-    // FALLBACK DINÁMICO
+  } catch (error: any) {
+    console.error('❌ Error en procesarPreguntaMedica (Gemini):', error?.message || error);
     return res.json({
       ok: true,
-      respuesta: `Aquí el asistente de ClinicMed (Modo Desconectado). No pude conectar con el servidor de Inteligencia Artificial para responder a: "${mensaje}". Por favor verifica la configuración del sistema.`
+      respuesta: `Aquí el asistente de ClinicMed (Modo Desconectado). No pude conectar con el servidor de Inteligencia Artificial para responder a: "${mensaje}". Por favor verifica la conexión.`
     });
   }
 };
@@ -37,15 +45,15 @@ export const resumirExpediente = async (req: Request, res: Response) => {
   if (!expedienteData) return res.status(400).json({ ok: false, error: 'Datos requeridos' });
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const prompt = `Actúa como un asistente clínico. Elabora un resumen clínico profesional, claro y conciso basado estrictamente en esta información:\n\n${JSON.stringify(expedienteData)}\n\nEl resumen debe destacar datos relevantes sin inventar síntomas.`;
+    const model = getGeminiModel();
+    const prompt = `Actúa como un médico especialista asistente. Elabora un resumen clínico profesional, conciso y estructurado en Markdown basado estrictamente en estos datos del expediente:\n\n${JSON.stringify(expedienteData, null, 2)}\n\nIncluye: 1. Estado General, 2. Alergias Críticas, 3. Antecedentes Patológicos, 4. Últimas Consultas y Recomendaciones Breves.`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
     return res.json({ ok: true, resumen: text });
-  } catch (error) {
-    console.error('Error en Gemini AI Resumen:', error);
+  } catch (error: any) {
+    console.error('❌ Error en resumirExpediente (Gemini):', error?.message || error);
     // FALLBACK SIMULADO DINÁMICO BASADO EN LOS DATOS REALES
     const { paciente, alergias, patologias } = expedienteData;
     
@@ -60,3 +68,4 @@ export const resumirExpediente = async (req: Request, res: Response) => {
     });
   }
 };
+
