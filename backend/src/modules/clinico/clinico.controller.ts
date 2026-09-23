@@ -14,7 +14,7 @@ export const getExpedienteByPacienteId = async (req: AuthenticatedRequest, res: 
   }
 
   try {
-    const pacienteRes = await pool!.query('SELECT * FROM pacientes WHERE id = $1', [pacienteId]);
+    const pacienteRes = await pool!.query('SELECT p.*, per.sexo FROM pacientes p JOIN personas per ON p.persona_id = per.id WHERE p.id = $1', [pacienteId]);
     const paciente = pacienteRes.rows[0];
 
     if (!paciente) {
