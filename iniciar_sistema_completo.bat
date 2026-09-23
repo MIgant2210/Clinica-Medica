@@ -12,10 +12,10 @@ echo.
 cd /d "%~dp0"
 
 echo [1/3] Abriendo Servidor Backend...
-start "ClinicMed - Backend API" cmd /k "call \"%~dp0iniciar_backend.bat\""
+start "" "%~dp0iniciar_backend.bat"
 
 echo [2/3] Abriendo Interfaz Frontend...
-start "ClinicMed - Frontend Web" cmd /k "call \"%~dp0iniciar_frontend.bat\""
+start "" "%~dp0iniciar_frontend.bat"
 
 echo [3/3] Esperando 5 segundos para inicializar servicios y abrir el navegador...
 timeout /t 5 /nobreak >nul
