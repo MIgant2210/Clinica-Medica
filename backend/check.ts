@@ -1,8 +1,9 @@
 import { pool } from './src/config/db';
 async function run() {
   try {
-    const res = await pool!.query(`SELECT p.id, per.primer_nombre, per.sexo FROM pacientes p JOIN personas per ON p.persona_id = per.id`);
-    console.log(res.rows);
+    await pool!.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS estado VARCHAR(20) DEFAULT 'ACTIVO'`);
+    await pool!.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+    console.log("Columnas agregadas");
   } catch (e) {
     console.error(e);
   } finally {
