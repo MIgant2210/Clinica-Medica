@@ -13,10 +13,10 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
-    let prompt = `Eres el Dr. Simi IA, el asistente médico de ClinicMed...\n\n`;
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    let prompt = `Eres el asistente médico IA de ClinicMed, experto en análisis de datos clínicos.\n\n`;
     if (historial) prompt += `Contexto del paciente: ${historial}\n\n`;
-    prompt += `Pregunta o comando del paciente/doctor: ${mensaje}\n\nRespuesta de Dr. Simi IA:`;
+    prompt += `Pregunta o comando: ${mensaje}\n\nRespuesta de la IA:`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
@@ -24,12 +24,10 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
     return res.json({ ok: true, respuesta: text });
   } catch (error) {
     console.error('Error en Gemini AI:', error);
-    // FALLBACK SIMULADO
+    // FALLBACK DINÁMICO
     return res.json({
       ok: true,
-      respuesta: `[Simulador] ¡Hola! Soy el Dr. Simi IA. Google Gemini está teniendo un pico de alta demanda en este momento (Error 503). Pero no te preocupes, como tu asistente de respaldo, sigo aquí. ${
-        historial ? 'Veo el historial del paciente.' : '¿En qué te puedo ayudar hoy?'
-      }`
+      respuesta: `Aquí el asistente de ClinicMed (Modo Desconectado). No pude conectar con el servidor de Inteligencia Artificial para responder a: "${mensaje}". Por favor verifica la configuración del sistema.`
     });
   }
 };
@@ -39,8 +37,8 @@ export const resumirExpediente = async (req: Request, res: Response) => {
   if (!expedienteData) return res.status(400).json({ ok: false, error: 'Datos requeridos' });
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
-    const prompt = `Actúa como un asistente clínico. Resume brevemente:\n\n${JSON.stringify(expedienteData)}`;
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const prompt = `Actúa como un asistente clínico. Elabora un resumen clínico profesional, claro y conciso basado estrictamente en esta información:\n\n${JSON.stringify(expedienteData)}\n\nEl resumen debe destacar datos relevantes sin inventar síntomas.`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
@@ -48,10 +46,17 @@ export const resumirExpediente = async (req: Request, res: Response) => {
     return res.json({ ok: true, resumen: text });
   } catch (error) {
     console.error('Error en Gemini AI Resumen:', error);
-    // FALLBACK SIMULADO
+    // FALLBACK SIMULADO DINÁMICO BASADO EN LOS DATOS REALES
+    const { paciente, alergias, patologias } = expedienteData;
+    
+    let resumenSimulado = `**Resumen Clínico Generado Localmente:**\n\nEl paciente **${paciente || 'desconocido'}** presenta:\n`;
+    resumenSimulado += `- **Antecedentes Alérgicos:** ${alergias || 'Ninguno reportado'}.\n`;
+    resumenSimulado += `- **Antecedentes Patológicos:** ${patologias || 'Ninguno reportado'}.\n\n`;
+    resumenSimulado += `*Nota: La IA en la nube no está disponible en este momento.*`;
+
     return res.json({
       ok: true,
-      resumen: `(Resumen Simulado - Error de API Key)\n\nEl paciente presenta antecedentes patológicos de hipertensión y es **alérgico a la penicilina**. En sus últimas 3 consultas ha presentado cuadros de estrés y presión arterial elevada.\n\nSe recomienda monitoreo constante y evitar medicamentos con compuestos betalactámicos.`
+      resumen: resumenSimulado
     });
   }
 };
