@@ -4,14 +4,37 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-function getGeminiModel() {
+const RESILIENT_MODELS = [
+  'gemini-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-3.1-flash-lite-preview'
+];
+
+async function generarConGemini(systemInstruction: string, prompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY || '';
   if (!apiKey) {
-    console.error('⚠️ [ClinicMed IA] Error: GEMINI_API_KEY no encontrada en process.env');
-    throw new Error('API Key de Gemini no configurada');
+    throw new Error('GEMINI_API_KEY no encontrada en process.env');
   }
+
   const genAI = new GoogleGenerativeAI(apiKey);
-  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  let ultimoError: any = null;
+
+  for (const modelName of RESILIENT_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction });
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      if (text && text.trim().length > 0) {
+        return text.trim();
+      }
+    } catch (err: any) {
+      ultimoError = err;
+      console.warn(`[ClinicMed IA] Modelo ${modelName} no disponible (${err.message}). Reintentando con alternativo...`);
+    }
+  }
+
+  throw ultimoError || new Error('No se pudo conectar con ningún modelo de Gemini');
 }
 
 export const procesarPreguntaMedica = async (req: Request, res: Response) => {
@@ -22,17 +45,19 @@ export const procesarPreguntaMedica = async (req: Request, res: Response) => {
   }
 
   try {
-    const model = getGeminiModel();
-    let prompt = `Eres el asistente médico IA oficial de ClinicMed. Brinda respuestas médicas profesionales, claras, empáticas y fundamentadas en guías clínicas.\n\n`;
-    if (historial) prompt += `Contexto del paciente:\n${historial}\n\n`;
-    prompt += `Pregunta o consulta clínica: ${mensaje}\n\nRespuesta:`;
+    const sysInstruction = `Eres el Asistente Médico IA oficial de ClinicMed. Brindas orientación clínica cálida, rigurosa, empática y comprensible.
+- NUNCA uses saludos vacíos ni introducciones repetitivas.
+- Responde directamente a la consulta médica usando un formato limpio con viñetas y términos claros tanto para el médico como para el paciente.
+- Si hay antecedentes de alergias o fármacos en el historial, tenlos siempre en cuenta para emitir advertencias farmacológicas preventivas.`;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    let prompt = '';
+    if (historial) prompt += `Contexto del paciente en ClinicMed:\n${historial}\n\n`;
+    prompt += `Consulta recibida:\n"${mensaje}"\n\nPor favor brinda una respuesta médica estructurada, clara y con recomendaciones prácticas:`;
 
-    return res.json({ ok: true, respuesta: text });
+    const respuesta = await generarConGemini(sysInstruction, prompt);
+    return res.json({ ok: true, respuesta });
   } catch (error: any) {
-    console.error('❌ Error en procesarPreguntaMedica (Gemini):', error?.message || error);
+    console.error('❌ Error en procesarPreguntaMedica:', error?.message || error);
     return res.json({
       ok: true,
       respuesta: `Aquí el asistente de ClinicMed (Modo Desconectado). No pude conectar con el servidor de Inteligencia Artificial para responder a: "${mensaje}". Por favor verifica la conexión.`
@@ -45,16 +70,35 @@ export const resumirExpediente = async (req: Request, res: Response) => {
   if (!expedienteData) return res.status(400).json({ ok: false, error: 'Datos requeridos' });
 
   try {
-    const model = getGeminiModel();
-    const prompt = `Actúa como un médico especialista asistente. Elabora un resumen clínico profesional, conciso y estructurado en Markdown basado estrictamente en estos datos del expediente:\n\n${JSON.stringify(expedienteData, null, 2)}\n\nIncluye: 1. Estado General, 2. Alergias Críticas, 3. Antecedentes Patológicos, 4. Últimas Consultas y Recomendaciones Breves.`;
+    const sysInstruction = `Eres el Asistente Clínico Inteligente de ClinicMed. Tu objetivo es generar un resumen médico de alta calidad para el expediente clínico electrónico.
+REGLAS OBLIGATORIAS:
+- NUNCA incluyas frases introductorias (como "Aquí tiene el resumen:", "A continuación:", etc.) ni despedidas.
+- Comienza directamente con los encabezados estructurados.
+- Redacción médica elegante, humana, clara y orientada a la seguridad del paciente.`;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const prompt = `Elabora un Resumen Clínico Integral y Elegante para el expediente médico de ${expedienteData.paciente || 'el paciente'}.
 
-    return res.json({ ok: true, resumen: text });
+Utiliza exactamente esta estructura limpia con viñetas:
+
+📋 **Perfil Clínico General**
+(Síntesis clara del estado general y condición del paciente en lenguaje clínico profesional)
+
+⚠️ **Alertas Críticas y Alergias**
+(Identificación clara de fármacos o sustancias contraindicadas y advertencias de seguridad)
+
+🩺 **Antecedentes Patológicos**
+(Detalle de afecciones crónicas o antecedentes relevantes con su estado de control)
+
+💡 **Orientación y Plan Preventivo**
+(Recomendaciones médicas clave sobre monitoreo, hábitos de vida y siguientes pasos clínicos)
+
+Datos clínicos registrados:
+${JSON.stringify(expedienteData, null, 2)}`;
+
+    const resumen = await generarConGemini(sysInstruction, prompt);
+    return res.json({ ok: true, resumen });
   } catch (error: any) {
     console.error('❌ Error en resumirExpediente (Gemini):', error?.message || error);
-    // FALLBACK SIMULADO DINÁMICO BASADO EN LOS DATOS REALES
     const { paciente, alergias, patologias } = expedienteData;
     
     let resumenSimulado = `**Resumen Clínico Generado Localmente:**\n\nEl paciente **${paciente || 'desconocido'}** presenta:\n`;

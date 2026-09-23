@@ -8,6 +8,66 @@ interface MedicalAICopilotProps {
   paciente: Paciente;
 }
 
+const FormattedMarkdown: React.FC<{ text: string }> = ({ text }) => {
+  const lines = text.split('\n');
+  return (
+    <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={idx} className="h-1" />;
+
+        const isHeader =
+          trimmed.startsWith('#') ||
+          trimmed.startsWith('📋') ||
+          trimmed.startsWith('⚠️') ||
+          trimmed.startsWith('🩺') ||
+          trimmed.startsWith('💡') ||
+          trimmed.startsWith('🔍');
+
+        const renderText = (str: string) => {
+          const parts = str.split(/(\*\*.*?\*\*)/g);
+          return parts.map((part, pIdx) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return (
+                <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
+                  {part.slice(2, -2)}
+                </strong>
+              );
+            }
+            return part;
+          });
+        };
+
+        if (isHeader) {
+          return (
+            <div
+              key={idx}
+              className="font-bold text-indigo-900 dark:text-indigo-300 pt-2 pb-0.5 border-b border-indigo-100 dark:border-indigo-900/40 flex items-center gap-1.5 text-xs uppercase tracking-wide"
+            >
+              {renderText(trimmed.replace(/^#+\s*/, ''))}
+            </div>
+          );
+        }
+
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-1.5">
+              <span className="text-indigo-500 font-bold mt-1 text-[10px] leading-none">•</span>
+              <span className="flex-1 text-slate-700 dark:text-slate-300">{renderText(trimmed.slice(2))}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={idx} className="text-slate-700 dark:text-slate-300">
+            {renderText(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
+
 export const MedicalAICopilot: React.FC<MedicalAICopilotProps> = ({ expediente, paciente }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -97,15 +157,15 @@ export const MedicalAICopilot: React.FC<MedicalAICopilotProps> = ({ expediente, 
               <button
                 onClick={handleGenerarResumen}
                 disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                className="w-full py-3 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-70 active:scale-[0.99]"
               >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 Generar Resumen Clínico
               </button>
               
               {resumen && (
-                <div className="p-4 bg-indigo-50/80 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                  {resumen}
+                <div className="p-4 bg-indigo-50/90 dark:bg-slate-800/80 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 shadow-sm">
+                  <FormattedMarkdown text={resumen} />
                 </div>
               )}
             </div>
@@ -125,12 +185,16 @@ export const MedicalAICopilot: React.FC<MedicalAICopilotProps> = ({ expediente, 
                 
                 {chatHistory.map((msg, i) => (
                   <div key={i} className={`flex ${msg.rol === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
+                    <div className={`max-w-[85%] p-3.5 rounded-2xl text-xs sm:text-sm ${
                       msg.rol === 'user' 
-                        ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 rounded-tr-sm' 
-                        : 'bg-indigo-100 text-indigo-950 dark:bg-indigo-900/40 dark:text-indigo-200 rounded-tl-sm border border-indigo-200/50 dark:border-indigo-800/50 whitespace-pre-wrap'
+                        ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 rounded-tr-sm shadow-sm' 
+                        : 'bg-indigo-50 dark:bg-slate-800/90 rounded-tl-sm border border-indigo-100 dark:border-slate-700 shadow-sm'
                     }`}>
-                      {msg.msj}
+                      {msg.rol === 'user' ? (
+                        <p className="whitespace-pre-wrap">{msg.msj}</p>
+                      ) : (
+                        <FormattedMarkdown text={msg.msj} />
+                      )}
                     </div>
                   </div>
                 ))}
