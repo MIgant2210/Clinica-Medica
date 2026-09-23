@@ -158,7 +158,6 @@ export const createPaciente = async (req: Request, res: Response) => {
       mensaje: 'Paciente registrado exitosamente con expediente clínico aperturado.',
       paciente: nuevoPaciente,
       expediente: nuevoExpediente,
-      expediente: nuevoExpediente,
     });
   } catch (error) {
     await client.query('ROLLBACK');

@@ -49,6 +49,13 @@ export const Sidebar: React.FC = () => {
       roles: ['ADMIN'],
       badge: 'ISO 25010',
     },
+    {
+      to: '/usuarios',
+      label: 'Usuarios',
+      icon: Users,
+      roles: ['ADMIN'],
+      badge: 'Control',
+    },
   ];
 
   const allowedNavItems = navItems.filter((item) => user && item.roles.includes(user.rol));

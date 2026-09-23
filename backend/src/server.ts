@@ -9,6 +9,7 @@ import citasRoutes from './modules/citas/citas.routes';
 import clinicoRoutes from './modules/clinico/clinico.routes';
 import auditoriaRoutes from './modules/auditoria/auditoria.routes';
 import iaRoutes from './modules/ia/ia.routes';
+import usuariosRoutes from './modules/usuarios/usuarios.routes';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 // Registro de Módulos de la API REST
+app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/organizacion', organizacionRoutes);
 app.use('/api/pacientes', pacientesRoutes);

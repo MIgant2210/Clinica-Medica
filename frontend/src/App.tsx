@@ -9,6 +9,7 @@ import { CitasPage } from './pages/CitasPage';
 import { PacientesPage } from './pages/PacientesPage';
 import { ExpedientePage } from './pages/ExpedientePage';
 import { AuditoriaPage } from './pages/AuditoriaPage';
+import { UsuariosPage } from './pages/UsuariosPage';
 
 export const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ export const App: React.FC = () => {
               <Route path="pacientes" element={<PacientesPage />} />
               <Route path="expediente" element={<ExpedientePage />} />
               <Route path="auditoria" element={<AuditoriaPage />} />
+              <Route path="usuarios" element={<UsuariosPage />} />
             </Route>
 
             {/* Redirección por defecto */}
