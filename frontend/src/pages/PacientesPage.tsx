@@ -3,9 +3,14 @@ import { apiClient } from '../api/client';
 import { Paciente } from '../types';
 import { 
   Search, User, FileText, X, Heart, 
-  ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact
+  ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact, Edit2, Trash2, AlertCircle
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { es } from 'date-fns/locale/es';
+import 'react-datepicker/dist/react-datepicker.css';
+
+registerLocale('es', es);
 
 export const PacientesPage: React.FC = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -31,6 +36,10 @@ export const PacientesPage: React.FC = () => {
   const [antecedentesAlergias, setAntecedentesAlergias] = useState('');
   const [antecedentesPatologicos, setAntecedentesPatologicos] = useState('');
 
+  const [pacienteAEliminar, setPacienteAEliminar] = useState<Paciente | null>(null);
+
+  const [pacienteAEditar, setPacienteAEditar] = useState<Paciente | null>(null);
+
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -38,8 +47,7 @@ export const PacientesPage: React.FC = () => {
     const q = searchParams.get('q');
     if (q) setBusqueda(q);
     if (searchParams.get('nuevo') === 'true') {
-      setModalAbierto(true);
-      setPasoActual(1);
+      abrirModalNuevo();
       searchParams.delete('nuevo');
       setSearchParams(searchParams);
     }
@@ -64,38 +72,80 @@ export const PacientesPage: React.FC = () => {
     cargarPacientes();
   }, [busqueda]);
 
-  const handleCrearPaciente = async (e?: React.FormEvent) => {
+  const abrirModalNuevo = () => {
+    setPacienteAEditar(null);
+    setPrimerNombre('');
+    setPrimerApellido('');
+    setNumeroDocumento('');
+    setFechaNacimiento('');
+    setTelefono('');
+    setCorreo('');
+    setContactoEmergencia('');
+    setAntecedentesAlergias('');
+    setAntecedentesPatologicos('');
+    setPasoActual(1);
+    setModalAbierto(true);
+  };
+
+  const abrirModalEditar = (p: Paciente) => {
+    setPacienteAEditar(p);
+    setPrimerNombre(p.nombre_completo.split(' ')[0]);
+    setPrimerApellido(p.nombre_completo.split(' ').slice(1).join(' '));
+    setTipoDocumento('DPI');
+    setNumeroDocumento(p.documento);
+    setFechaNacimiento(p.fecha_nacimiento?.split('T')[0] || '');
+    setSexo(p.sexo || 'MASCULINO');
+    setTelefono(p.telefono === 'N/A' ? '' : p.telefono);
+    setCorreo(p.correo === 'N/A' ? '' : p.correo);
+    setTipoSangre(p.tipo_sangre === 'N/A' ? 'O+' : p.tipo_sangre);
+    setContactoEmergencia(p.contacto_emergencia === 'No registrado' ? '' : p.contacto_emergencia);
+    setPasoActual(1);
+    setModalAbierto(true);
+  };
+
+  const handleGuardarPaciente = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorModal(null);
 
     try {
-      const res = await apiClient.post('/pacientes', {
-        tipo_documento: tipoDocumento,
-        numero_documento: numeroDocumento,
-        primer_nombre: primerNombre,
-        primer_apellido: primerApellido,
-        fecha_nacimiento: fechaNacimiento,
-        sexo,
-        telefono,
-        correo,
-        tipo_sangre: tipoSangre,
-        contacto_emergencia_nombre: contactoEmergencia,
-        antecedentes_alergias: antecedentesAlergias,
-        antecedentes_patologicos: antecedentesPatologicos,
-      });
+      if (pacienteAEditar) {
+        // Modo Edición
+        const res = await apiClient.put(`/pacientes/${pacienteAEditar.id}`, {
+          telefono,
+          correo,
+          tipo_sangre: tipoSangre,
+          contacto_emergencia: contactoEmergencia,
+          estado: 'ACTIVO'
+        });
 
-      if (res.data.ok) {
-        setModalAbierto(false);
-        setPasoActual(1);
-        setPrimerNombre('');
-        setPrimerApellido('');
-        setNumeroDocumento('');
-        setTelefono('');
-        setCorreo('');
-        cargarPacientes();
+        if (res.data.ok) {
+          setModalAbierto(false);
+          cargarPacientes();
+        }
+      } else {
+        // Modo Creación
+        const res = await apiClient.post('/pacientes', {
+          tipo_documento: tipoDocumento,
+          numero_documento: numeroDocumento,
+          primer_nombre: primerNombre,
+          primer_apellido: primerApellido,
+          fecha_nacimiento: fechaNacimiento,
+          sexo,
+          telefono,
+          correo,
+          tipo_sangre: tipoSangre,
+          contacto_emergencia_nombre: contactoEmergencia,
+          antecedentes_alergias: antecedentesAlergias,
+          antecedentes_patologicos: antecedentesPatologicos,
+        });
+
+        if (res.data.ok) {
+          setModalAbierto(false);
+          cargarPacientes();
+        }
       }
     } catch (err: any) {
-      setErrorModal(err.response?.data?.error || 'Error al registrar paciente.');
+      setErrorModal(err.response?.data?.error || 'Error al guardar paciente.');
     }
   };
 
@@ -132,10 +182,7 @@ export const PacientesPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => {
-            setPasoActual(1);
-            setModalAbierto(true);
-          }}
+          onClick={abrirModalNuevo}
           className="group relative px-6 py-4 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-[1.5rem] text-sm font-bold shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-1 overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
@@ -221,13 +268,22 @@ export const PacientesPage: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm(`¿Estás seguro de eliminar a ${p.nombre_completo}?`)) {
-                        apiClient.delete(`/pacientes/${p.id}`).then(() => cargarPacientes());
-                      }
+                      abrirModalEditar(p);
+                    }}
+                    className="w-12 bg-sky-50 hover:bg-sky-500 text-sky-500 hover:text-white border border-sky-200 hover:border-sky-500 rounded-[1.25rem] flex items-center justify-center transition-all duration-300"
+                    title="Editar Paciente"
+                  >
+                    <Edit2 className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPacienteAEliminar(p);
                     }}
                     className="w-12 bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-200 hover:border-rose-500 rounded-[1.25rem] flex items-center justify-center transition-all duration-300"
+                    title="Eliminar Paciente"
                   >
-                    <X className="h-5 w-5" />
+                    <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -386,13 +442,26 @@ export const PacientesPage: React.FC = () => {
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                         Fecha de Nacimiento *
                       </label>
-                      <input
-                        type="date"
-                        required
-                        value={fechaNacimiento}
-                        onChange={(e) => setFechaNacimiento(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
-                      />
+                      <div className="relative">
+                        <DatePicker
+                          selected={fechaNacimiento ? new Date(fechaNacimiento + 'T12:00:00') : null}
+                          onChange={(date: Date | null) => {
+                            if (date) {
+                              setFechaNacimiento(date.toISOString().split('T')[0]);
+                            } else {
+                              setFechaNacimiento('');
+                            }
+                          }}
+                          locale="es"
+                          dateFormat="dd/MM/yyyy"
+                          showYearDropdown
+                          showMonthDropdown
+                          dropdownMode="select"
+                          placeholderText="dd/mm/aaaa"
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium z-[100] relative"
+                          wrapperClassName="w-full"
+                        />
+                      </div>
                     </div>
 
                     <div>
@@ -562,7 +631,7 @@ export const PacientesPage: React.FC = () => {
                 ) : (
                   <button
                     type="button"
-                    onClick={handleCrearPaciente}
+                    onClick={handleGuardarPaciente}
                     className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-sky-500 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/30 flex items-center gap-1.5 active:scale-95 transition-all"
                   >
                     <Check className="h-4 w-4 stroke-[3]" />
@@ -575,6 +644,52 @@ export const PacientesPage: React.FC = () => {
           </div>
         </div>
       )}
+      {/* =================================================================== */}
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN                                */}
+      {/* =================================================================== */}
+      {pacienteAEliminar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setPacienteAEliminar(null)} />
+          
+          <div className="relative bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl animate-scale-in border border-slate-100 dark:border-slate-800 p-6 text-center">
+            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-rose-600 dark:text-rose-400" />
+            </div>
+            
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+              ¿Eliminar Paciente?
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              Estás a punto de inactivar el registro de <strong>{pacienteAEliminar.nombre_completo}</strong>. ¿Deseas continuar?
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPacienteAEliminar(null)}
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await apiClient.delete(`/pacientes/${pacienteAEliminar.id}`);
+                    setPacienteAEliminar(null);
+                    cargarPacientes();
+                  } catch (e) {
+                    console.error("Error", e);
+                    alert("Ocurrió un error al intentar eliminar el paciente.");
+                  }
+                }}
+                className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-rose-500/25"
+              >
+                Sí, Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
