@@ -208,25 +208,18 @@ export const DashboardPage: React.FC = () => {
     <div className="space-y-6">
       <WelcomeHeader />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <button onClick={() => navigate('/citas?nueva=true')} className="group relative overflow-hidden p-8 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-sky-100 dark:border-sky-900 rounded-[2.5rem] shadow-xl shadow-sky-900/5 hover:shadow-2xl hover:shadow-sky-500/10 transition-all text-left flex flex-col justify-between min-h-[200px]">
-          <div className="absolute -right-12 -top-12 w-40 h-40 bg-sky-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-400 flex items-center justify-center text-white shadow-lg shadow-sky-500/30 mb-6 relative z-10">
-            <Calendar className="h-7 w-7" />
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">Agendar Cita</h3>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-2">Programar nueva atención médica guiada</p>
+        <button onClick={() => navigate('/citas?nueva=true')} className="p-8 bg-sky-500 hover:bg-sky-600 text-white rounded-[2rem] shadow-lg transition-all transform hover:-translate-y-1 text-left flex flex-col justify-between min-h-[160px]">
+          <Calendar className="h-8 w-8 mb-4 opacity-80" />
+          <div>
+            <h3 className="text-2xl font-black">Agendar Cita</h3>
+            <p className="text-sky-100 text-sm mt-1">Programar nueva atención médica</p>
           </div>
         </button>
-
-        <button onClick={() => navigate('/pacientes?nuevo=true')} className="group relative overflow-hidden p-8 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-teal-100 dark:border-teal-900 rounded-[2.5rem] shadow-xl shadow-teal-900/5 hover:shadow-2xl hover:shadow-teal-500/10 transition-all text-left flex flex-col justify-between min-h-[200px]">
-          <div className="absolute -right-12 -top-12 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-teal-500/30 mb-6 relative z-10">
-            <UserPlus className="h-7 w-7" />
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">Registrar Paciente</h3>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-2">Aperturar Expediente Clínico Electrónico</p>
+        <button onClick={() => navigate('/pacientes?nuevo=true')} className="p-8 bg-teal-500 hover:bg-teal-600 text-white rounded-[2rem] shadow-lg transition-all transform hover:-translate-y-1 text-left flex flex-col justify-between min-h-[160px]">
+          <UserPlus className="h-8 w-8 mb-4 opacity-80" />
+          <div>
+            <h3 className="text-2xl font-black">Registrar Paciente</h3>
+            <p className="text-teal-100 text-sm mt-1">Ingresar nuevo paciente al sistema</p>
           </div>
         </button>
       </div>
