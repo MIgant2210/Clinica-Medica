@@ -111,6 +111,12 @@ export const PacientesPage: React.FC = () => {
       if (pacienteAEditar) {
         // Modo Edición
         const res = await apiClient.put(`/pacientes/${pacienteAEditar.id}`, {
+          primer_nombre: primerNombre,
+          primer_apellido: primerApellido,
+          tipo_documento: tipoDocumento,
+          numero_documento: numeroDocumento,
+          fecha_nacimiento: fechaNacimiento,
+          sexo,
           telefono,
           correo,
           tipo_sangre: tipoSangre,

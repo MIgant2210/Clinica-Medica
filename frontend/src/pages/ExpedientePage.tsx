@@ -8,8 +8,19 @@ import {
   X, AlertTriangle, 
   ChevronDown, Baby, PhoneCall, Video, Phone
 } from 'lucide-react';
+import Select from 'react-select';
 import { MedicalAICopilot } from '../components/MedicalAICopilot';
 import { useContextoClinico } from '../hooks/useContextoClinico';
+
+const CIE10_OPTIONS = [
+  { value: 'J00|Rinofaringitis aguda (resfriado común)', label: 'J00 - Rinofaringitis aguda (resfriado común)' },
+  { value: 'J02.9|Faringitis aguda, no especificada', label: 'J02.9 - Faringitis aguda, no especificada' },
+  { value: 'J03.9|Amigdalitis aguda, no especificada', label: 'J03.9 - Amigdalitis aguda, no especificada' },
+  { value: 'J20.9|Bronquitis aguda, no especificada', label: 'J20.9 - Bronquitis aguda, no especificada' },
+  { value: 'I10|Hipertensión esencial (primaria)', label: 'I10 - Hipertensión esencial (primaria)' },
+  { value: 'E11.9|Diabetes mellitus tipo 2 sin complicaciones', label: 'E11.9 - Diabetes mellitus tipo 2' },
+  { value: 'A09.9|Gastroenteritis y colitis de origen no especificado', label: 'A09.9 - Gastroenteritis' }
+];
 
 export const ExpedientePage: React.FC = () => {
   const { user } = useAuth();
@@ -31,6 +42,8 @@ export const ExpedientePage: React.FC = () => {
   const [tipoConsulta, setTipoConsulta] = useState<'GENERAL' | 'PEDIATRICA' | 'MATERNIDAD'>('GENERAL');
   const [modalidad, setModalidad] = useState<'PRESENCIAL' | 'LLAMADA' | 'TELEMEDICINA'>('PRESENCIAL');
   const [diagnosticoDesc, setDiagnosticoDesc] = useState('');
+  const [diagnosticoTipo, setDiagnosticoTipo] = useState<'PRESUNTIVO' | 'DEFINITIVO'>('PRESUNTIVO');
+  const [diagnosticoCie10, setDiagnosticoCie10] = useState('');
   
   // Signos Vitales
   const [presion, setPresion] = useState('120/80');
@@ -50,6 +63,12 @@ export const ExpedientePage: React.FC = () => {
 
   // Remoto
   const [duracionLlamada, setDuracionLlamada] = useState(0);
+
+  // Tratamiento
+  const [medicamento, setMedicamento] = useState('');
+  const [dosis, setDosis] = useState('');
+  const [frecuenciaMed, setFrecuenciaMed] = useState('');
+  const [tratamientos, setTratamientos] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchPacientes = async () => {
@@ -96,6 +115,14 @@ export const ExpedientePage: React.FC = () => {
   const pacienteActual = pacientes.find(p => p.id === pacienteSeleccionadoId);
   const { edadFormateada, esPediatrico, esMujer } = useContextoClinico(pacienteActual?.fecha_nacimiento, pacienteActual?.sexo);
 
+  const agregarTratamiento = () => {
+    if (!medicamento) return;
+    setTratamientos([...tratamientos, { medicamento, dosis, frecuencia: frecuenciaMed, duracion_dias: 7 }]);
+    setMedicamento('');
+    setDosis('');
+    setFrecuenciaMed('');
+  };
+
   const guardarConsulta = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!expediente) return;
@@ -111,11 +138,12 @@ export const ExpedientePage: React.FC = () => {
       },
       diagnosticos: [
         {
-          codigo_cie10: 'Z00.0',
+          codigo_cie10: diagnosticoCie10 || 'Z00.0',
           descripcion: diagnosticoDesc || 'Examen médico general',
-          tipo: 'PRESUNTIVO'
+          tipo: diagnosticoTipo
         }
       ],
+      tratamiento: tratamientos,
       datos_obstetricos: tipoConsulta === 'MATERNIDAD' ? {
         semanas_gestacion: semanasGestacion,
         altura_uterina: alturaUterina,
@@ -322,7 +350,7 @@ export const ExpedientePage: React.FC = () => {
                   </div>
                   <div className="text-center max-w-md">
                     <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-indigo-200">Aviso: La evaluación remota tiene limitaciones clínicas. Si detecta signos de alarma, refiera al paciente a atención presencial inmediatamente.</p>
+                    <p className="text-xs font-bold text-indigo-200">Aviso: La evaluación remota tiene limitaciones clínicas. Recuerde solicitar consentimiento informado y registrar si la calidad del video es aceptable para emitir diagnóstico.</p>
                   </div>
                 </div>
               )}
@@ -410,10 +438,69 @@ export const ExpedientePage: React.FC = () => {
 
               {/* NOTAS Y DIAGNOSTICO */}
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Diagnóstico (Opcional)</label>
-                  <input type="text" value={diagnosticoDesc} onChange={e => setDiagnosticoDesc(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:ring-2 focus:ring-sky-500" placeholder="Ej. Faringitis Aguda"/>
+                <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+                  <label className="block text-xs font-bold text-purple-900 mb-2 uppercase tracking-wide">Diagnóstico CIE-10 (Buscador)</label>
+                  <Select
+                    options={CIE10_OPTIONS}
+                    placeholder="Buscar CIE-10..."
+                    isClearable
+                    onChange={(selected: any) => {
+                      if (selected) {
+                        const [code, desc] = selected.value.split('|');
+                        setDiagnosticoCie10(code);
+                        setDiagnosticoDesc(desc);
+                      } else {
+                        setDiagnosticoCie10('');
+                        setDiagnosticoDesc('');
+                      }
+                    }}
+                    className="text-sm"
+                  />
+                  <div className="flex gap-4 mt-3">
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Código CIE-10</label>
+                      <input type="text" value={diagnosticoCie10} onChange={e => setDiagnosticoCie10(e.target.value)} className="w-full p-2 border rounded-lg text-sm bg-white" />
+                    </div>
+                    <div className="flex-[3]">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Descripción Manual</label>
+                      <input type="text" value={diagnosticoDesc} onChange={e => setDiagnosticoDesc(e.target.value)} className="w-full p-2 border rounded-lg text-sm bg-white" />
+                    </div>
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    <label className="flex items-center gap-1 text-xs font-bold text-purple-800">
+                      <input type="radio" checked={diagnosticoTipo === 'PRESUNTIVO'} onChange={() => setDiagnosticoTipo('PRESUNTIVO')} /> Presuntivo
+                    </label>
+                    <label className="flex items-center gap-1 text-xs font-bold text-purple-800">
+                      <input type="radio" checked={diagnosticoTipo === 'DEFINITIVO'} onChange={() => setDiagnosticoTipo('DEFINITIVO')} /> Definitivo
+                    </label>
+                  </div>
                 </div>
+
+                <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                  <label className="block text-xs font-bold text-emerald-900 mb-2 uppercase tracking-wide">Tratamiento / Receta</label>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Medicamento</label>
+                      <input type="text" value={medicamento} onChange={e => setMedicamento(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Ej. Paracetamol 500mg"/>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Dosis / Frecuencia</label>
+                      <input type="text" value={frecuenciaMed} onChange={e => setFrecuenciaMed(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Ej. 1 tableta cada 8h"/>
+                    </div>
+                    <button type="button" onClick={agregarTratamiento} className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 text-sm">Añadir</button>
+                  </div>
+                  {tratamientos.length > 0 && (
+                    <div className="mt-3 bg-white border border-emerald-200 rounded-lg divide-y divide-emerald-100">
+                      {tratamientos.map((t, idx) => (
+                        <div key={idx} className="p-2 text-xs flex justify-between font-medium">
+                          <span>• {t.medicamento}</span>
+                          <span className="text-slate-500">{t.frecuencia}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1">Notas de Evolución *</label>
                   <textarea required value={notasEvolucion} onChange={e => setNotasEvolucion(e.target.value)} rows={4} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:ring-2 focus:ring-sky-500" placeholder="Evolución clínica, examen físico y plan..."></textarea>

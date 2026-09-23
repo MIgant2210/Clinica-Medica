@@ -74,6 +74,8 @@ export interface Cita {
   duracion_minutos: number;
   estado: 'PROGRAMADA' | 'CONFIRMADA' | 'ATENDIDA' | 'CANCELADA' | 'REPROGRAMADA' | 'NO_ASISTIO';
   motivo: string;
+  modalidad?: string;
+  enlace_telemedicina?: string;
 }
 
 export interface SignosVitales {

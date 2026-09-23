@@ -170,19 +170,43 @@ export const createPaciente = async (req: Request, res: Response) => {
 
 export const updatePaciente = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { telefono, correo, tipo_sangre, contacto_emergencia, estado } = req.body;
+  const {
+    primer_nombre, primer_apellido, tipo_documento, numero_documento,
+    fecha_nacimiento, sexo, telefono, correo, tipo_sangre, contacto_emergencia, estado
+  } = req.body;
+
+  const client = await pool!.connect();
 
   try {
-    const { rows } = await pool!.query(
-      `UPDATE pacientes 
-       SET telefono = $1, correo = $2, tipo_sangre = $3, contacto_emergencia = $4, estado = $5 
-       WHERE id = $6 RETURNING *`,
-      [telefono, correo, tipo_sangre, contacto_emergencia, estado, id]
-    );
+    await client.query('BEGIN');
 
-    if (rows.length === 0) {
+    // Get persona_id
+    const pacienteResult = await client.query('SELECT persona_id FROM pacientes WHERE id = $1', [id]);
+    if (pacienteResult.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ ok: false, error: 'Paciente no encontrado.' });
     }
+    const personaId = pacienteResult.rows[0].persona_id;
+
+    // Update Personas
+    await client.query(
+      `UPDATE personas
+       SET primer_nombre = $1, primer_apellido = $2, tipo_documento = $3, numero_documento = $4,
+           fecha_nacimiento = $5, sexo = $6, telefono = $7, correo = $8
+       WHERE id = $9`,
+      [primer_nombre, primer_apellido, tipo_documento, numero_documento, fecha_nacimiento, sexo, telefono, correo, personaId]
+    );
+
+    // Update Pacientes
+    const nombre_completo = `${primer_nombre} ${primer_apellido}`;
+    const { rows } = await client.query(
+      `UPDATE pacientes 
+       SET nombre_completo = $1, documento = $2, telefono = $3, correo = $4, tipo_sangre = $5, contacto_emergencia = $6, estado = $7 
+       WHERE id = $8 RETURNING *`,
+      [nombre_completo, numero_documento, telefono, correo, tipo_sangre, contacto_emergencia, estado || 'ACTIVO', id]
+    );
+
+    await client.query('COMMIT');
 
     return res.json({
       ok: true,
@@ -190,8 +214,11 @@ export const updatePaciente = async (req: Request, res: Response) => {
       paciente: rows[0],
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error al actualizar paciente:', error);
     return res.status(500).json({ ok: false, error: 'Error del servidor al actualizar paciente.' });
+  } finally {
+    client.release();
   }
 };
 

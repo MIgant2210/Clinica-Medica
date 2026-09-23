@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { Cita, Paciente } from '../types';
 import { 
-  Calendar, Clock, UserPlus, FileText, Activity, Stethoscope
+  Calendar, Clock, UserPlus, FileText, Activity, Stethoscope, Video, Phone, Users, User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,6 +37,12 @@ export const DashboardPage: React.FC = () => {
   const citasPendientes = citas.filter((c) => c.estado === 'PROGRAMADA' || c.estado === 'CONFIRMADA').length;
   const citasAtendidas = citas.filter((c) => c.estado === 'ATENDIDA').length;
   const totalPacientes = pacientes.length;
+
+  const modalidadesStats = {
+    presencial: citas.filter(c => c.modalidad === 'PRESENCIAL' || !c.modalidad).length,
+    telemedicina: citas.filter(c => c.modalidad === 'TELEMEDICINA').length,
+    llamada: citas.filter(c => c.modalidad === 'LLAMADA').length,
+  };
 
   const fechaHoy = new Date().toLocaleDateString('es-GT', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -78,31 +84,74 @@ export const DashboardPage: React.FC = () => {
     <div className="space-y-6">
       <WelcomeHeader />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-          <div className="text-slate-500 text-xs font-black uppercase mb-2">Total Citas</div>
+        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div className="text-slate-500 text-xs font-black uppercase mb-2 flex items-center gap-2"><Calendar className="w-4 h-4"/>Total Citas</div>
           <div className="text-3xl font-black text-slate-900 dark:text-white">{totalCitas}</div>
         </div>
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-          <div className="text-slate-500 text-xs font-black uppercase mb-2">Pacientes</div>
+        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div className="text-slate-500 text-xs font-black uppercase mb-2 flex items-center gap-2"><Users className="w-4 h-4"/>Pacientes</div>
           <div className="text-3xl font-black text-slate-900 dark:text-white">{totalPacientes}</div>
         </div>
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-          <div className="text-slate-500 text-xs font-black uppercase mb-2">Atendidas</div>
-          <div className="text-3xl font-black text-slate-900 dark:text-white">{citasAtendidas}</div>
+        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div className="text-teal-500 text-xs font-black uppercase mb-2 flex items-center gap-2"><Activity className="w-4 h-4"/>Atendidas</div>
+          <div className="text-3xl font-black text-teal-600 dark:text-teal-400">{citasAtendidas}</div>
         </div>
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-          <div className="text-slate-500 text-xs font-black uppercase mb-2">Pendientes</div>
-          <div className="text-3xl font-black text-slate-900 dark:text-white">{citasPendientes}</div>
+        <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div className="text-amber-500 text-xs font-black uppercase mb-2 flex items-center gap-2"><Clock className="w-4 h-4"/>Pendientes</div>
+          <div className="text-3xl font-black text-amber-600 dark:text-amber-400">{citasPendientes}</div>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6">
-          <h2 className="text-lg font-black mb-4">Agenda General</h2>
-          <button onClick={() => navigate('/citas')} className="w-full py-3 bg-sky-50 dark:bg-sky-900/30 text-sky-600 font-bold rounded-xl text-sm">Ver Calendario Completo</button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
+          <h2 className="text-lg font-black mb-6 text-slate-800 dark:text-slate-200">Distribución por Modalidad</h2>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span className="flex items-center gap-2 text-emerald-600"><User className="w-4 h-4"/> Presencial</span>
+                <span>{modalidadesStats.presencial} citas</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+                <div className="bg-emerald-500 h-3 rounded-full" style={{ width: `${totalCitas ? (modalidadesStats.presencial / totalCitas) * 100 : 0}%` }}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span className="flex items-center gap-2 text-indigo-600"><Video className="w-4 h-4"/> Telemedicina</span>
+                <span>{modalidadesStats.telemedicina} citas</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+                <div className="bg-indigo-500 h-3 rounded-full" style={{ width: `${totalCitas ? (modalidadesStats.telemedicina / totalCitas) * 100 : 0}%` }}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span className="flex items-center gap-2 text-purple-600"><Phone className="w-4 h-4"/> Llamada</span>
+                <span>{modalidadesStats.llamada} citas</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+                <div className="bg-purple-500 h-3 rounded-full" style={{ width: `${totalCitas ? (modalidadesStats.llamada / totalCitas) * 100 : 0}%` }}></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6">
-          <h2 className="text-lg font-black mb-4">Gestión de Usuarios</h2>
-          <button onClick={() => navigate('/usuarios')} className="w-full py-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 font-bold rounded-xl text-sm">Administrar Accesos</button>
+        
+        <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 className="text-lg font-black mb-4">Acciones Rápidas</h2>
+            <div className="space-y-3">
+              <button onClick={() => navigate('/citas')} className="w-full py-3 bg-sky-50 dark:bg-sky-900/30 text-sky-600 font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+                <Calendar className="w-4 h-4"/> Ver Agenda General
+              </button>
+              <button onClick={() => navigate('/usuarios')} className="w-full py-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+                <Users className="w-4 h-4"/> Administrar Accesos
+              </button>
+            </div>
+          </div>
+          <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+            <h3 className="text-xs font-black uppercase text-slate-500 mb-2">Sistema</h3>
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-400">ClinicMed v2.0 - Arquitectura con Maternidad, Pediatría y Telemedicina operativa.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -122,18 +171,18 @@ export const DashboardPage: React.FC = () => {
               <div className="p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 text-slate-500 text-sm font-bold">No tienes citas pendientes.</div>
             ) : (
               misCitas.map(c => (
-                <div key={c.id} className="p-5 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div key={c.id} className="p-5 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4 group hover:border-teal-300 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center">
-                      <Clock className="h-5 w-5" />
+                      {c.modalidad === 'TELEMEDICINA' ? <Video className="h-5 w-5" /> : c.modalidad === 'LLAMADA' ? <Phone className="h-5 w-5"/> : <Clock className="h-5 w-5" />}
                     </div>
                     <div>
                       <h3 className="font-bold text-slate-900 dark:text-white">{c.paciente_nombre}</h3>
                       <p className="text-xs text-slate-500 font-mono">{new Date(c.fecha_inicio).toLocaleString()}</p>
                     </div>
                   </div>
-                  <button onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors">
-                    Iniciar Atención
+                  <button onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-lg">
+                    Atender Ahora
                   </button>
                 </div>
               ))
@@ -193,7 +242,6 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 
-  // Render condicional
   switch (user?.rol) {
     case 'ADMIN': return <DashboardAdmin />;
     case 'MEDICO': return <DashboardMedico />;
