@@ -73,6 +73,7 @@ export const createPaciente = async (req: Request, res: Response) => {
     tipo_sangre,
     contacto_emergencia_nombre,
     contacto_emergencia_telefono,
+    contacto_emergencia,
     antecedentes_alergias,
     antecedentes_patologicos,
   } = req.body;
@@ -82,6 +83,49 @@ export const createPaciente = async (req: Request, res: Response) => {
       ok: false,
       error: 'Faltan campos obligatorios para registrar al paciente.',
     });
+  }
+
+  // Validaciones de formato por tipo de documento
+  if (tipo_documento === 'DPI') {
+    if (!/^\d{13}$/.test(numero_documento)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El número de DPI solo debe contener 13 dígitos y no aceptar caracteres alfabéticos ni especiales.',
+      });
+    }
+  } else if (tipo_documento === 'PASAPORTE') {
+    if (!/^\d{15}$/.test(numero_documento)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El número de pasaporte solo debe aceptar 15 dígitos y no aceptar caracteres alfabéticos ni especiales.',
+      });
+    }
+  }
+
+  // Validación de número telefónico (8 dígitos)
+  let telefonoFormateado = telefono;
+  if (telefono && telefono !== 'N/A') {
+    const digitosTel = telefono.replace(/\D/g, '');
+    if (digitosTel.length !== 8) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El número telefónico debe contener exactamente 8 dígitos (ej. 5500-1122).',
+      });
+    }
+    telefonoFormateado = `${digitosTel.slice(0, 4)}-${digitosTel.slice(4)}`;
+  }
+
+  // Validación de teléfono de contacto de emergencia (si se proporciona)
+  let contactoTelFormateado = contacto_emergencia_telefono;
+  if (contacto_emergencia_telefono && contacto_emergencia_telefono !== 'N/A') {
+    const digitosTelEmg = contacto_emergencia_telefono.replace(/\D/g, '');
+    if (digitosTelEmg.length !== 8) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El teléfono del contacto de emergencia debe contener exactamente 8 dígitos (ej. 4422-9989).',
+      });
+    }
+    contactoTelFormateado = `${digitosTelEmg.slice(0, 4)}-${digitosTelEmg.slice(4)}`;
   }
 
   const client = await pool!.connect();
@@ -107,7 +151,7 @@ export const createPaciente = async (req: Request, res: Response) => {
     const personaResult = await client.query(
       `INSERT INTO personas (tipo_documento, numero_documento, primer_nombre, primer_apellido, fecha_nacimiento, sexo, telefono, correo)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [tipo_documento, numero_documento, primer_nombre, primer_apellido, fecha_nacimiento, sexo, telefono, correo]
+      [tipo_documento, numero_documento, primer_nombre, primer_apellido, fecha_nacimiento, sexo, telefonoFormateado, correo]
     );
     const personaId = personaResult.rows[0].id;
 
@@ -117,12 +161,13 @@ export const createPaciente = async (req: Request, res: Response) => {
 
     // Insertar Paciente
     const nombre_completo = `${primer_nombre} ${primer_apellido}`;
-    const contacto_emergencia = contacto_emergencia_nombre ? `${contacto_emergencia_nombre} (${contacto_emergencia_telefono || 'S/T'})` : 'No registrado';
+    const finalContactoEmergencia = contacto_emergencia 
+      || (contacto_emergencia_nombre ? `${contacto_emergencia_nombre} (${contactoTelFormateado || 'S/T'})` : 'No registrado');
     
     const pacienteResult = await client.query(
       `INSERT INTO pacientes (persona_id, codigo_paciente, nombre_completo, documento, tipo_sangre, telefono, correo, contacto_emergencia)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [personaId, codigoPaciente, nombre_completo, numero_documento, tipo_sangre || 'N/A', telefono || 'N/A', correo || 'N/A', contacto_emergencia]
+      [personaId, codigoPaciente, nombre_completo, numero_documento, tipo_sangre || 'N/A', telefonoFormateado || 'N/A', correo || 'N/A', finalContactoEmergencia]
     );
     const nuevoPaciente = pacienteResult.rows[0];
 
@@ -175,6 +220,36 @@ export const updatePaciente = async (req: Request, res: Response) => {
     fecha_nacimiento, sexo, telefono, correo, tipo_sangre, contacto_emergencia, estado
   } = req.body;
 
+  // Validaciones de formato por tipo de documento si se proporcionan
+  if (tipo_documento === 'DPI' && numero_documento) {
+    if (!/^\d{13}$/.test(numero_documento)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El número de DPI solo debe contener 13 dígitos y no aceptar caracteres alfabéticos ni especiales.',
+      });
+    }
+  } else if (tipo_documento === 'PASAPORTE' && numero_documento) {
+    if (!/^\d{15}$/.test(numero_documento)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El número de pasaporte solo debe aceptar 15 dígitos y no aceptar caracteres alfabéticos ni especiales.',
+      });
+    }
+  }
+
+  // Validación de número telefónico (8 dígitos)
+  let telefonoFormateado = telefono;
+  if (telefono && telefono !== 'N/A') {
+    const digitosTel = telefono.replace(/\D/g, '');
+    if (digitosTel.length !== 8) {
+      return res.status(400).json({
+        ok: false,
+        error: 'El número telefónico debe contener exactamente 8 dígitos (ej. 5500-1122).',
+      });
+    }
+    telefonoFormateado = `${digitosTel.slice(0, 4)}-${digitosTel.slice(4)}`;
+  }
+
   const client = await pool!.connect();
 
   try {
@@ -194,7 +269,7 @@ export const updatePaciente = async (req: Request, res: Response) => {
        SET primer_nombre = $1, primer_apellido = $2, tipo_documento = $3, numero_documento = $4,
            fecha_nacimiento = $5, sexo = $6, telefono = $7, correo = $8
        WHERE id = $9`,
-      [primer_nombre, primer_apellido, tipo_documento, numero_documento, fecha_nacimiento, sexo, telefono, correo, personaId]
+      [primer_nombre, primer_apellido, tipo_documento, numero_documento, fecha_nacimiento, sexo, telefonoFormateado, correo, personaId]
     );
 
     // Update Pacientes
@@ -203,7 +278,7 @@ export const updatePaciente = async (req: Request, res: Response) => {
       `UPDATE pacientes 
        SET nombre_completo = $1, documento = $2, telefono = $3, correo = $4, tipo_sangre = $5, contacto_emergencia = $6, estado = $7 
        WHERE id = $8 RETURNING *`,
-      [nombre_completo, numero_documento, telefono, correo, tipo_sangre, contacto_emergencia, estado || 'ACTIVO', id]
+      [nombre_completo, numero_documento, telefonoFormateado, correo, tipo_sangre, contacto_emergencia, estado || 'ACTIVO', id]
     );
 
     await client.query('COMMIT');

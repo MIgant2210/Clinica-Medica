@@ -32,7 +32,10 @@ export const PacientesPage: React.FC = () => {
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [tipoSangre, setTipoSangre] = useState('O+');
-  const [contactoEmergencia, setContactoEmergencia] = useState('');
+  const [contactoNombre, setContactoNombre] = useState('');
+  const [contactoApellido, setContactoApellido] = useState('');
+  const [contactoParentesco, setContactoParentesco] = useState('Familiar');
+  const [contactoTelefono, setContactoTelefono] = useState('');
   const [antecedentesAlergias, setAntecedentesAlergias] = useState('');
   const [antecedentesPatologicos, setAntecedentesPatologicos] = useState('');
 
@@ -72,18 +75,50 @@ export const PacientesPage: React.FC = () => {
     cargarPacientes();
   }, [busqueda]);
 
+  const formatearTelefono = (val: string) => {
+    const soloDigitos = val.replace(/\D/g, '').slice(0, 8);
+    if (soloDigitos.length <= 4) return soloDigitos;
+    return `${soloDigitos.slice(0, 4)}-${soloDigitos.slice(4)}`;
+  };
+
+  const handleCambioTipoDocumento = (doc: string) => {
+    setTipoDocumento(doc);
+    setErrorModal(null);
+    if (doc === 'DPI') {
+      setNumeroDocumento((prev) => prev.replace(/\D/g, '').slice(0, 13));
+    } else if (doc === 'PASAPORTE') {
+      setNumeroDocumento((prev) => prev.replace(/\D/g, '').slice(0, 15));
+    }
+  };
+
+  const handleCambioNumeroDocumento = (val: string) => {
+    setErrorModal(null);
+    if (tipoDocumento === 'DPI') {
+      const limpio = val.replace(/\D/g, '').slice(0, 13);
+      setNumeroDocumento(limpio);
+    } else {
+      const limpio = val.replace(/\D/g, '').slice(0, 15);
+      setNumeroDocumento(limpio);
+    }
+  };
+
   const abrirModalNuevo = () => {
     setPacienteAEditar(null);
     setPrimerNombre('');
     setPrimerApellido('');
+    setTipoDocumento('DPI');
     setNumeroDocumento('');
     setFechaNacimiento('');
     setTelefono('');
     setCorreo('');
-    setContactoEmergencia('');
+    setContactoNombre('');
+    setContactoApellido('');
+    setContactoParentesco('Familiar');
+    setContactoTelefono('');
     setAntecedentesAlergias('');
     setAntecedentesPatologicos('');
     setPasoActual(1);
+    setErrorModal(null);
     setModalAbierto(true);
   };
 
@@ -91,21 +126,94 @@ export const PacientesPage: React.FC = () => {
     setPacienteAEditar(p);
     setPrimerNombre(p.nombre_completo.split(' ')[0]);
     setPrimerApellido(p.nombre_completo.split(' ').slice(1).join(' '));
-    setTipoDocumento('DPI');
-    setNumeroDocumento(p.documento);
+    const docDigits = (p.documento || '').replace(/\D/g, '');
+    const docTipo = docDigits.length === 15 ? 'PASAPORTE' : 'DPI';
+    setTipoDocumento(docTipo);
+    setNumeroDocumento(p.documento || '');
     setFechaNacimiento(p.fecha_nacimiento?.split('T')[0] || '');
     setSexo(p.sexo || 'MASCULINO');
-    setTelefono(p.telefono === 'N/A' ? '' : p.telefono);
+    setTelefono(p.telefono === 'N/A' ? '' : formatearTelefono(p.telefono));
     setCorreo(p.correo === 'N/A' ? '' : p.correo);
     setTipoSangre(p.tipo_sangre === 'N/A' ? 'O+' : p.tipo_sangre);
-    setContactoEmergencia(p.contacto_emergencia === 'No registrado' ? '' : p.contacto_emergencia);
+
+    if (p.contacto_emergencia && p.contacto_emergencia !== 'No registrado') {
+      const telMatch = p.contacto_emergencia.match(/(?:Tel:\s*|\()([0-9]{4}-?[0-9]{4})\)?/);
+      const telFound = telMatch ? formatearTelefono(telMatch[1]) : '';
+      setContactoTelefono(telFound);
+
+      const parentescoMatch = p.contacto_emergencia.match(/\((Padre|Madre|Cónyuge|Hijo\/a|Hermano\/a|Tío\/a|Abuelo\/a|Tutor Legal|Familiar|Amigo\/a|Otro)\)/i);
+      if (parentescoMatch) {
+        setContactoParentesco(parentescoMatch[1]);
+      } else {
+        setContactoParentesco('Familiar');
+      }
+
+      let textoSinTel = p.contacto_emergencia
+        .replace(/(?:-\s*Tel:\s*|\()?[0-9]{4}-?[0-9]{4}\)?/g, '')
+        .replace(/\((?:Padre|Madre|Cónyuge|Hijo\/a|Hermano\/a|Tío\/a|Abuelo\/a|Tutor Legal|Familiar|Amigo\/a|Otro)\)/gi, '')
+        .replace(/[-()]/g, ' ')
+        .trim();
+      const partes = textoSinTel.split(/\s+/).filter(Boolean);
+      if (partes.length >= 2) {
+        setContactoNombre(partes[0]);
+        setContactoApellido(partes.slice(1).join(' '));
+      } else if (partes.length === 1) {
+        setContactoNombre(partes[0]);
+        setContactoApellido('');
+      } else {
+        setContactoNombre('');
+        setContactoApellido('');
+      }
+    } else {
+      setContactoNombre('');
+      setContactoApellido('');
+      setContactoParentesco('Familiar');
+      setContactoTelefono('');
+    }
+
     setPasoActual(1);
+    setErrorModal(null);
     setModalAbierto(true);
   };
 
   const handleGuardarPaciente = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorModal(null);
+
+    if (tipoDocumento === 'DPI' && !/^\d{13}$/.test(numeroDocumento)) {
+      setErrorModal('El número de DPI solo debe contener 13 dígitos y no aceptar caracteres alfabéticos ni especiales.');
+      return;
+    }
+    if (tipoDocumento === 'PASAPORTE' && !/^\d{15}$/.test(numeroDocumento)) {
+      setErrorModal('El número de pasaporte solo debe aceptar 15 dígitos y no aceptar caracteres alfabéticos ni especiales.');
+      return;
+    }
+
+    // Validación de Teléfono Móvil
+    if (telefono.trim()) {
+      const digitosTel = telefono.replace(/\D/g, '');
+      if (digitosTel.length !== 8) {
+        setErrorModal('El número telefónico debe contener exactamente 8 dígitos (ej. 5500-1122).');
+        return;
+      }
+    }
+
+    // Validación de Contacto de Emergencia
+    if (!contactoNombre.trim() || !contactoApellido.trim()) {
+      setErrorModal('Por favor completa el nombre y apellido del contacto de emergencia.');
+      return;
+    }
+    if (!contactoTelefono.trim()) {
+      setErrorModal('Por favor ingresa el número telefónico del contacto de emergencia.');
+      return;
+    }
+    const digitosContactoTel = contactoTelefono.replace(/\D/g, '');
+    if (digitosContactoTel.length !== 8) {
+      setErrorModal('El teléfono del contacto de emergencia debe contener exactamente 8 dígitos (ej. 4422-9989).');
+      return;
+    }
+
+    const contactoEmergenciaConsolidado = `${contactoNombre.trim()} ${contactoApellido.trim()} (${contactoParentesco}) - Tel: ${contactoTelefono.trim()}`;
 
     try {
       if (pacienteAEditar) {
@@ -117,10 +225,12 @@ export const PacientesPage: React.FC = () => {
           numero_documento: numeroDocumento,
           fecha_nacimiento: fechaNacimiento,
           sexo,
-          telefono,
-          correo,
+          telefono: telefono ? formatearTelefono(telefono) : 'N/A',
+          correo: correo || 'N/A',
           tipo_sangre: tipoSangre,
-          contacto_emergencia: contactoEmergencia,
+          contacto_emergencia: contactoEmergenciaConsolidado,
+          contacto_emergencia_nombre: `${contactoNombre.trim()} ${contactoApellido.trim()} (${contactoParentesco})`,
+          contacto_emergencia_telefono: contactoTelefono.trim(),
           estado: 'ACTIVO'
         });
 
@@ -137,10 +247,12 @@ export const PacientesPage: React.FC = () => {
           primer_apellido: primerApellido,
           fecha_nacimiento: fechaNacimiento,
           sexo,
-          telefono,
-          correo,
+          telefono: telefono ? formatearTelefono(telefono) : 'N/A',
+          correo: correo || 'N/A',
           tipo_sangre: tipoSangre,
-          contacto_emergencia_nombre: contactoEmergencia,
+          contacto_emergencia: contactoEmergenciaConsolidado,
+          contacto_emergencia_nombre: `${contactoNombre.trim()} ${contactoApellido.trim()} (${contactoParentesco})`,
+          contacto_emergencia_telefono: contactoTelefono.trim(),
           antecedentes_alergias: antecedentesAlergias,
           antecedentes_patologicos: antecedentesPatologicos,
         });
@@ -380,12 +492,12 @@ export const PacientesPage: React.FC = () => {
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                       Tipo de Documento
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {['DPI', 'PASAPORTE', 'PARTIDA'].map((doc) => (
+                    <div className="grid grid-cols-2 gap-2">
+                      {['DPI', 'PASAPORTE'].map((doc) => (
                         <button
                           type="button"
                           key={doc}
-                          onClick={() => setTipoDocumento(doc)}
+                          onClick={() => handleCambioTipoDocumento(doc)}
                           className={`py-2.5 px-3 rounded-2xl text-xs font-bold border transition-all ${
                             tipoDocumento === doc
                               ? 'bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-600/20'
@@ -399,17 +511,39 @@ export const PacientesPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                      Número de Documento *
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        Número de Documento *
+                      </label>
+                      {tipoDocumento === 'DPI' ? (
+                        <span className={`text-[11px] font-mono font-bold ${numeroDocumento.length === 13 ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}`}>
+                          {numeroDocumento.length} / 13 dígitos
+                        </span>
+                      ) : (
+                        <span className={`text-[11px] font-mono font-bold ${numeroDocumento.length === 15 ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}`}>
+                          {numeroDocumento.length} / 15 dígitos
+                        </span>
+                      )}
+                    </div>
                     <input
                       type="text"
+                      inputMode="numeric"
                       required
+                      maxLength={tipoDocumento === 'DPI' ? 13 : 15}
                       value={numeroDocumento}
-                      onChange={(e) => setNumeroDocumento(e.target.value)}
-                      placeholder="2981726350101"
+                      onChange={(e) => handleCambioNumeroDocumento(e.target.value)}
+                      placeholder={
+                        tipoDocumento === 'DPI'
+                          ? '2981726350101 (13 dígitos)'
+                          : '123456789012345 (15 dígitos)'
+                      }
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono font-bold"
                     />
+                    <p className="mt-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+                      {tipoDocumento === 'DPI'
+                        ? 'Solo números: exactamente 13 dígitos, sin letras ni caracteres especiales.'
+                        : 'Solo números: exactamente 15 dígitos, sin letras ni caracteres especiales.'}
+                    </p>
                   </div>
                 </div>
               )}
@@ -528,19 +662,30 @@ export const PacientesPage: React.FC = () => {
                 <div className="space-y-4 animate-in fade-in duration-200">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                        Teléfono Móvil
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                          Teléfono Móvil
+                        </label>
+                        <span className={`text-[11px] font-mono font-bold ${telefono.replace(/\D/g, '').length === 8 ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}`}>
+                          {telefono.replace(/\D/g, '').length} / 8 dígitos
+                        </span>
+                      </div>
                       <div className="relative">
                         <Phone className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                           type="tel"
+                          inputMode="numeric"
+                          maxLength={9}
                           value={telefono}
-                          onChange={(e) => setTelefono(e.target.value)}
+                          onChange={(e) => {
+                            setErrorModal(null);
+                            setTelefono(formatearTelefono(e.target.value));
+                          }}
                           placeholder="5500-1122"
-                          className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono font-medium"
                         />
                       </div>
+                      <span className="text-[10px] text-slate-400 mt-1 block">8 dígitos con guión automático (XXXX-XXXX)</span>
                     </div>
 
                     <div>
@@ -560,17 +705,102 @@ export const PacientesPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                      Contacto de Urgencia / Familiar
-                    </label>
-                    <input
-                      type="text"
-                      value={contactoEmergencia}
-                      onChange={(e) => setContactoEmergencia(e.target.value)}
-                      placeholder="Nombre del familiar y teléfono de urgencia"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
-                    />
+                  {/* Sección de Contacto de Emergencia */}
+                  <div className="p-4 rounded-3xl bg-slate-50/80 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center gap-2 pb-1 border-b border-slate-200/60 dark:border-slate-800">
+                      <div className="h-7 w-7 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
+                        <Heart className="h-3.5 w-3.5 fill-current" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                          Contacto de Emergencia
+                        </h4>
+                        <p className="text-[11px] text-slate-400">Datos del familiar o responsable en caso de urgencia</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                          Nombre *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={contactoNombre}
+                          onChange={(e) => setContactoNombre(e.target.value)}
+                          placeholder="Ej. María"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                          Apellido *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={contactoApellido}
+                          onChange={(e) => setContactoApellido(e.target.value)}
+                          placeholder="Ej. Gómez"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                          Parentesco *
+                        </label>
+                        <select
+                          value={contactoParentesco}
+                          onChange={(e) => setContactoParentesco(e.target.value)}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-sm text-slate-800 dark:text-slate-200"
+                        >
+                          <option value="Padre">Padre</option>
+                          <option value="Madre">Madre</option>
+                          <option value="Cónyuge">Cónyuge / Pareja</option>
+                          <option value="Hijo/a">Hijo/a</option>
+                          <option value="Hermano/a">Hermano/a</option>
+                          <option value="Tío/a">Tío/a</option>
+                          <option value="Abuelo/a">Abuelo/a</option>
+                          <option value="Tutor Legal">Tutor Legal</option>
+                          <option value="Familiar">Familiar</option>
+                          <option value="Amigo/a">Amigo/a</option>
+                          <option value="Otro">Otro</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Teléfono del Contacto *
+                          </label>
+                          <span className={`text-[11px] font-mono font-bold ${contactoTelefono.replace(/\D/g, '').length === 8 ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}`}>
+                            {contactoTelefono.replace(/\D/g, '').length} / 8 dígitos
+                          </span>
+                        </div>
+                        <div className="relative">
+                          <Phone className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="tel"
+                            inputMode="numeric"
+                            maxLength={9}
+                            required
+                            value={contactoTelefono}
+                            onChange={(e) => {
+                              setErrorModal(null);
+                              setContactoTelefono(formatearTelefono(e.target.value));
+                            }}
+                            placeholder="4422-9989"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono font-medium text-sm"
+                          />
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-1 block">8 dígitos con guión automático</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Tarjeta Resumen / Carnet Médico Previsto */}
@@ -583,7 +813,7 @@ export const PacientesPage: React.FC = () => {
                         {primerNombre || 'Nombre'} {primerApellido || 'Apellido'}
                       </div>
                       <span className="text-xs text-slate-500 font-mono">
-                        DPI: {numeroDocumento || '---'} &bull; Tipo: {tipoSangre}
+                        {tipoDocumento}: {numeroDocumento || '---'} &bull; Tipo: {tipoSangre}
                       </span>
                     </div>
                     <div className="h-10 w-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-bold shadow-md">
@@ -618,9 +848,19 @@ export const PacientesPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      if (pasoActual === 1 && (!primerNombre || !primerApellido || !numeroDocumento)) {
-                        setErrorModal('Por favor completa los nombres y número de documento.');
-                        return;
+                      if (pasoActual === 1) {
+                        if (!primerNombre.trim() || !primerApellido.trim() || !numeroDocumento.trim()) {
+                          setErrorModal('Por favor completa los nombres y número de documento.');
+                          return;
+                        }
+                        if (tipoDocumento === 'DPI' && !/^\d{13}$/.test(numeroDocumento)) {
+                          setErrorModal('El número de DPI solo debe contener 13 dígitos y no aceptar caracteres alfabéticos ni especiales.');
+                          return;
+                        }
+                        if (tipoDocumento === 'PASAPORTE' && !/^\d{15}$/.test(numeroDocumento)) {
+                          setErrorModal('El número de pasaporte solo debe aceptar 15 dígitos y no aceptar caracteres alfabéticos ni especiales.');
+                          return;
+                        }
                       }
                       if (pasoActual === 2 && !fechaNacimiento) {
                         setErrorModal('Por favor indica la fecha de nacimiento.');

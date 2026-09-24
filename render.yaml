@@ -1,0 +1,33 @@
+services:
+  # ---------------------------------------------------------------------------
+  # 1. Backend REST API (Web Service Node.js / Express)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: clinica-medica-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres.oetkzzayhnowscfnirym:Umg$supabase123456@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: '*'
+
+  # ---------------------------------------------------------------------------
+  # 2. Frontend Web App (Static Site Vite + React)
+  # ---------------------------------------------------------------------------
+  - type: static
+    name: clinica-medica-frontend
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
