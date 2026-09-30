@@ -8,7 +8,7 @@ const router = Router();
 router.use(autenticarJWT);
 
 router.get('/expediente/:pacienteId', getExpedienteByPacienteId);
-router.post('/consultas', autorizarRoles('ADMIN', 'MEDICO'), createConsulta);
+router.post('/consultas', autorizarRoles('MEDICO'), createConsulta);
 router.put('/expediente/:expedienteId/antecedentes', autorizarRoles('ADMIN', 'MEDICO'), updateAntecedentesExpediente);
 
 export default router;

@@ -361,7 +361,7 @@ export const CitasPage: React.FC = () => {
                             Confirmar
                           </button>
                         )}
-                        {c.estado !== 'ATENDIDA' && (
+                        {user?.rol === 'MEDICO' && c.estado !== 'ATENDIDA' && (
                           <button onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)} className="flex-1 py-2 bg-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-500/20 hover:bg-teal-400 transition-all transform hover:-translate-y-0.5">
                             Dar Atención
                           </button>

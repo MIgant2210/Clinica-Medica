@@ -158,6 +158,11 @@ export const ExpedientePage: React.FC = () => {
       } : {}
     };
 
+    if (!puedeAtender) {
+      alert('Acción restringida: Únicamente el personal médico está autorizado para registrar consultas clínicas.');
+      return;
+    }
+
     try {
       const res = await apiClient.post('/clinico/consultas', nuevaConsulta);
       if (res.data.ok) {
@@ -171,7 +176,7 @@ export const ExpedientePage: React.FC = () => {
     }
   };
 
-  const puedeAtender = user?.rol === 'ADMIN' || user?.rol === 'MEDICO';
+  const puedeAtender = user?.rol === 'MEDICO';
 
   return (
     <div className="space-y-6">
@@ -274,9 +279,11 @@ export const ExpedientePage: React.FC = () => {
                     <p className="text-xs text-pink-700 font-bold">Gestaciones previas: 0</p>
                     <p className="text-xs text-pink-700 font-bold">FUM: No registrada</p>
                   </div>
-                  <button onClick={() => setModalAbierto(true)} className="mt-3 w-full py-2 bg-pink-100 text-pink-700 font-bold text-xs rounded-xl hover:bg-pink-200 transition-colors">
-                    Iniciar Control Prenatal
-                  </button>
+                  {puedeAtender && (
+                    <button onClick={() => { setTipoConsulta('MATERNIDAD'); setModalAbierto(true); }} className="mt-3 w-full py-2 bg-pink-100 text-pink-700 font-bold text-xs rounded-xl hover:bg-pink-200 transition-colors">
+                      Iniciar Control Prenatal
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -308,8 +315,8 @@ export const ExpedientePage: React.FC = () => {
         <div className="p-12 text-center text-sm text-slate-400">Selecciona un paciente para ver su expediente.</div>
       )}
 
-      {/* Modal Nueva Consulta Dinámico */}
-      {modalAbierto && (
+      {/* Modal Nueva Consulta Dinámico (Exclusivo para Médicos) */}
+      {modalAbierto && puedeAtender && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-[2rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-10">
@@ -516,8 +523,8 @@ export const ExpedientePage: React.FC = () => {
         </div>
       )}
 
-      {/* IA Copilot */}
-      {expediente && pacienteActual && (
+      {/* IA Copilot (Exclusivo para Médicos) */}
+      {puedeAtender && expediente && pacienteActual && (
         <MedicalAICopilot expediente={expediente} paciente={pacienteActual} />
       )}
     </div>
