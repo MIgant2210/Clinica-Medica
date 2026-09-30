@@ -20,15 +20,17 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Interceptor para redirección al login en caso de 401
+// Interceptor para redirección al login en caso de 401 en rutas protegidas
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Si expira la sesión, limpiar almacenamiento y forzar recarga
-      localStorage.removeItem('token_clinica');
-      localStorage.removeItem('usuario_clinica');
-      window.location.href = '/login';
+      if (!error.config?.url?.includes('/auth/login')) {
+        // Si expira la sesión, limpiar almacenamiento y forzar recarga
+        localStorage.removeItem('token_clinica');
+        localStorage.removeItem('usuario_clinica');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
