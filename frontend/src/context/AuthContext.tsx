@@ -6,7 +6,8 @@ interface AuthContextType {
   user: Usuario | null;
   token: string | null;
   loading: boolean;
-  login: (correo: string, contrasena: string) => Promise<{ ok: boolean; error?: string }>;
+  simulandoAdmin: boolean;
+  login: (correo: string, contrasena: string, esQuickLogin?: boolean) => Promise<{ ok: boolean; error?: string }>;
   quickLogin: (rol: RolUsuario) => Promise<void>;
   logout: () => void;
 }
@@ -17,24 +18,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<Usuario | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [simulandoAdmin, setSimulandoAdmin] = useState<boolean>(() => {
+    return localStorage.getItem('simulando_desde_admin') === 'true';
+  });
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token_clinica');
     const savedUser = localStorage.getItem('usuario_clinica');
+    const savedSimulando = localStorage.getItem('simulando_desde_admin') === 'true';
 
     if (savedToken && savedUser) {
       try {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
+        setSimulandoAdmin(savedSimulando);
       } catch (e) {
         localStorage.removeItem('token_clinica');
         localStorage.removeItem('usuario_clinica');
+        localStorage.removeItem('simulando_desde_admin');
+        setSimulandoAdmin(false);
       }
     }
     setLoading(false);
   }, []);
 
-  const login = async (correo: string, contrasena: string) => {
+  const login = async (correo: string, contrasena: string, esQuickLogin: boolean = false) => {
     try {
       const response = await apiClient.post('/auth/login', { correo, contrasena });
       if (response.data.ok) {
@@ -43,8 +51,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(usuario);
         localStorage.setItem('token_clinica', nuevoToken);
         localStorage.setItem('usuario_clinica', JSON.stringify(usuario));
-        if (usuario.rol !== 'ADMIN') {
+
+        // Si es un inicio de sesión manual directo (formulario de login)
+        // y el rol NO es ADMIN, nos aseguramos de apagar cualquier simulación previa.
+        if (!esQuickLogin && usuario.rol !== 'ADMIN') {
           localStorage.removeItem('simulando_desde_admin');
+          setSimulandoAdmin(false);
         }
         return { ok: true };
       }
@@ -67,27 +79,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const cred = credencialesPorRol[rol];
     if (cred) {
-      if (user?.rol === 'ADMIN' || localStorage.getItem('simulando_desde_admin') === 'true') {
+      const puedeSimular = user?.rol === 'ADMIN' || simulandoAdmin || localStorage.getItem('simulando_desde_admin') === 'true';
+
+      if (puedeSimular) {
         if (rol !== 'ADMIN') {
           localStorage.setItem('simulando_desde_admin', 'true');
+          setSimulandoAdmin(true);
         } else {
           localStorage.removeItem('simulando_desde_admin');
+          setSimulandoAdmin(false);
         }
       }
-      await login(cred.correo, cred.contrasena);
+      await login(cred.correo, cred.contrasena, true);
     }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setSimulandoAdmin(false);
     localStorage.removeItem('token_clinica');
     localStorage.removeItem('usuario_clinica');
     localStorage.removeItem('simulando_desde_admin');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, quickLogin, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, simulandoAdmin, login, quickLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

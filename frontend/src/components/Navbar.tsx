@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, logout, quickLogin } = useAuth();
+  const { user, logout, quickLogin, simulandoAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toggleMobileOpen } = useLayout();
   const location = useLocation();
@@ -87,8 +87,8 @@ export const Navbar: React.FC = () => {
       {/* 3. Acciones Derecha: Selector de Rol, Modo Claro/Oscuro, Usuario */}
       <div className="flex items-center gap-2.5 sm:gap-3">
         
-        {/* Selector de Simulación de Rol (Solo visible para ADMIN o simulación autorizada desde ADMIN) */}
-        {(user?.rol === 'ADMIN' || localStorage.getItem('simulando_desde_admin') === 'true') && (
+        {/* Selector de Simulación de Rol (Solo visible para ADMIN o si el ADMIN está simulando otro rol) */}
+        {(user?.rol === 'ADMIN' || simulandoAdmin) && (
           <div className="hidden xl:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs">
             <span className="text-[10px] font-bold text-slate-400 px-1.5 uppercase">Rol:</span>
             {(['ADMIN', 'MEDICO', 'RECEPCIONISTA', 'PACIENTE'] as RolUsuario[]).map((rol) => (
