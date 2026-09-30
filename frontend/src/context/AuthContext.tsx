@@ -43,6 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(usuario);
         localStorage.setItem('token_clinica', nuevoToken);
         localStorage.setItem('usuario_clinica', JSON.stringify(usuario));
+        if (usuario.rol !== 'ADMIN') {
+          localStorage.removeItem('simulando_desde_admin');
+        }
         return { ok: true };
       }
       return { ok: false, error: response.data.error || 'Credenciales inválidas' };
@@ -64,6 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const cred = credencialesPorRol[rol];
     if (cred) {
+      if (user?.rol === 'ADMIN' || localStorage.getItem('simulando_desde_admin') === 'true') {
+        if (rol !== 'ADMIN') {
+          localStorage.setItem('simulando_desde_admin', 'true');
+        } else {
+          localStorage.removeItem('simulando_desde_admin');
+        }
+      }
       await login(cred.correo, cred.contrasena);
     }
   };
@@ -73,6 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     localStorage.removeItem('token_clinica');
     localStorage.removeItem('usuario_clinica');
+    localStorage.removeItem('simulando_desde_admin');
   };
 
   return (
