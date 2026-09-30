@@ -118,7 +118,7 @@ export const CitasPage: React.FC = () => {
 
   // Pacientes filtrados para el paso 1
   const pacientesFiltrados = useMemo(() => {
-    if (!busquedaPaciente.trim()) return pacientes.slice(0, 5);
+    if (!busquedaPaciente.trim()) return pacientes;
     const q = busquedaPaciente.toLowerCase();
     return pacientes.filter(
       (p) =>
@@ -503,7 +503,7 @@ export const CitasPage: React.FC = () => {
                         </div>
 
                         {/* Tarjetas de Pacientes */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
                           {pacientesFiltrados.map((p) => {
                             const seleccionado = pacienteSeleccionado?.id === p.id;
                             return (

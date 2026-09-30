@@ -21,6 +21,38 @@ export const createUsuario = async (req: Request, res: Response) => {
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, usuario, correo, rol, nombre_completo, estado`,
       [usuario, correo.toLowerCase().trim(), hash, rol, nombre_completo, estado || 'ACTIVO']
     );
+
+    // Si el rol es MEDICO, vincularlo como profesional para que aparezca al agendar citas
+    if (rol === 'MEDICO') {
+      try {
+        const partesNombre = (nombre_completo || 'Dr. Médico').trim().split(' ');
+        const primerNombre = partesNombre[0] || 'Dr.';
+        const primerApellido = partesNombre.slice(1).join(' ') || 'Médico';
+        
+        const perRes = await pool!.query(
+          `INSERT INTO personas (tipo_documento, numero_documento, primer_nombre, primer_apellido, fecha_nacimiento, sexo, telefono, correo)
+           VALUES ('DPI', $1, $2, $3, '1985-01-01', 'MASCULINO', '5500-0000', $4) RETURNING id`,
+          ['DOC' + Math.floor(10000000 + Math.random() * 90000000), primerNombre, primerApellido, correo.toLowerCase().trim()]
+        );
+        const personaId = perRes.rows[0].id;
+
+        const empRes = await pool!.query(
+          `INSERT INTO empleados (persona_id, codigo_empleado, puesto)
+           VALUES ($1, $2, 'Médico Especialista') RETURNING id`,
+          [personaId, 'EMP-' + Math.floor(1000 + Math.random() * 9000)]
+        );
+        const empleadoId = empRes.rows[0].id;
+
+        await pool!.query(
+          `INSERT INTO profesionales (empleado_id, persona_id, nombre, numero_colegiado, especialidad)
+           VALUES ($1, $2, $3, $4, 'Medicina General')`,
+          [empleadoId, personaId, nombre_completo, 'COL-' + Math.floor(10000 + Math.random() * 90000)]
+        );
+      } catch (profErr) {
+        console.error('Advertencia al crear registro de profesional para nuevo médico:', profErr);
+      }
+    }
+
     return res.status(201).json({ ok: true, usuario: rows[0], mensaje: 'Usuario creado exitosamente' });
   } catch (error: any) {
     console.error('Error al crear usuario:', error);
