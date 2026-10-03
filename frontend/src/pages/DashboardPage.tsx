@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { Cita, Paciente } from '../types';
 import { 
-  Calendar, Clock, UserPlus, FileText, Activity, Stethoscope, Video, Phone, Users, User
+  Calendar, Clock, UserPlus, FileText, Activity, Stethoscope, Video, Phone, Users, User,
+  HeartPulse, Bed
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -54,24 +55,24 @@ export const DashboardPage: React.FC = () => {
 
   // --- COMPONENTES COMUNES ---
   const WelcomeHeader = () => (
-    <div className="relative overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-8 sm:p-10 rounded-[2.5rem] border border-white/60 dark:border-white/10 shadow-xl shadow-sky-900/5 dark:shadow-none flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="relative overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-8 md:p-10 rounded-3xl sm:rounded-[2.5rem] border border-white/60 dark:border-white/10 shadow-xl shadow-sky-900/5 dark:shadow-none flex flex-col md:flex-row md:items-center justify-between gap-5">
       <div className="absolute -top-24 -right-24 w-64 h-64 bg-teal-400/20 dark:bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-sky-400/20 dark:bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
       
-      <div className="relative flex items-center gap-5 z-10">
-        <div className="h-16 w-16 rounded-3xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-sky-500/30">
-          <Stethoscope className="h-8 w-8 stroke-[2.5]" />
+      <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 z-10">
+        <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-sky-500/30 shrink-0">
+          <Stethoscope className="h-7 w-7 sm:h-8 sm:w-8 stroke-[2.5]" />
         </div>
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Hola, {user?.nombreCompleto}
             </h1>
-            <span className="text-[10px] uppercase font-black px-2.5 py-1 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+            <span className="text-[10px] uppercase font-black px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
               {user?.rol}
             </span>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 capitalize mt-1.5 flex items-center gap-2">
+          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 capitalize mt-1 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             {fechaHoy} &bull; Panel de Control
           </p>
@@ -140,10 +141,16 @@ export const DashboardPage: React.FC = () => {
           <div>
             <h2 className="text-lg font-black mb-4">Acciones Rápidas</h2>
             <div className="space-y-3">
-              <button onClick={() => navigate('/citas')} className="w-full py-3 bg-sky-50 dark:bg-sky-900/30 text-sky-600 font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/citas')} className="w-full py-2.5 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-sky-100 transition-colors cursor-pointer">
                 <Calendar className="w-4 h-4"/> Ver Agenda General
               </button>
-              <button onClick={() => navigate('/usuarios')} className="w-full py-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/urgencias')} className="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors cursor-pointer">
+                <HeartPulse className="w-4 h-4"/> Urgencias & Triaje
+              </button>
+              <button onClick={() => navigate('/hospitalizacion')} className="w-full py-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-indigo-100 transition-colors cursor-pointer">
+                <Bed className="w-4 h-4"/> Camas & Hospital
+              </button>
+              <button onClick={() => navigate('/usuarios')} className="w-full py-2.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-purple-100 transition-colors cursor-pointer">
                 <Users className="w-4 h-4"/> Administrar Accesos
               </button>
             </div>
@@ -191,10 +198,16 @@ export const DashboardPage: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-black flex items-center gap-2"><Activity className="h-5 w-5 text-teal-500"/> Acciones Rápidas</h2>
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 space-y-3">
-              <button onClick={() => navigate('/expediente')} className="w-full py-3 bg-teal-50 text-teal-700 font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/urgencias')} className="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors cursor-pointer">
+                <HeartPulse className="h-4 w-4"/> Urgencias & Triaje
+              </button>
+              <button onClick={() => navigate('/hospitalizacion')} className="w-full py-2.5 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300 font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-sky-100 transition-colors cursor-pointer">
+                <Bed className="h-4 w-4"/> Camas & Hospital
+              </button>
+              <button onClick={() => navigate('/expediente')} className="w-full py-2.5 bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-teal-100 transition-colors cursor-pointer">
                 <FileText className="h-4 w-4"/> Ir a Expedientes
               </button>
-              <button onClick={() => navigate('/citas')} className="w-full py-3 bg-sky-50 text-sky-700 font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+              <button onClick={() => navigate('/citas')} className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors cursor-pointer">
                 <Calendar className="h-4 w-4"/> Mi Agenda
               </button>
             </div>

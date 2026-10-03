@@ -106,7 +106,9 @@ CREATE TABLE IF NOT EXISTS citas (
   fecha_fin TIMESTAMPTZ NOT NULL,
   duracion_minutos INT NOT NULL,
   estado VARCHAR(50) NOT NULL DEFAULT 'PROGRAMADA',
-  motivo TEXT
+  motivo TEXT,
+  modalidad VARCHAR(50) DEFAULT 'PRESENCIAL',
+  enlace_telemedicina TEXT
 );
 
 -- 11. Consultas Clínicas (Atenciones en el expediente)

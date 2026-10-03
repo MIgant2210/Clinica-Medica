@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { CitasPage } from './pages/CitasPage';
@@ -10,6 +11,9 @@ import { PacientesPage } from './pages/PacientesPage';
 import { ExpedientePage } from './pages/ExpedientePage';
 import { AuditoriaPage } from './pages/AuditoriaPage';
 import { UsuariosPage } from './pages/UsuariosPage';
+import { FarmaciaPage } from './pages/FarmaciaPage';
+import { UrgenciasPage } from './pages/UrgenciasPage';
+import { HospitalizacionPage } from './pages/HospitalizacionPage';
 
 export const App: React.FC = () => {
   return (
@@ -18,6 +22,8 @@ export const App: React.FC = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/registro" element={<RegisterPage />} />
+            <Route path="/register" element={<Navigate to="/registro" replace />} />
 
             {/* Rutas protegidas bajo el Layout principal */}
             <Route path="/" element={<DashboardLayout />}>
@@ -25,6 +31,9 @@ export const App: React.FC = () => {
               <Route path="citas" element={<CitasPage />} />
               <Route path="pacientes" element={<PacientesPage />} />
               <Route path="expediente" element={<ExpedientePage />} />
+              <Route path="farmacia" element={<FarmaciaPage />} />
+              <Route path="urgencias" element={<UrgenciasPage />} />
+              <Route path="hospitalizacion" element={<HospitalizacionPage />} />
               <Route path="auditoria" element={<AuditoriaPage />} />
               <Route path="usuarios" element={<UsuariosPage />} />
             </Route>

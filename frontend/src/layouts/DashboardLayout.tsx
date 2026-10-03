@@ -40,17 +40,15 @@ export const DashboardLayout: React.FC = () => {
         </div>
 
         {/* Contenedor Principal */}
-        <div className="relative z-10 flex h-screen w-full p-2 sm:p-4 gap-4">
-          {/* Sidebar Flotante */}
-          <div className="hidden lg:flex w-[260px] flex-shrink-0">
-            <Sidebar />
-          </div>
+        <div className="relative z-10 flex h-screen w-full p-1.5 sm:p-4 gap-2 sm:gap-4 overflow-hidden">
+          {/* Sidebar (Maneja su propio aside para desktop y drawer para mobile) */}
+          <Sidebar />
           
           {/* Contenido Central */}
           <div className="flex-1 flex flex-col min-w-0 h-full relative">
             <Navbar />
-            <main className="flex-1 overflow-y-auto mt-4 pb-4">
-              <div className="h-full w-full max-w-7xl mx-auto px-2 sm:px-4">
+            <main className="flex-1 overflow-y-auto mt-2 sm:mt-4 pb-4">
+              <div className="h-full w-full max-w-7xl mx-auto px-1 sm:px-4">
                 <Outlet />
               </div>
             </main>

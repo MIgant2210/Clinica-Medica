@@ -6,7 +6,8 @@ import { Cita, Paciente, Profesional, Sede, Servicio } from '../types';
 import { 
   Plus, Check, X, Calendar as CalIcon, Clock, 
   Stethoscope, Building2, AlertCircle, CheckCircle2, 
-  Search, ChevronRight, ChevronLeft, User, Phone, Video, Activity
+  Search, ChevronRight, ChevronLeft, User, Phone, Video, Activity,
+  Copy, ExternalLink, MessageCircle, Sparkles, Link2
 } from 'lucide-react';
 import { CustomDatePicker } from '../components/CustomDatePicker';
 import { useNavigate } from 'react-router-dom';
@@ -52,12 +53,60 @@ export const CitasPage: React.FC = () => {
   const [duracionMinutos, setDuracionMinutos] = useState(30);
   const [motivo, setMotivo] = useState('');
   const [modalidad, setModalidad] = useState<'PRESENCIAL' | 'LLAMADA' | 'TELEMEDICINA'>('PRESENCIAL');
+  const [plataformaTelemedicina, setPlataformaTelemedicina] = useState<'MEET' | 'TEAMS' | 'ZOOM' | 'JITSI'>('MEET');
+  const [enlaceReunion, setEnlaceReunion] = useState('');
+  const [copiadoId, setCopiadoId] = useState<string | null>(null);
   const [simiCallActive, setSimiCallActive] = useState<string | null>(null);
 
   const bloquesHorarios = [
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
     '11:00', '11:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
   ];
+
+  // Generador de sala instantánea de Telemedicina
+  const generarSalaInstantanea = () => {
+    const pacienteNombreLimpio = (pacienteSeleccionado?.nombre_completo || 'Paciente')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '');
+    const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const link = `https://meet.jit.si/ClinicaMedica-${pacienteNombreLimpio || 'Consulta'}-${rand}`;
+    setEnlaceReunion(link);
+    setPlataformaTelemedicina('JITSI');
+  };
+
+  const getPlataformaInfo = (enlace?: string) => {
+    if (!enlace) return { nombre: 'Telemedicina', color: 'indigo', badgeCls: 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' };
+    const url = enlace.toLowerCase();
+    if (url.includes('meet.google.com')) {
+      return { nombre: 'Google Meet', color: 'emerald', badgeCls: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' };
+    }
+    if (url.includes('teams.microsoft.com') || url.includes('teams.live.com')) {
+      return { nombre: 'MS Teams', color: 'purple', badgeCls: 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' };
+    }
+    if (url.includes('zoom.us')) {
+      return { nombre: 'Zoom', color: 'blue', badgeCls: 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800' };
+    }
+    if (url.includes('jit.si')) {
+      return { nombre: 'Jitsi Meet', color: 'sky', badgeCls: 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800' };
+    }
+    return { nombre: 'Videollamada', color: 'indigo', badgeCls: 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800' };
+  };
+
+  const copiarEnlace = (id: string, enlace: string) => {
+    navigator.clipboard.writeText(enlace);
+    setCopiadoId(id);
+    setTimeout(() => setCopiadoId(null), 2500);
+  };
+
+  const compartirPorWhatsApp = (cita: Cita) => {
+    if (!cita.enlace_telemedicina) return;
+    const fecha = new Date(cita.fecha_inicio).toLocaleDateString('es-GT', { weekday: 'long', day: 'numeric', month: 'long' });
+    const hora = new Date(cita.fecha_inicio).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
+    const texto = `Hola ${cita.paciente_nombre}, le saludamos de ClinicMed.\n\nLe confirmamos su cita virtual con el ${cita.profesional_nombre} programada para el día *${fecha}* a las *${hora} hrs*.\n\nPuede unirse a la videollamada desde el siguiente enlace seguro:\n🔗 ${cita.enlace_telemedicina}\n\nPor favor conéctese 5 minutos antes con micrófono y cámara activados.`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+    window.open(url, '_blank');
+  };
 
   // Cargar datos del servidor
   const cargarDatos = async () => {
@@ -100,6 +149,9 @@ export const CitasPage: React.FC = () => {
     setPasoActual(1);
     setErrorModal(null);
     setCitaExitosa(false);
+    setModalidad('PRESENCIAL');
+    setEnlaceReunion('');
+    setPlataformaTelemedicina('MEET');
 
     // Si el usuario logueado es un paciente, autoseleccionarlo
     if (user?.rol === 'PACIENTE' && user.pacienteId) {
@@ -155,6 +207,11 @@ export const CitasPage: React.FC = () => {
       return;
     }
 
+    if (modalidad === 'TELEMEDICINA' && !enlaceReunion.trim()) {
+      setErrorModal('Para citas virtuales de Telemedicina debes generar o ingresar el enlace de la videollamada.');
+      return;
+    }
+
     setErrorModal(null);
     setGuardando(true);
 
@@ -163,6 +220,9 @@ export const CitasPage: React.FC = () => {
     const fin = new Date(inicio.getTime() + duracionMinutos * 60000);
 
     const motivoFinal = motivo.trim() || 'Consulta médica de rutina';
+    const finalEnlace = modalidad === 'TELEMEDICINA'
+      ? (enlaceReunion.trim() || `https://meet.jit.si/ClinicaMedica-Consulta-${Date.now().toString(36).toUpperCase()}`)
+      : null;
 
     try {
       const res = await apiClient.post('/citas', {
@@ -175,7 +235,7 @@ export const CitasPage: React.FC = () => {
         duracion_minutos: duracionMinutos,
         motivo: motivoFinal,
         modalidad,
-        enlace_telemedicina: modalidad === 'TELEMEDICINA' ? 'https://meet.clinicmed.com/room-' + Date.now() : null,
+        enlace_telemedicina: finalEnlace,
       });
 
       if (res.data.ok) {
@@ -346,31 +406,115 @@ export const CitasPage: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Sección de Telemedicina */}
+                  {(c.modalidad === 'TELEMEDICINA' || c.enlace_telemedicina) && (
+                    <div className="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 rounded-2xl p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                          <Video className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                          <span>Telemedicina</span>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${getPlataformaInfo(c.enlace_telemedicina).badgeCls}`}>
+                            {getPlataformaInfo(c.enlace_telemedicina).nombre}
+                          </span>
+                        </div>
+                        {c.enlace_telemedicina && (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => copiarEnlace(c.id, c.enlace_telemedicina!)}
+                              className="px-2 py-1 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-300 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors flex items-center gap-1 text-[11px] font-bold"
+                              title="Copiar enlace de la videollamada"
+                            >
+                              {copiadoId === c.id ? (
+                                <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
+                                  <Check className="w-3 h-3 stroke-[3]" /> ¡Copiado!
+                                </span>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>Copiar</span>
+                                </>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => compartirPorWhatsApp(c)}
+                              className="p-1.5 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
+                              title="Enviar recordatorio y enlace al paciente por WhatsApp"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {c.enlace_telemedicina && (
+                        <a
+                          href={c.enlace_telemedicina}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-[11px] font-mono text-indigo-600 dark:text-indigo-400 hover:underline truncate bg-white/90 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-900/40"
+                        >
+                          {c.enlace_telemedicina}
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                   {/* Acciones */}
-                  <div className="flex justify-end gap-2 pt-2">
-                    {c.motivo?.includes('[Telemedicina]') && c.estado !== 'CANCELADA' && c.estado !== 'ATENDIDA' && (
-                      <button onClick={() => setSimiCallActive(c.id)} className="flex-1 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors">
-                        Iniciar Video
-                      </button>
+                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    {/* Botón de ingreso a Telemedicina */}
+                    {(c.modalidad === 'TELEMEDICINA' || c.enlace_telemedicina) && c.estado !== 'CANCELADA' && c.estado !== 'ATENDIDA' && (
+                      <div className="flex items-center gap-1.5 w-full">
+                        {c.enlace_telemedicina ? (
+                          <a
+                            href={c.enlace_telemedicina}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex-1 py-2 px-3 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Entrar a Videollamada</span>
+                            <ExternalLink className="w-3 h-3 opacity-80" />
+                          </a>
+                        ) : (
+                          <button 
+                            onClick={() => setSimiCallActive(c.id)} 
+                            className="flex-1 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-1"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Iniciar Video</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setSimiCallActive(c.id)}
+                          className="p-2 text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-colors"
+                          title="Abrir Simulador / Asistente Clínico"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                     
-                    {user?.rol !== 'PACIENTE' && c.estado !== 'CANCELADA' && (
-                      <>
-                        {c.estado === 'PROGRAMADA' && (
-                          <button onClick={() => handleCambiarEstado(c.id, 'CONFIRMADA')} className="flex-1 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors">
-                            Confirmar
+                    <div className="flex items-center justify-end gap-2">
+                      {user?.rol !== 'PACIENTE' && c.estado !== 'CANCELADA' && (
+                        <>
+                          {c.estado === 'PROGRAMADA' && (
+                            <button onClick={() => handleCambiarEstado(c.id, 'CONFIRMADA')} className="flex-1 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors">
+                              Confirmar
+                            </button>
+                          )}
+                          {user?.rol === 'MEDICO' && c.estado !== 'ATENDIDA' && (
+                            <button onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)} className="flex-1 py-2 bg-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-500/20 hover:bg-teal-400 transition-all transform hover:-translate-y-0.5">
+                              Dar Atención
+                            </button>
+                          )}
+                          <button onClick={() => handleCambiarEstado(c.id, 'CANCELADA')} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors" title="Cancelar cita">
+                            <X className="w-4 h-4" />
                           </button>
-                        )}
-                        {user?.rol === 'MEDICO' && c.estado !== 'ATENDIDA' && (
-                          <button onClick={() => navigate(`/expediente?pacienteId=${c.paciente_id}`)} className="flex-1 py-2 bg-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-500/20 hover:bg-teal-400 transition-all transform hover:-translate-y-0.5">
-                            Dar Atención
-                          </button>
-                        )}
-                        <button onClick={() => handleCambiarEstado(c.id, 'CANCELADA')} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors" title="Cancelar cita">
-                          <X className="w-4 h-4" />
-                        </button>
-                      </>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -673,29 +817,35 @@ export const CitasPage: React.FC = () => {
                   {pasoActual === 3 && (
                     <div className="space-y-5">
                       {/* Selector de Fecha */}
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                          1. Fecha de Atención Clínica *
-                        </label>
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          {[
-                            { label: 'Mañana', val: new Date(Date.now() + 86400000).toISOString().split('T')[0] },
-                            { label: 'En 2 Días', val: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0] },
-                            { label: 'En 3 Días', val: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0] },
-                          ].map((d) => (
-                            <button
-                              key={d.val}
-                              type="button"
-                              onClick={() => setFechaSeleccionada(d.val)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                                fechaSeleccionada === d.val
-                                  ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
-                              }`}
-                            >
-                              {d.label}
-                            </button>
-                          ))}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            1. Fecha de Atención Clínica *
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider hidden sm:inline">Atajos:</span>
+                            {[
+                              { label: 'Mañana', val: new Date(Date.now() + 86400000).toISOString().split('T')[0] },
+                              { label: '+2 Días', val: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0] },
+                              { label: '+3 Días', val: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0] },
+                            ].map((d) => (
+                              <button
+                                key={d.val}
+                                type="button"
+                                onClick={() => setFechaSeleccionada(d.val)}
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all ${
+                                  fechaSeleccionada === d.val
+                                    ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                                    : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                                }`}
+                              >
+                                {d.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="w-full">
                           <CustomDatePicker
                             value={fechaSeleccionada}
                             onChange={(date) => setFechaSeleccionada(date)}
@@ -820,7 +970,12 @@ export const CitasPage: React.FC = () => {
                             </button>
                             <button
                               type="button"
-                              onClick={() => setModalidad('TELEMEDICINA')}
+                              onClick={() => {
+                                setModalidad('TELEMEDICINA');
+                                if (!enlaceReunion) {
+                                  generarSalaInstantanea();
+                                }
+                              }}
                               className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 font-bold ${
                                 modalidad === 'TELEMEDICINA'
                                   ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 shadow-sm ring-1 ring-indigo-500/50'
@@ -832,6 +987,137 @@ export const CitasPage: React.FC = () => {
                             </button>
                           </div>
                         </div>
+
+                        {/* Configuración avanzada de Telemedicina */}
+                        {modalidad === 'TELEMEDICINA' && (
+                          <div className="sm:col-span-3 p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 space-y-3.5 animate-in fade-in duration-200">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div>
+                                <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5 uppercase tracking-wider">
+                                  <Video className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                  Plataforma de Videollamada
+                                </span>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                  Selecciona el proveedor o genera una sala segura instantánea sin costo.
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={generarSalaInstantanea}
+                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-indigo-500/20 active:scale-95 transition-all self-start sm:self-auto"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Generar Sala Rápida (Jitsi)</span>
+                              </button>
+                            </div>
+
+                            {/* Opciones de plataforma */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {[
+                                { id: 'MEET', label: 'Google Meet', help: 'https://meet.google.com/new', desc: 'meet.google.com' },
+                                { id: 'TEAMS', label: 'MS Teams', help: 'https://teams.live.com', desc: 'teams.microsoft.com' },
+                                { id: 'ZOOM', label: 'Zoom', help: 'https://zoom.us/start/videomeeting', desc: 'zoom.us' },
+                                { id: 'JITSI', label: 'Jitsi Meet', help: 'https://meet.jit.si', desc: 'Sala Clínica Directa' },
+                              ].map((plat) => {
+                                const selected = plataformaTelemedicina === plat.id;
+                                return (
+                                  <button
+                                    key={plat.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setPlataformaTelemedicina(plat.id as any);
+                                      if (plat.id === 'JITSI' && !enlaceReunion) {
+                                        generarSalaInstantanea();
+                                      }
+                                    }}
+                                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                                      selected
+                                        ? 'bg-white dark:bg-slate-900 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/30 shadow-sm'
+                                        : 'bg-white/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-indigo-300'
+                                    }`}
+                                  >
+                                    <div className="font-bold text-xs flex items-center justify-between">
+                                      <span>{plat.label}</span>
+                                      {selected && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 stroke-[3]" />}
+                                    </div>
+                                    <span className="text-[10px] text-slate-400 block truncate mt-0.5">{plat.desc}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {/* Input del enlace */}
+                            <div>
+                              <div className="flex items-center justify-between mb-1.5">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                  <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                                  <span>Enlace de la Videollamada (URL) *</span>
+                                </label>
+                                {plataformaTelemedicina === 'MEET' && (
+                                  <a
+                                    href="https://meet.google.com/new"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
+                                  >
+                                    Crear sala en Meet <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                )}
+                                {plataformaTelemedicina === 'TEAMS' && (
+                                  <a
+                                    href="https://teams.live.com"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1 font-semibold"
+                                  >
+                                    Abrir Teams <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                )}
+                                {plataformaTelemedicina === 'ZOOM' && (
+                                  <a
+                                    href="https://zoom.us/start/videomeeting"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-semibold"
+                                  >
+                                    Abrir Zoom <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
+
+                              <div className="relative">
+                                <input
+                                  type="url"
+                                  value={enlaceReunion}
+                                  onChange={(e) => setEnlaceReunion(e.target.value)}
+                                  placeholder={
+                                    plataformaTelemedicina === 'MEET'
+                                      ? 'https://meet.google.com/abc-defg-hij'
+                                      : plataformaTelemedicina === 'TEAMS'
+                                      ? 'https://teams.microsoft.com/l/meetup-join/...'
+                                      : plataformaTelemedicina === 'ZOOM'
+                                      ? 'https://zoom.us/j/1234567890?pwd=...'
+                                      : 'https://meet.jit.si/ClinicaMedica-...'
+                                  }
+                                  className="w-full pl-3 pr-20 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                {enlaceReunion && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setEnlaceReunion('')}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 text-[11px] px-2 py-1 rounded font-bold"
+                                  >
+                                    Limpiar
+                                  </button>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-slate-500 mt-1">
+                                ℹ️ Este enlace se asociará a la cita para que paciente y médico puedan ingresar o compartirlo por WhatsApp con un solo clic.
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -888,10 +1174,28 @@ export const CitasPage: React.FC = () => {
                               {fechaSeleccionada} a las {horaSeleccionada} hrs
                             </strong>
                             <p className="text-slate-500 text-[11px]">
-                              Duración: {duracionMinutos} minutos
+                              Modalidad: {modalidad} &bull; Duración: {duracionMinutos} min
                             </p>
                           </div>
                         </div>
+
+                        {/* Detalle de Telemedicina en resumen */}
+                        {modalidad === 'TELEMEDICINA' && (
+                          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl space-y-1 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+                                <Video className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                                Videollamada Configurada
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPlataformaInfo(enlaceReunion).badgeCls}`}>
+                                {getPlataformaInfo(enlaceReunion).nombre}
+                              </span>
+                            </div>
+                            <p className="text-[11px] font-mono text-indigo-700 dark:text-indigo-300 truncate">
+                              {enlaceReunion || 'Generación automática asignada'}
+                            </p>
+                          </div>
+                        )}
 
                         {motivo && (
                           <div className="pt-2 border-t border-sky-200/50 dark:border-slate-700 text-xs">
@@ -939,6 +1243,10 @@ export const CitasPage: React.FC = () => {
                           }
                           if (pasoActual === 2 && (!sedeSeleccionada || !servicioSeleccionado)) {
                             setErrorModal('Debes seleccionar una sede y un servicio médico.');
+                            return;
+                          }
+                          if (pasoActual === 3 && modalidad === 'TELEMEDICINA' && !enlaceReunion.trim()) {
+                            setErrorModal('Para citas virtuales de Telemedicina debes generar o ingresar el enlace de la reunión.');
                             return;
                           }
                           setErrorModal(null);

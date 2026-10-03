@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, logout, quickLogin, simulandoAdmin } = useAuth();
+  const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toggleMobileOpen } = useLayout();
   const location = useLocation();
@@ -84,28 +84,8 @@ export const Navbar: React.FC = () => {
         </div>
       </form>
 
-      {/* 3. Acciones Derecha: Selector de Rol, Modo Claro/Oscuro, Usuario */}
+      {/* 3. Acciones Derecha: Modo Claro/Oscuro, Usuario */}
       <div className="flex items-center gap-2.5 sm:gap-3">
-        
-        {/* Selector de Simulación de Rol (Solo visible para ADMIN o si el ADMIN está simulando otro rol) */}
-        {(user?.rol === 'ADMIN' || simulandoAdmin) && (
-          <div className="hidden xl:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs">
-            <span className="text-[10px] font-bold text-slate-400 px-1.5 uppercase">Rol:</span>
-            {(['ADMIN', 'MEDICO', 'RECEPCIONISTA', 'PACIENTE'] as RolUsuario[]).map((rol) => (
-              <button
-                key={rol}
-                onClick={() => quickLogin(rol)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  user?.rol === rol
-                    ? 'bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-300 shadow-sm font-bold'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
-                }`}
-              >
-                {rol === 'RECEPCIONISTA' ? 'Recep' : rol.charAt(0) + rol.slice(1).toLowerCase()}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Selector Visual de Tema: Claro / Oscuro */}
         <div className="flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700 text-xs">

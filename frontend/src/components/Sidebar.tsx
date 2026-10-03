@@ -5,7 +5,8 @@ import { useLayout } from '../context/LayoutContext';
 import { useTheme } from '../context/ThemeContext';
 import { 
   LayoutDashboard, Calendar, Users, FileText, ShieldAlert, 
-  Activity, ChevronLeft, ChevronRight, X, Sparkles, Sun, Moon
+  Activity, ChevronLeft, ChevronRight, X, Sparkles, Sun, Moon, Pill,
+  HeartPulse, Bed
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -41,6 +42,27 @@ export const Sidebar: React.FC = () => {
       icon: FileText,
       roles: ['ADMIN', 'MEDICO', 'PACIENTE'],
       badge: 'Historial',
+    },
+    {
+      to: '/farmacia',
+      label: 'Farmacia & Stock',
+      icon: Pill,
+      roles: ['ADMIN', 'MEDICO', 'RECEPCIONISTA'],
+      badge: 'Stock',
+    },
+    {
+      to: '/urgencias',
+      label: 'Urgencias & Triaje',
+      icon: HeartPulse,
+      roles: ['ADMIN', 'MEDICO', 'RECEPCIONISTA'],
+      badge: 'Triaje',
+    },
+    {
+      to: '/hospitalizacion',
+      label: 'Camas & Hospital',
+      icon: Bed,
+      roles: ['ADMIN', 'MEDICO', 'RECEPCIONISTA'],
+      badge: 'Camas',
     },
     {
       to: '/auditoria',
@@ -97,7 +119,7 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {/* 2. Menú de Navegación */}
-        <nav className="p-3 space-y-1.5">
+        <nav className="p-3 space-y-1.5 overflow-y-auto max-h-[calc(100vh-230px)]">
           {!isCollapsed && (
             <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Navegación Clínica
@@ -110,6 +132,7 @@ export const Sidebar: React.FC = () => {
                 key={item.to}
                 to={item.to}
                 end={item.to === '/'}
+                onClick={closeMobile}
                 title={isCollapsed ? item.label : undefined}
                 className={({ isActive }) =>
                   `group flex items-center ${
@@ -228,11 +251,11 @@ export const Sidebar: React.FC = () => {
           {/* Backdrop con desenfoque */}
           <div
             onClick={closeMobile}
-            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
           />
 
           {/* Drawer deslizable */}
-          <div className="relative w-72 max-w-[85vw] h-full z-10 animate-in slide-in-from-left duration-200 shadow-2xl">
+          <div className="relative w-72 max-w-[85vw] h-full z-10 animate-in slide-in-from-left duration-200 shadow-2xl p-2 sm:p-3">
             {sidebarContent}
           </div>
         </div>

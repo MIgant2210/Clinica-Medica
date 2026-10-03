@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { 
@@ -331,6 +331,19 @@ export const LoginPage: React.FC = () => {
                 )}
               </button>
             </form>
+
+            {/* Acceso a Registro de Nuevo Paciente */}
+            <div className="mt-5 text-center">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                ¿No tienes una cuenta médica todavía?{' '}
+                <Link
+                  to="/registro"
+                  className="font-bold text-teal-600 dark:text-teal-400 hover:underline inline-flex items-center gap-1"
+                >
+                  Regístrate aquí gratis
+                </Link>
+              </p>
+            </div>
           </div>
 
           {/* Footer de Seguridad */}

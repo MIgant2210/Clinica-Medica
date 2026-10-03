@@ -138,3 +138,16 @@ export interface TrazaAuditoria {
   fecha_accion: string;
   detalles: string;
 }
+
+export interface DatosRegistroUsuario {
+  nombre_completo: string;
+  correo: string;
+  contrasena: string;
+  confirmar_contrasena: string;
+  fecha_nacimiento: string;
+  numero_documento?: string;
+  telefono?: string;
+  sexo?: 'MASCULINO' | 'FEMENINO' | 'OTRO';
+  tipo_sangre?: string;
+  terminos_aceptados?: boolean;
+}

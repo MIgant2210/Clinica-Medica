@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Usuario, RolUsuario } from '../types';
+import { Usuario, RolUsuario, DatosRegistroUsuario } from '../types';
 import { apiClient } from '../api/client';
 
 interface AuthContextType {
@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   simulandoAdmin: boolean;
   login: (correo: string, contrasena: string, esQuickLogin?: boolean) => Promise<{ ok: boolean; error?: string }>;
+  register: (datos: DatosRegistroUsuario) => Promise<{ ok: boolean; error?: string; errors?: Record<string, string>; mensaje?: string }>;
   quickLogin: (rol: RolUsuario) => Promise<void>;
   logout: () => void;
 }
@@ -94,6 +95,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const register = async (datos: DatosRegistroUsuario) => {
+    try {
+      const response = await apiClient.post('/auth/register', datos);
+      if (response.data.ok) {
+        const { token: nuevoToken, usuario } = response.data;
+        if (nuevoToken && usuario) {
+          setToken(nuevoToken);
+          setUser(usuario);
+          localStorage.setItem('token_clinica', nuevoToken);
+          localStorage.setItem('usuario_clinica', JSON.stringify(usuario));
+          localStorage.removeItem('simulando_desde_admin');
+          setSimulandoAdmin(false);
+        }
+        return { ok: true, mensaje: response.data.mensaje, usuario };
+      }
+      return {
+        ok: false,
+        error: response.data.error || 'Error al procesar el registro.',
+        errors: response.data.errors,
+      };
+    } catch (err: any) {
+      return {
+        ok: false,
+        error: err.response?.data?.error || 'Error al conectar con el servidor para registrar la cuenta.',
+        errors: err.response?.data?.errors,
+      };
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -104,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, simulandoAdmin, login, quickLogin, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, simulandoAdmin, login, register, quickLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

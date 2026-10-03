@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { Plus, Edit2, Trash2, Shield, CheckCircle2, XCircle } from 'lucide-react';
+import { CustomSelect } from '../components/CustomSelect';
 
 interface Usuario {
   id: string;
@@ -260,21 +261,29 @@ export const UsuariosPage: React.FC = () => {
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                       Rol *
                     </label>
-                    <select value={rol} onChange={e => setRol(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium font-bold text-slate-700 dark:text-slate-300">
-                      <option value="ADMIN">Administrador</option>
-                      <option value="MEDICO">Médico</option>
-                      <option value="RECEPCIONISTA">Recepcionista</option>
-                    </select>
+                    <CustomSelect
+                      value={rol}
+                      onChange={val => setRol(val)}
+                      options={[
+                        { value: 'ADMIN', label: 'Administrador' },
+                        { value: 'MEDICO', label: 'Médico' },
+                        { value: 'RECEPCIONISTA', label: 'Recepcionista' }
+                      ]}
+                    />
                   </div>
                   {usuarioEditar && (
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                         Estado
                       </label>
-                      <select value={estado} onChange={e => setEstado(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium font-bold text-slate-700 dark:text-slate-300">
-                        <option value="ACTIVO">Activo</option>
-                        <option value="INACTIVO">Inactivo</option>
-                      </select>
+                      <CustomSelect
+                        value={estado}
+                        onChange={val => setEstado(val)}
+                        options={[
+                          { value: 'ACTIVO', label: 'Activo' },
+                          { value: 'INACTIVO', label: 'Inactivo' }
+                        ]}
+                      />
                     </div>
                   )}
                 </div>

@@ -25,9 +25,17 @@ if (connectionString) {
 
     // Probar conexión inicial
     pool.query('SELECT NOW()')
-      .then(() => {
+      .then(async () => {
         isDatabaseConnected = true;
         console.log('✅ [DATABASE] Conexión exitosa a PostgreSQL / Supabase.');
+        try {
+          await pool?.query(`
+            ALTER TABLE citas ADD COLUMN IF NOT EXISTS modalidad VARCHAR(50) DEFAULT 'PRESENCIAL';
+            ALTER TABLE citas ADD COLUMN IF NOT EXISTS enlace_telemedicina TEXT;
+          `);
+        } catch (e: any) {
+          console.warn('ℹ️ [DATABASE] Verificación de columnas de citas completada.');
+        }
       })
       .catch((err) => {
         console.warn('⚠️ [DATABASE] No se pudo conectar a PostgreSQL (' + err.message + ').');

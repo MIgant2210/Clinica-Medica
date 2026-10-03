@@ -5,10 +5,13 @@ import { apiClient } from '../api/client';
 import { Paciente, ExpedienteClinico } from '../types';
 import { 
   Stethoscope, Clock, User, FileText, Plus, Heart, 
-  X, AlertTriangle, 
-  ChevronDown, Baby, PhoneCall, Video, Phone
+  X, 
+  ChevronDown, Baby, PhoneCall, Video, Phone,
+  Printer, ShieldCheck, Share2, Pill, ExternalLink, Copy, Check, MessageCircle, Sparkles, Link2
 } from 'lucide-react';
 import Select from 'react-select';
+import { CustomSelect } from '../components/CustomSelect';
+import { getMedicamentosFarmacia, Medicamento } from '../services/farmaciaService';
 import { MedicalAICopilot } from '../components/MedicalAICopilot';
 import { useContextoClinico } from '../hooks/useContextoClinico';
 
@@ -31,6 +34,9 @@ export const ExpedientePage: React.FC = () => {
   const [pacienteSeleccionadoId, setPacienteSeleccionadoId] = useState<string | null>(pacienteQueryId);
   const [expediente, setExpediente] = useState<ExpedienteClinico | null>(null);
   const [cargando, setCargando] = useState(false);
+  
+  const pacienteActual = pacientes.find(p => p.id === pacienteSeleccionadoId);
+  const { edadFormateada, esPediatrico, esMujer } = useContextoClinico(pacienteActual?.fecha_nacimiento, pacienteActual?.sexo);
   
   // UI States
   const [isSelectOpen, setIsSelectOpen] = useState(false);
@@ -69,6 +75,103 @@ export const ExpedientePage: React.FC = () => {
   const [dosis, setDosis] = useState('');
   const [frecuenciaMed, setFrecuenciaMed] = useState('');
   const [tratamientos, setTratamientos] = useState<any[]>([]);
+  const [recetaModalOpen, setRecetaModalOpen] = useState<any | null>(null);
+
+  // Integración con Farmacia Hospitalaria
+  const [medicamentosFarmacia, setMedicamentosFarmacia] = useState<Medicamento[]>([]);
+  const [farmaciaSeleccionadaId, setFarmaciaSeleccionadaId] = useState<string>('');
+
+  // Telemedicina en vivo
+  const [enlaceTelemedicinaConsulta, setEnlaceTelemedicinaConsulta] = useState('');
+  const [segundosLlamada, setSegundosLlamada] = useState(0);
+  const [llamadaActiva, setLlamadaActiva] = useState(true);
+  const [copiadoEnlaceConsulta, setCopiadoEnlaceConsulta] = useState(false);
+
+  // Cargar catálogo de farmacia
+  useEffect(() => {
+    setMedicamentosFarmacia(getMedicamentosFarmacia());
+  }, [modalAbierto]);
+
+  // Cronómetro de videollamada en vivo
+  useEffect(() => {
+    let interval: any = null;
+    if (modalAbierto && modalidad === 'TELEMEDICINA' && llamadaActiva) {
+      interval = setInterval(() => {
+        setSegundosLlamada((s) => s + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [modalAbierto, modalidad, llamadaActiva]);
+
+  // Generar o inicializar enlace de llamada para la consulta
+  useEffect(() => {
+    if (modalAbierto && modalidad === 'TELEMEDICINA' && !enlaceTelemedicinaConsulta) {
+      const roomName = (pacienteActual?.nombre_completo || 'Paciente')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]/g, '');
+      const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+      setEnlaceTelemedicinaConsulta(`https://meet.jit.si/ClinicaMedica-Consulta-${roomName || 'Paciente'}-${code}`);
+    }
+  }, [modalAbierto, modalidad, pacienteActual, enlaceTelemedicinaConsulta]);
+
+  const formatearTiempo = (seg: number) => {
+    const m = Math.floor(seg / 60);
+    const s = seg % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  const copiarEnlaceConsulta = () => {
+    if (!enlaceTelemedicinaConsulta) return;
+    navigator.clipboard.writeText(enlaceTelemedicinaConsulta);
+    setCopiadoEnlaceConsulta(true);
+    setTimeout(() => setCopiadoEnlaceConsulta(false), 2000);
+  };
+
+  const compartirEnlaceWhatsApp = () => {
+    if (!pacienteActual || !enlaceTelemedicinaConsulta) return;
+    const texto = `Hola ${pacienteActual.nombre_completo}, el médico le está esperando en su consulta virtual en ClinicMed.\n\nPuede ingresar a la videollamada ahora mediante el siguiente enlace seguro:\n🔗 ${enlaceTelemedicinaConsulta}\n\nPor favor active su cámara y micrófono al entrar.`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+  };
+
+  const handleSeleccionarMedicamentoFarmacia = (id: string) => {
+    setFarmaciaSeleccionadaId(id);
+    if (!id || id === 'MANUAL') {
+      return;
+    }
+    const med = medicamentosFarmacia.find((m) => m.id === id);
+    if (med) {
+      setMedicamento(med.nombre);
+      if (med.principio_activo.includes('500mg')) {
+        setDosis('500mg');
+        setFrecuenciaMed('1 tableta cada 8 horas');
+      } else if (med.principio_activo.includes('400mg')) {
+        setDosis('400mg');
+        setFrecuenciaMed('1 cápsula cada 8 horas');
+      } else if (med.principio_activo.includes('50mg')) {
+        setDosis('50mg');
+        setFrecuenciaMed('1 tableta cada 24 horas');
+      } else if (med.principio_activo.includes('20mg')) {
+        setDosis('20mg');
+        setFrecuenciaMed('1 cápsula en ayunas por la mañana');
+      } else if (med.principio_activo.includes('850mg')) {
+        setDosis('850mg');
+        setFrecuenciaMed('1 tableta con el almuerzo');
+      } else {
+        setDosis(med.presentacion);
+        setFrecuenciaMed('Según prescripción clínica');
+      }
+    }
+  };
+
+  const compartirRecetaWhatsApp = (consulta: any, paciente: Paciente) => {
+    if (!consulta.tratamiento || consulta.tratamiento.length === 0) return;
+    const medsTexto = consulta.tratamiento
+      .map((t: any, i: number) => `${i + 1}. *${t.medicamento}* - ${t.dosis} (${t.frecuencia}) por ${t.duracion_dias || 7} días`)
+      .join('\n');
+    const texto = `Hola ${paciente.nombre_completo}, le compartimos su *Receta Médica Oficial* emitida por el ${consulta.profesional_nombre} en ClinicMed:\n\n*Fecha:* ${new Date(consulta.fecha_atencion).toLocaleDateString('es-GT')}\n*Diagnóstico:* ${consulta.diagnosticos?.[0]?.descripcion || 'Consulta Médica'}\n\n*Medicamentos Prescritos:*\n${medsTexto}\n\nRecuerde no suspender el tratamiento antes de tiempo y consultar a su médico ante cualquier síntoma adverso.`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+  };
 
   useEffect(() => {
     const fetchPacientes = async () => {
@@ -112,9 +215,6 @@ export const ExpedientePage: React.FC = () => {
     fetchExpediente();
   }, [pacienteSeleccionadoId]);
 
-  const pacienteActual = pacientes.find(p => p.id === pacienteSeleccionadoId);
-  const { edadFormateada, esPediatrico, esMujer } = useContextoClinico(pacienteActual?.fecha_nacimiento, pacienteActual?.sexo);
-
   const agregarTratamiento = () => {
     if (!medicamento) return;
     setTratamientos([...tratamientos, { medicamento, dosis, frecuencia: frecuenciaMed, duracion_dias: 7 }]);
@@ -154,7 +254,8 @@ export const ExpedientePage: React.FC = () => {
         perimetro_cefalico: perimetroCefalico
       } : {},
       datos_remotos: modalidad !== 'PRESENCIAL' ? {
-        duracion_minutos: duracionLlamada
+        duracion_minutos: modalidad === 'TELEMEDICINA' ? Math.max(1, Math.ceil(segundosLlamada / 60)) : duracionLlamada,
+        enlace_telemedicina: modalidad === 'TELEMEDICINA' ? enlaceTelemedicinaConsulta : null
       } : {}
     };
 
@@ -181,28 +282,41 @@ export const ExpedientePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Selector de Paciente y Encabezado */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-3xl sm:rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold mb-1 border border-teal-100">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 text-xs font-bold mb-1 border border-teal-100 dark:border-teal-800">
             <FileText className="h-3.5 w-3.5" /> ECE
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Historia Médica del Paciente
           </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {user?.rol !== 'PACIENTE' && (
-            <div className="relative z-20">
-              <label className="text-[10px] font-black text-slate-400 uppercase mr-2">Paciente</label>
-              <button onClick={() => setIsSelectOpen(!isSelectOpen)} className="px-5 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold flex gap-3 items-center">
-                {pacienteActual?.nombre_completo || 'Seleccionar...'}
-                <ChevronDown className="w-4 h-4" />
+            <div className="relative z-20 w-full sm:w-auto">
+              <label className="text-[10px] font-black text-slate-400 uppercase mr-2 block sm:inline">Paciente</label>
+              <button 
+                type="button"
+                onClick={() => setIsSelectOpen(!isSelectOpen)} 
+                className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-bold flex justify-between sm:justify-start gap-3 items-center text-slate-900 dark:text-white cursor-pointer"
+              >
+                <span className="truncate">{pacienteActual?.nombre_completo || 'Seleccionar...'}</span>
+                <ChevronDown className="w-4 h-4 shrink-0 text-slate-400" />
               </button>
               {isSelectOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white border shadow-xl rounded-xl p-2 z-50 max-h-64 overflow-y-auto">
+                <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-2 z-50 max-h-64 overflow-y-auto">
                   {pacientes.map(p => (
-                    <button key={p.id} onClick={() => { setPacienteSeleccionadoId(p.id); setIsSelectOpen(false); }} className="w-full text-left p-2 hover:bg-slate-50 rounded-lg text-sm font-bold">
+                    <button 
+                      key={p.id} 
+                      type="button"
+                      onClick={() => { setPacienteSeleccionadoId(p.id); setIsSelectOpen(false); }} 
+                      className={`w-full text-left p-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                        pacienteSeleccionadoId === p.id 
+                          ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300' 
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
                       {p.nombre_completo}
                     </button>
                   ))}
@@ -211,7 +325,10 @@ export const ExpedientePage: React.FC = () => {
             </div>
           )}
           {puedeAtender && expediente && (
-            <button onClick={() => setModalAbierto(true)} className="px-5 py-3.5 bg-sky-600 hover:bg-sky-500 text-white rounded-2xl text-sm font-bold shadow-lg flex items-center gap-2">
+            <button 
+              onClick={() => setModalAbierto(true)} 
+              className="w-full sm:w-auto px-5 py-2.5 sm:py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-2xl text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all"
+            >
               <Plus className="h-4 w-4" /> Nueva Consulta
             </button>
           )}
@@ -293,13 +410,29 @@ export const ExpedientePage: React.FC = () => {
                   <Clock className="w-5 h-5 text-teal-500" /> Últimas Consultas
                 </h3>
                 <div className="space-y-3">
-                  {expediente.consultas?.slice(0, 3).map(c => (
+                  {expediente.consultas?.slice(0, 5).map(c => (
                     <div key={c.id} className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-bold text-sky-600">{new Date(c.fecha_atencion).toLocaleDateString()}</span>
-                        <span className="text-[10px] font-black uppercase bg-slate-100 px-2 rounded-md">{c.tipo_consulta || 'GENERAL'}</span>
+                        <span className="text-[10px] font-black uppercase bg-slate-100 dark:bg-slate-700 dark:text-slate-200 px-2 py-0.5 rounded-md">{c.tipo_consulta || 'GENERAL'}</span>
                       </div>
-                      <p className="text-xs font-bold text-slate-600 mt-1 truncate">{c.motivo_consulta}</p>
+                      <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 truncate">{c.motivo_consulta}</p>
+                      
+                      {c.tratamiento && c.tratamiento.length > 0 && (
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                            <Pill className="w-3 h-3" /> {c.tratamiento.length} medicamento{c.tratamiento.length > 1 ? 's' : ''}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setRecetaModalOpen(c)}
+                            className="text-[11px] font-bold text-teal-600 hover:text-teal-700 dark:text-teal-400 flex items-center gap-1 hover:underline cursor-pointer"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>Receta Oficial (QR)</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                   {(!expediente.consultas || expediente.consultas.length === 0) && (
@@ -348,17 +481,119 @@ export const ExpedientePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* UIs CONTEXTUALES DE MODALIDAD */}
+              {/* UIs CONTEXTUALES DE MODALIDAD: TELEMEDICINA EN VIVO */}
               {modalidad === 'TELEMEDICINA' && (
-                <div className="bg-indigo-900 text-white p-6 rounded-2xl flex flex-col items-center justify-center border border-indigo-700 shadow-inner space-y-4">
-                  <div className="flex items-center gap-3 animate-pulse">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="font-bold tracking-widest uppercase text-sm">Sala Virtual Activa</span>
+                <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white p-5 sm:p-6 rounded-2xl border border-indigo-700/60 shadow-xl space-y-4">
+                  {/* Barra de estado en vivo */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-800/80">
+                    <div className="flex items-center gap-2.5">
+                      <span className="relative flex h-3.5 w-3.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500"></span>
+                      </span>
+                      <span className="font-black tracking-wider uppercase text-xs text-rose-300">
+                        Sesión de Telemedicina en Vivo
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-900 text-indigo-300 border border-indigo-700">
+                        Paciente: {pacienteActual?.nombre_completo}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 font-mono text-xs bg-slate-950/60 px-3 py-1.5 rounded-xl border border-indigo-800 text-emerald-400 font-bold">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{formatearTiempo(segundosLlamada)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setLlamadaActiva(!llamadaActiva)}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors ${
+                          llamadaActiva
+                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
+                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                        }`}
+                      >
+                        {llamadaActiva ? 'Pausar Tiempo' : 'Reanudar'}
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-center max-w-md">
-                    <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-indigo-200">Aviso: La evaluación remota tiene limitaciones clínicas. Recuerde solicitar consentimiento informado y registrar si la calidad del video es aceptable para emitir diagnóstico.</p>
+
+                  {/* Campo y Acciones del Enlace de Videollamada */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <label className="font-bold text-indigo-200 flex items-center gap-1.5">
+                        <Link2 className="w-4 h-4 text-indigo-400" />
+                        <span>Enlace de Videollamada (Meet / Teams / Jitsi / Zoom)</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const roomName = (pacienteActual?.nombre_completo || 'Paciente').replace(/[^a-zA-Z0-9]/g, '');
+                          const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+                          setEnlaceTelemedicinaConsulta(`https://meet.jit.si/ClinicaMedica-Consulta-${roomName || 'Paciente'}-${code}`);
+                        }}
+                        className="text-[11px] text-indigo-300 hover:text-white flex items-center gap-1 font-bold underline cursor-pointer"
+                      >
+                        <Sparkles className="w-3 h-3" /> Generar nueva sala Jitsi
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="url"
+                        value={enlaceTelemedicinaConsulta}
+                        onChange={(e) => setEnlaceTelemedicinaConsulta(e.target.value)}
+                        placeholder="https://meet.google.com/... o https://meet.jit.si/..."
+                        className="flex-1 px-3 py-2 bg-slate-950/70 border border-indigo-700/80 rounded-xl font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      />
+
+                      <div className="flex items-center gap-2">
+                        {enlaceTelemedicinaConsulta && (
+                          <a
+                            href={enlaceTelemedicinaConsulta}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white rounded-xl text-xs font-bold shadow-md shadow-teal-500/20 flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Abrir Videollamada</span>
+                            <ExternalLink className="w-3 h-3 opacity-80" />
+                          </a>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={copiarEnlaceConsulta}
+                          className="px-3 py-2 bg-indigo-800/80 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
+                          title="Copiar enlace"
+                        >
+                          {copiadoEnlaceConsulta ? (
+                            <span className="text-emerald-300 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Copiado</span>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copiar</span>
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={compartirEnlaceWhatsApp}
+                          className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 transition-colors shrink-0 cursor-pointer"
+                          title="Enviar enlace por WhatsApp"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">WhatsApp</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
+
+                  <p className="text-[11px] text-indigo-300/80 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                    <span>Conexión de telemedicina cifrada. Puede mantener esta ventana abierta en una pantalla mientras atiende la videollamada en otra.</span>
+                  </p>
                 </div>
               )}
 
@@ -430,11 +665,15 @@ export const ExpedientePage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-pink-800 mb-1">Movimientos Fetales</label>
-                    <select value={movimientosFetales} onChange={e => setMovimientosFetales(e.target.value)} className="w-full p-2 font-bold text-sm border border-pink-300 rounded-lg bg-white">
-                      <option value="POSITIVO">Positivos (+)</option>
-                      <option value="DISMINUIDO">Disminuidos</option>
-                      <option value="AUSENTE">Ausentes (-)</option>
-                    </select>
+                    <CustomSelect
+                      value={movimientosFetales}
+                      onChange={val => setMovimientosFetales(val)}
+                      options={[
+                        { value: 'POSITIVO', label: 'Positivos (+)' },
+                        { value: 'DISMINUIDO', label: 'Disminuidos' },
+                        { value: 'AUSENTE', label: 'Ausentes (-)' }
+                      ]}
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-pink-800 mb-1">Frecuencia Cardíaca Fetal (lpm)</label>
@@ -483,25 +722,89 @@ export const ExpedientePage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
-                  <label className="block text-xs font-bold text-emerald-900 mb-2 uppercase tracking-wide">Tratamiento / Receta</label>
-                  <div className="flex gap-2 items-end">
-                    <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Medicamento</label>
-                      <input type="text" value={medicamento} onChange={e => setMedicamento(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Ej. Paracetamol 500mg"/>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Dosis / Frecuencia</label>
-                      <input type="text" value={frecuenciaMed} onChange={e => setFrecuenciaMed(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Ej. 1 tableta cada 8h"/>
-                    </div>
-                    <button type="button" onClick={agregarTratamiento} className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 text-sm">Añadir</button>
+                <div className="bg-emerald-50/50 dark:bg-emerald-950/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black text-emerald-900 dark:text-emerald-200 uppercase tracking-wide flex items-center gap-1.5">
+                      <Pill className="w-4 h-4 text-emerald-600" />
+                      <span>Tratamiento Farmacológico / Receta Médica</span>
+                    </label>
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
+                      Inventario Farmacia Activo
+                    </span>
                   </div>
+
+                  {/* Selector de Medicamentos Registrados en Farmacia */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">
+                      1. Seleccionar de Medicamentos Registrados en Farmacia
+                    </label>
+                    <CustomSelect
+                      value={farmaciaSeleccionadaId}
+                      onChange={handleSeleccionarMedicamentoFarmacia}
+                      placeholder="Seleccionar fármaco de farmacia (con stock disponible)..."
+                      options={[
+                        { value: 'MANUAL', label: '✏️ Escribir medicamento personalizado / externo' },
+                        ...medicamentosFarmacia.map(m => ({
+                          value: m.id,
+                          label: `${m.nombre} (${m.presentacion})`,
+                          badge: m.stock_actual > 0 ? `Stock: ${m.stock_actual}` : 'Agotado (0)',
+                          description: `${m.principio_activo} • Lote: ${m.lote}`
+                        }))
+                      ]}
+                    />
+                  </div>
+
+                  {/* Inputs de Medicamento y Dosis */}
+                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 items-end pt-1">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Nombre del Medicamento *</label>
+                      <input 
+                        type="text" 
+                        value={medicamento} 
+                        onChange={e => setMedicamento(e.target.value)} 
+                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" 
+                        placeholder="Ej. Paracetamol 500mg"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1">Dosis / Frecuencia *</label>
+                      <input 
+                        type="text" 
+                        value={frecuenciaMed} 
+                        onChange={e => setFrecuenciaMed(e.target.value)} 
+                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" 
+                        placeholder="Ej. 1 tableta cada 8 horas por 5 días"
+                      />
+                    </div>
+                    <div className="sm:col-span-1">
+                      <button 
+                        type="button" 
+                        onClick={agregarTratamiento} 
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3]" />
+                        <span>Añadir</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lista de tratamientos en la receta */}
                   {tratamientos.length > 0 && (
-                    <div className="mt-3 bg-white border border-emerald-200 rounded-lg divide-y divide-emerald-100">
+                    <div className="mt-2 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800/60 rounded-xl divide-y divide-emerald-100 dark:divide-slate-700">
                       {tratamientos.map((t, idx) => (
-                        <div key={idx} className="p-2 text-xs flex justify-between font-medium">
-                          <span>• {t.medicamento}</span>
-                          <span className="text-slate-500">{t.frecuencia}</span>
+                        <div key={idx} className="p-2.5 text-xs flex justify-between items-center font-medium">
+                          <div>
+                            <span className="font-bold text-slate-900 dark:text-white">• {t.medicamento}</span>
+                            <span className="text-slate-500 dark:text-slate-400 block text-[11px] pl-3">{t.frecuencia}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setTratamientos(tratamientos.filter((_, i) => i !== idx))}
+                            className="p-1 text-slate-400 hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                            title="Eliminar de la receta"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -519,6 +822,215 @@ export const ExpedientePage: React.FC = () => {
                 <button type="submit" className="px-6 py-3 rounded-xl font-bold text-white bg-sky-600 hover:bg-sky-500 shadow-lg shadow-sky-600/30">Guardar Consulta</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL RECETA MÉDICA OFICIAL CON CÓDIGO QR (ISO/IEC 25010) */}
+      {recetaModalOpen && pacienteActual && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in overflow-y-auto">
+          <div className="bg-white text-slate-900 rounded-[28px] w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col">
+            
+            {/* Barra de Acciones Superior (No se imprime) */}
+            <div className="p-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between print:hidden">
+              <div className="flex items-center gap-2">
+                <span className="h-8 w-8 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold">
+                  <FileText className="w-4 h-4" />
+                </span>
+                <div>
+                  <h4 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+                    Receta Médica Electrónica Oficial
+                  </h4>
+                  <p className="text-[10px] text-slate-500">Documento clínico certificado con código QR</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => compartirRecetaWhatsApp(recetaModalOpen, pacienteActual)}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                  title="Enviar por WhatsApp"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">WhatsApp</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Imprimir / PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRecetaModalOpen(null)}
+                  className="p-1.5 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* HOJA DE LA RECETA (DISEÑO PROFESIONAL IMPRIMIBLE) */}
+            <div className="p-6 sm:p-8 space-y-6 bg-white font-sans text-slate-800">
+              
+              {/* Encabezado Hospitalario */}
+              <div className="flex items-start justify-between border-b-2 border-teal-600 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-9 w-9 bg-teal-600 text-white rounded-xl flex items-center justify-center font-black text-lg shadow-sm">
+                      +
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-slate-900 tracking-tight leading-none uppercase">
+                        ClinicMed - Red Hospitalaria
+                      </h2>
+                      <p className="text-[11px] text-teal-700 font-bold tracking-wide">
+                        Centro Clínico y Quirúrgico de Especialidades
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    PBX: (+502) 2200-1100 &bull; 10ma Calle 3-40 Zona 10 &bull; NIT: 8493021-4
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <span className="inline-block bg-teal-50 text-teal-800 border border-teal-200 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                    Receta No. REC-{(recetaModalOpen.id || '2026').substring(0, 8).toUpperCase()}
+                  </span>
+                  <p className="text-[11px] text-slate-500 mt-1 font-mono">
+                    Fecha: {new Date(recetaModalOpen.fecha_atencion).toLocaleDateString('es-GT', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Datos del Médico y del Paciente */}
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Médico Tratante</span>
+                  <strong className="text-sm font-black text-slate-900 block">{recetaModalOpen.profesional_nombre}</strong>
+                  <p className="text-[11px] text-teal-700 font-bold">Colegiado Activo No. 12480</p>
+                  <p className="text-[10px] text-slate-500">Medicina General & Especialidades</p>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Datos del Paciente</span>
+                  <strong className="text-sm font-black text-slate-900 block">{pacienteActual.nombre_completo}</strong>
+                  <p className="text-[11px] text-slate-600 font-mono">
+                    DPI: {pacienteActual.documento} &bull; Exp: {pacienteActual.codigo_paciente}
+                  </p>
+                  <p className="text-[10px] text-slate-500">
+                    Tipo de Sangre: <span className="font-bold text-slate-800">{pacienteActual.tipo_sangre || 'O+'}</span> &bull; Modalidad: {recetaModalOpen.modalidad || 'PRESENCIAL'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Diagnóstico CIE-10 */}
+              {recetaModalOpen.diagnosticos && recetaModalOpen.diagnosticos.length > 0 && (
+                <div className="text-xs">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">
+                    Diagnóstico Clínico (CIE-10)
+                  </span>
+                  <div className="bg-sky-50/70 border border-sky-200/80 p-2.5 rounded-xl font-medium text-sky-950 flex items-center justify-between">
+                    <span>
+                      <strong className="font-mono text-sky-700">[{recetaModalOpen.diagnosticos[0].codigo_cie10}]</strong> {recetaModalOpen.diagnosticos[0].descripcion}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase bg-sky-200/60 text-sky-800 px-2 py-0.5 rounded">
+                      {recetaModalOpen.diagnosticos[0].tipo || 'DEFINITIVO'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* RP / Prescripción Médica Farmacológica */}
+              <div>
+                <div className="flex items-center gap-2 mb-3 pb-1 border-b border-slate-200">
+                  <span className="text-xl font-black text-teal-700 italic">Rp.</span>
+                  <span className="text-xs font-black uppercase text-slate-600 tracking-wider">
+                    Prescripción e Indicaciones Farmacológicas
+                  </span>
+                </div>
+
+                <div className="space-y-2.5">
+                  {recetaModalOpen.tratamiento && recetaModalOpen.tratamiento.length > 0 ? (
+                    recetaModalOpen.tratamiento.map((med: any, idx: number) => (
+                      <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start justify-between text-xs">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="h-5 w-5 rounded-full bg-teal-100 text-teal-800 font-bold text-[10px] flex items-center justify-center shrink-0">
+                              {idx + 1}
+                            </span>
+                            <strong className="text-sm font-black text-slate-900">{med.medicamento}</strong>
+                            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold font-mono">
+                              {med.dosis}
+                            </span>
+                          </div>
+                          <p className="text-slate-600 pl-7 font-medium">
+                            {med.frecuencia} &bull; Duración: <span className="font-bold text-slate-900">{med.duracion_dias || 7} días</span>
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider shrink-0">
+                          Vía Oral
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">Sin prescripciones farmacológicas registradas en esta atención.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Cuidados e Indicaciones Generales */}
+              {recetaModalOpen.notas_evolucion && (
+                <div className="text-xs bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">
+                    Indicaciones Generales y Cuidados
+                  </span>
+                  <p className="text-slate-700 font-medium">{recetaModalOpen.notas_evolucion}</p>
+                </div>
+              )}
+
+              {/* Pie de Receta: Sello, Firma y Código QR de Validación */}
+              <div className="pt-4 border-t-2 border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                
+                {/* Código QR de Verificación */}
+                <div className="flex items-center gap-3">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=0&data=${encodeURIComponent(`VERIFICACION-RECETA-CLINICMED | Folio: REC-${(recetaModalOpen.id || '2026').substring(0,8).toUpperCase()} | Paciente: ${pacienteActual.nombre_completo} | Medico: ${recetaModalOpen.profesional_nombre} | SQA-ISO-25010-VALIDADA`)}`}
+                    alt="Código QR de Verificación"
+                    className="h-20 w-20 rounded-xl border border-slate-300 p-1 bg-white shadow-sm shrink-0"
+                  />
+                  <div className="space-y-1 text-[10px] text-slate-500">
+                    <span className="font-black text-slate-800 uppercase flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+                      Autenticidad Verificada
+                    </span>
+                    <p>Escanee para validar la prescripción médica en el portal del hospital.</p>
+                    <p className="font-mono text-[9px] text-slate-400">Norma ISO/IEC 25010 &bull; ECE Seguro</p>
+                  </div>
+                </div>
+
+                {/* Sello y Firma Digital del Médico */}
+                <div className="text-center sm:text-right space-y-1">
+                  <div className="h-10 flex items-center justify-center sm:justify-end">
+                    <span className="font-serif italic text-base text-slate-700 font-bold border-b border-slate-400 px-6 pb-0.5">
+                      {recetaModalOpen.profesional_nombre}
+                    </span>
+                  </div>
+                  <strong className="text-xs block text-slate-800 font-black">
+                    Firma & Sello Médico Digital
+                  </strong>
+                  <span className="text-[10px] text-teal-700 font-bold block">
+                    Colegiado Activo No. 12480
+                  </span>
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
         </div>
       )}

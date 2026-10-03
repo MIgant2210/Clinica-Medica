@@ -6,11 +6,8 @@ import {
   ChevronRight, ChevronLeft, Phone, Mail, UserPlus, Check, Contact, Edit2, Trash2, AlertCircle
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import DatePicker, { registerLocale } from 'react-datepicker';
-import { es } from 'date-fns/locale/es';
-import 'react-datepicker/dist/react-datepicker.css';
-
-registerLocale('es', es);
+import { CustomDatePicker } from '../components/CustomDatePicker';
+import { CustomSelect } from '../components/CustomSelect';
 
 export const PacientesPage: React.FC = () => {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
@@ -583,23 +580,11 @@ export const PacientesPage: React.FC = () => {
                         Fecha de Nacimiento *
                       </label>
                       <div className="relative">
-                        <DatePicker
-                          selected={fechaNacimiento ? new Date(fechaNacimiento + 'T12:00:00') : null}
-                          onChange={(date: Date | null) => {
-                            if (date) {
-                              setFechaNacimiento(date.toISOString().split('T')[0]);
-                            } else {
-                              setFechaNacimiento('');
-                            }
-                          }}
-                          locale="es"
-                          dateFormat="dd/MM/yyyy"
-                          showYearDropdown
-                          showMonthDropdown
-                          dropdownMode="select"
-                          placeholderText="dd/mm/aaaa"
-                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium z-[100] relative"
-                          wrapperClassName="w-full"
+                        <CustomDatePicker
+                          value={fechaNacimiento}
+                          onChange={(date) => setFechaNacimiento(date)}
+                          maxDate={new Date().toISOString().split('T')[0]}
+                          placeholder="Seleccionar fecha de nacimiento"
                         />
                       </div>
                     </div>
@@ -754,23 +739,23 @@ export const PacientesPage: React.FC = () => {
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                           Parentesco *
                         </label>
-                        <select
+                        <CustomSelect
                           value={contactoParentesco}
-                          onChange={(e) => setContactoParentesco(e.target.value)}
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border rounded-2xl border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium text-sm text-slate-800 dark:text-slate-200"
-                        >
-                          <option value="Padre">Padre</option>
-                          <option value="Madre">Madre</option>
-                          <option value="Cónyuge">Cónyuge / Pareja</option>
-                          <option value="Hijo/a">Hijo/a</option>
-                          <option value="Hermano/a">Hermano/a</option>
-                          <option value="Tío/a">Tío/a</option>
-                          <option value="Abuelo/a">Abuelo/a</option>
-                          <option value="Tutor Legal">Tutor Legal</option>
-                          <option value="Familiar">Familiar</option>
-                          <option value="Amigo/a">Amigo/a</option>
-                          <option value="Otro">Otro</option>
-                        </select>
+                          onChange={(val) => setContactoParentesco(val)}
+                          options={[
+                            { value: 'Padre', label: 'Padre' },
+                            { value: 'Madre', label: 'Madre' },
+                            { value: 'Cónyuge', label: 'Cónyuge / Pareja' },
+                            { value: 'Hijo/a', label: 'Hijo/a' },
+                            { value: 'Hermano/a', label: 'Hermano/a' },
+                            { value: 'Tío/a', label: 'Tío/a' },
+                            { value: 'Abuelo/a', label: 'Abuelo/a' },
+                            { value: 'Tutor Legal', label: 'Tutor Legal' },
+                            { value: 'Familiar', label: 'Familiar' },
+                            { value: 'Amigo/a', label: 'Amigo/a' },
+                            { value: 'Otro', label: 'Otro' },
+                          ]}
+                        />
                       </div>
 
                       <div>
